@@ -30,3 +30,5 @@ typed-ast==1.4.2
 visdcc==0.0.40
 Werkzeug==1.0.1
 wrapt==1.12.1
+Owlready2==0.33
+pyvis==0.1.9

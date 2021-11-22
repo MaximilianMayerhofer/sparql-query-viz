@@ -41,7 +41,7 @@ def parse_dataframe(edge_df, node_df=None):
     # Data post processing - convert the from and to columns in edge data as string for searching
     edge_df.loc[:, ['from', 'to']] = edge_df.loc[:, ['from', 'to']].astype(str)
 
-    # Data pot processing (scaling numerical cols in nodes and edge)
+    # Data post processing (scaling numerical cols in nodes and edge)
     scaling_vars = {'node': None, 'edge': None}
     if node_df is not None:
         scaling_vars['node'] = compute_scaling_vars_for_numerical_cols(node_df)
@@ -60,6 +60,7 @@ def parse_dataframe(edge_df, node_df=None):
             nodes.append({**node, **{'label': node['id'], 'shape': 'dot', 'size': 7}})
     
     # create edges from df
+    # TODO: add labels for edges
     edges = []
     for row in edge_df.to_dict(orient='records'):
         edges.append({**row, **{'id': row['from'] + "__" + row['to'],  'color': {'color': '#97C2FC'}}})
