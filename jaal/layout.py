@@ -13,6 +13,7 @@ from dash import dcc, html
 # import dash_core_components as dcc
 # import dash_html_components as html
 import dash_bootstrap_components as dbc
+from .ontor import OntoEditor
 
 # Constants
 #--------------
@@ -59,9 +60,13 @@ DEFAULT_OPTIONS = {
 
 # Code
 #---------
+#def function(values, id, selected, hovering):
+# values.size = 14
+
 def get_options(directed, opts_args):
     opts = DEFAULT_OPTIONS.copy()
-    opts['edges'] = { 'arrows': { 'to': directed } }
+    opts['edges'] = {'arrows': {'to': directed}}
+    #opts['edges'] = { 'arrows': { 'to': directed }, 'font': { 'size': 0 }, 'chosen': { 'label': 'function (values,id,selected,hovering) {values.size = 14;}'}}
     if opts_args is not None:
         opts.update(opts_args)
     return opts
@@ -109,9 +114,9 @@ def create_row(children, style=fetch_flex_row_style()):
 search_form = dbc.FormGroup(
     [
         # dbc.Label("Search", html_for="search_graph"),
-        dbc.Input(type="search", id="search_graph", placeholder="Search node in graph..."),
+        dbc.Input(type="search", id="search_graph", placeholder="Search node or edge in graph..."),
         dbc.FormText(
-            "Show the node you are looking for",
+            "Show the node or edge you are looking for",
             color="secondary",
         ),
     ]
@@ -173,7 +178,7 @@ def get_categorical_features(df_, unique_limit=20, blacklist_features=['shape', 
     # identify the rel cols + None
     cat_features = ['None'] + df_.columns[(df_.dtypes == 'object') & (df_.apply(pd.Series.nunique) <= unique_limit)].tolist()
     # remove irrelevant cols
-    try: 
+    try:
         for col in blacklist_features:
             cat_features.remove(col)
     except:
@@ -196,7 +201,7 @@ def get_numerical_features(df_, unique_limit=20):
     # return
     return numeric_features
 
-def get_app_layout(graph_data, color_legends=[], directed=False, vis_opts=None):
+def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False, vis_opts=None):
     """Create and return the layout of the app
 
     Parameters
@@ -206,7 +211,7 @@ def get_app_layout(graph_data, color_legends=[], directed=False, vis_opts=None):
     """
     # Step 1-2: find categorical features of nodes and edges
     cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id'])
-    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color']), 20, ['color', 'from', 'to', 'id'])
+    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'chosen','font']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
@@ -217,6 +222,7 @@ def get_app_layout(graph_data, color_legends=[], directed=False, vis_opts=None):
     #encoded_image = base64.b64encode(open(image_filename, 'rb').read())
     return html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")), # Title
+            create_row(html.H3(children=onto.onto.name)),
             #create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
             create_row([
                 dbc.Col([
@@ -295,7 +301,7 @@ def get_app_layout(graph_data, color_legends=[], directed=False, vis_opts=None):
                         ], id="size-show-toggle", is_open=True),
 
                     ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
-                ],width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
                 # graph
                 dbc.Col(
                     visdcc.Network(

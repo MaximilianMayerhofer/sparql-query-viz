@@ -1,0 +1,10 @@
+from,to,relation,strength
+thing, human,is_a, 1
+thing, pizza,is_a, 1
+vegetarian,human,is_a,1
+pizza,food,is_a,1
+pizza_base,food,is_a,1
+pizza_topping,food,is_a,1
+vegetarian_pizza,food,is_a,1
+margherita,pizza,is_a,1
+vegetarian,vegetarian_pizza,eats,1

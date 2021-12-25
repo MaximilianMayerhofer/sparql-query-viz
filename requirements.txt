@@ -32,3 +32,4 @@ Werkzeug==1.0.1
 wrapt==1.12.1
 Owlready2==0.33
 pyvis==0.1.9
+ontor==0.3.0

@@ -1,4 +1,4 @@
-id,superclass,property,inverted,cardinalitytype,cardinality,opobject,dprange,dpminex,dpminin,dpexact,dpmaxin,dpmaxex,negated,equivalence
+class,superclass,property,inverted,cardinalitytype,cardinality,opobject,dprange,dpminex,dpminin,dpexact,dpmaxin,dpmaxex,negated,equivalence
 thin_crust,pizza_base,,,,,,,,,,,,,
 thick_crust,pizza_base,,,,,,,,,,,,,
 meat_topping,pizza_topping,,,,,,,,,,,,,

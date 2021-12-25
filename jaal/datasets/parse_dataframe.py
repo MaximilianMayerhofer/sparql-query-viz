@@ -57,13 +57,12 @@ def parse_dataframe(edge_df, node_df=None):
         node_df.loc[:, 'id'] = node_df.loc[:, 'id'].astype(str)
         # create the node data
         for node in node_df.to_dict(orient='records'):
-            nodes.append({**node, **{'label': node['id'], 'shape': 'dot', 'size': 7}})
-    
+            nodes.append({**node, **{'label': node['id'], 'size': 7}})
+
     # create edges from df
-    # TODO: add labels for edges
     edges = []
     for row in edge_df.to_dict(orient='records'):
-        edges.append({**row, **{'id': row['from'] + "__" + row['to'],  'color': {'color': '#97C2FC'}}})
+        edges.append({**row, **{'id': row['from'] + "__" + row['to'],  'color': {'color': '#97C2FC'}, 'font': {'size': 14}, 'chosen': { 'label': 'function (values,id,selected,hovering) {values.size = 14;}'}}})
     
     # return
     return {'nodes': nodes, 'edges': edges}, scaling_vars

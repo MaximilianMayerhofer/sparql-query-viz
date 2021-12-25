@@ -15,12 +15,13 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
+from .ontor import OntoEditor
 
 # class
 class Jaal:
     """The main visualization class
     """
-    def __init__(self, edge_df, node_df=None):
+    def __init__(self, edge_df, onto: OntoEditor, node_df=None):
         """
         Parameters
         -------------
@@ -35,18 +36,31 @@ class Jaal:
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}
+        self.onto = onto
         print("Done")
 
     def _callback_search_graph(self, graph_data, search_text):
         """Only show the nodes which match the search text
         """
         nodes = graph_data['nodes']
+        edges = graph_data['edges']
         for node in nodes:
             if search_text not in node['label'].lower():
                 node['hidden'] = True
             else:
                 node['hidden'] = False
+
+        for edge in edges:
+            if search_text in edge['label'].lower():
+                for node in nodes:
+                    if edge['from'].lower() == node['label'].lower():
+                        node['hidden'] = False
+                    elif edge['to'].lower() == node['label'].lower():
+                        node['hidden'] = False
+
         graph_data['nodes'] = nodes
+        graph_data['edges'] = edges
+
         return graph_data
 
     def _callback_filter_nodes(self, graph_data, filter_nodes_text):
@@ -219,7 +233,7 @@ class Jaal:
         app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # define layout
-        app.layout = get_app_layout(self.data, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts)
+        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts)
 
         # create callbacks to toggle legend popover
         @app.callback(
