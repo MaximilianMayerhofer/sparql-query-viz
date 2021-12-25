@@ -155,7 +155,7 @@ def get_inst_rel(nodelist, edgelist, onto: OntoEditor):
                 if cl[0] == ins.name:
                     flag_nodes = True
             if flag_nodes == False:
-                nodelist.append([ins.name, 1, 'square', 'A'])
+                nodelist.append([ins.name, 1, 'box', 'A'])
             for rel in edgelist:
                 if ins.name == rel[0] and superclass[0].name == rel[1]:
                     flag_edge = True
