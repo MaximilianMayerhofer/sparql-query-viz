@@ -124,12 +124,12 @@ search_form = dbc.FormGroup(
 
 filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
-    dbc.Textarea(id="filter_nodes", placeholder="Enter filter node query here..."),
+    dbc.Textarea(id="filter_nodes", placeholder="Enter SPARQL-query here..."),
     dbc.FormText(
         html.P([
-            "Filter on nodes properties by using ",
-            html.A("Pandas Query syntax",
-            href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html"),
+            "Filter graph data by using ",
+            html.A("SPARQL Query syntax",
+            href="https://owlready2.readthedocs.io/en/v0.35/sparql.html"),
         ]),
         color="secondary",
     ),
@@ -211,7 +211,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
     """
     # Step 1-2: find categorical features of nodes and edges
     cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id'])
-    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'chosen','font']), 20, ['color', 'from', 'to', 'id'])
+    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'chosen', 'font']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
@@ -235,14 +235,14 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
 
                         # ---- filter section ----
                         create_row([
-                            html.H6("Filter"),
+                            html.H6("SPARQL"),
                             dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary", size="sm"), # legend
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right':0, 'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
                             filter_edge_form,
-                        ], id="filter-show-toggle", is_open=False),
+                        ], id="filter-show-toggle", is_open=True),
                         
                         # ---- color section ----
                         create_row([
@@ -271,7 +271,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                                 label='Color edges by',
                                 description='Select the categorical edge property to color edges by'
                             ),
-                        ], id="color-show-toggle", is_open=True),
+                        ], id="color-show-toggle", is_open=False),
 
                         # ---- size section ----
                         create_row([
@@ -298,7 +298,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                                 label='Size edges by',
                                 description='Select the numerical edge property to size edges by'
                             ),
-                        ], id="size-show-toggle", is_open=True),
+                        ], id="size-show-toggle", is_open=False),
 
                     ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
                 ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),

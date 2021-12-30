@@ -67,18 +67,38 @@ class Jaal:
         """Filter the nodes based on the Python query syntax
         """
         self.filtered_data = self.data.copy()
-        node_df = pd.DataFrame(self.filtered_data['nodes'])
+        #node_df = pd.DataFrame(self.filtered_data['nodes'])
+        #try:
+        #    node_list = node_df.query(filter_nodes_text)['id'].tolist()
+        #    nodes = []
+        #    for node in self.filtered_data['nodes']:
+        #        if node['id'] in node_list:
+        #            nodes.append(node)
+        #    self.filtered_data['nodes'] = nodes
+        #    graph_data = self.filtered_data
+        #except:
+        #    graph_data = self.data
+        #    print("wrong node filter query!!")
+
         try:
-            node_list = node_df.query(filter_nodes_text)['id'].tolist()
-            nodes = []
-            for node in self.filtered_data['nodes']:
-                if node['id'] in node_list:
-                    nodes.append(node)
-            self.filtered_data['nodes'] = nodes
-            graph_data = self.filtered_data
+            res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
+            flat_res_list = [x for l in res_list for x in l]
+            res = []
+            res_is_int = True
+            for result in flat_res_list:
+                if type(result) is not int:
+                    res_is_int = False
+                    for node in self.filtered_data['nodes']:
+                        if node['id'] in res_list:
+                            res.append(node)
+                    self.filtered_data['nodes'] = res
+                    graph_data = self.filtered_data
+            if res_is_int:
+                print("SPARQL-query result:", res_list)
+                graph_data = self.data
         except:
             graph_data = self.data
-            print("wrong node filter query!!")
+            print("Not a valid SPARQL query.")
         return graph_data
 
     def _callback_filter_edges(self, graph_data, filter_edges_text):
