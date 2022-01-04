@@ -4,18 +4,19 @@ Author: Mohit Mayank
 Main class for Jaal network visualization dashboard
 """
 # import
+from ontor import OntoEditor
 import dash
 import visdcc
 import pandas as pd
-from dash import dcc, html
-# import dash_core_components as dcc
-# import dash_html_components as html
+# from dash import dcc, html
+import dash_core_components as dcc
+import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
-from .ontor import OntoEditor
+
 
 # class
 class Jaal:
