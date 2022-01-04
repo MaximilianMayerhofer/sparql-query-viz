@@ -10,8 +10,10 @@ Data details:
 # imports
 import os
 import pandas as pd
-from jaal import ontor
-from jaal.ontor import OntoEditor
+#from jaal import ontor
+#from jaal.ontor import OntoEditor
+import ontor as ontor
+from ontor import OntoEditor
 import owlready2
 
 # data load and return function
@@ -35,7 +37,7 @@ def load_ontology():
     this_dir, _ = os.path.split(__file__)
     iri = "http://example.org/onto-got.owl"
     fname = "./onto-got.owl"
-    ontor1 = ontor.OntoEditor(iri, fname)
+    ontor1 = OntoEditor(iri, fname)
     classes = [["company", None, None, None, None, None, None], \
                ["pizza_company", "company", None, None, None, None, False], \
                ["margherita_company", "pizza_company", None, None, None, None, False], \

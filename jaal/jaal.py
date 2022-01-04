@@ -64,6 +64,15 @@ class Jaal:
 
         return graph_data
 
+    def _callback_filter_nodes_output(self, graph_data, filter_nodes_text):
+        try:
+            res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
+            flat_res_list = [x for l in res_list for x in l]
+        except:
+            flat_res_list = []
+            print("Not a valid SPARQL query.")
+        return 'Result: \n{}'.format(flat_res_list)
+
     def _callback_filter_nodes(self, graph_data, filter_nodes_text):
         """Filter the nodes based on the Python query syntax
         """
@@ -89,14 +98,16 @@ class Jaal:
             for result in flat_res_list:
                 if type(result) is not int:
                     res_is_int = False
-                    for node in self.filtered_data['nodes']:
-                        if node['id'] in res_list:
-                            res.append(node)
-                    self.filtered_data['nodes'] = res
-                    graph_data = self.filtered_data
+                    
             if res_is_int:
-                print("SPARQL-query result:", res_list)
+                print("SPARQL-query result:", flat_res_list)
                 graph_data = self.data
+            else:
+                for node in self.filtered_data['nodes']:
+                    if node['id'] in res_list:
+                        res.append(node)
+                self.filtered_data['nodes'] = res
+                graph_data = self.filtered_data
         except:
             graph_data = self.data
             print("Not a valid SPARQL query.")
@@ -302,7 +313,7 @@ class Jaal:
 
         # create the main callbacks
         @app.callback(
-            [Output('graph', 'data'), Output('color-legend-popup', 'children')],
+            [Output('graph', 'data'), Output('color-legend-popup', 'children'), Output('textarea-result-output', 'children')],
             [Input('search_graph', 'value'),
             Input('filter_nodes', 'value'),
             Input('filter_edges', 'value'),
@@ -316,10 +327,11 @@ class Jaal:
                     color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
+            flat_res_list_children = []
             # if its the first call
             if not ctx.triggered:
                 print("No trigger")
-                return [self.data, self.get_color_popover_legend_children()]
+                return [self.data, self.get_color_popover_legend_children(), flat_res_list_children]
             else:
                 # find the id of the option which was triggered
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -329,6 +341,7 @@ class Jaal:
                 # In case filter nodes was triggered
                 elif input_id == 'filter_nodes':
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
+                    flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
                 # In case filter edges was triggered
                 elif input_id == 'filter_edges':
                     graph_data = self._callback_filter_edges(graph_data, filter_edges_text)
@@ -347,7 +360,7 @@ class Jaal:
             # create the color legend childrens
             color_popover_legend_children = self.get_color_popover_legend_children(self.node_value_color_mapping, self.edge_value_color_mapping)
             # finally return the modified data
-            return [graph_data, color_popover_legend_children]
+            return [graph_data, color_popover_legend_children, flat_res_list_children]
         # return server
         return app
 

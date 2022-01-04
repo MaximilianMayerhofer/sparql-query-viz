@@ -13,7 +13,7 @@ from dash import dcc, html
 # import dash_core_components as dcc
 # import dash_html_components as html
 import dash_bootstrap_components as dbc
-from .ontor import OntoEditor
+from ontor import OntoEditor
 
 # Constants
 #--------------
@@ -133,11 +133,12 @@ filter_node_form = dbc.FormGroup([
         ]),
         color="secondary",
     ),
+    html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'})
 ])
 
 filter_edge_form = dbc.FormGroup([
     # dbc.Label("Filter edges", html_for="filter_edges"),
-    dbc.Textarea(id="filter_edges", placeholder="Enter filter edge query here..."),
+    dbc.Textarea(id="filter_edges", placeholder="Prev: Filter edges (will be deleted)"),
     dbc.FormText(
         html.P([
             "Filter on edges properties by using ",
