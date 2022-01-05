@@ -8,9 +8,8 @@ from ontor import OntoEditor
 import dash
 import visdcc
 import pandas as pd
-# from dash import dcc, html
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State

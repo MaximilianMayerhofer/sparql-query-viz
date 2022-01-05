@@ -10,8 +10,6 @@ import visdcc
 import base64
 import pandas as pd
 from dash import dcc, html
-# import dash_core_components as dcc
-# import dash_html_components as html
 import dash_bootstrap_components as dbc
 from ontor import OntoEditor
 
@@ -242,7 +240,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                            filter_edge_form,
+                            #filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
                         
                         # ---- color section ----
