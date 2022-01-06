@@ -314,14 +314,14 @@ class Jaal:
             [Output('graph', 'data'), Output('color-legend-popup', 'children'), Output('textarea-result-output', 'children')],
             [Input('search_graph', 'value'),
             Input('filter_nodes', 'value'),
-            Input('filter_edges', 'value'),
+            # Input('filter_edges', 'value'),
             Input('color_nodes', 'value'),
             Input('color_edges', 'value'),
             Input('size_nodes', 'value'),
             Input('size_edges', 'value')],
             [State('graph', 'data')]
         )
-        def setting_pane_callback(search_text, filter_nodes_text, filter_edges_text, 
+        def setting_pane_callback(search_text, filter_nodes_text,  
                     color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
@@ -341,8 +341,8 @@ class Jaal:
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
                 # In case filter edges was triggered
-                elif input_id == 'filter_edges':
-                    graph_data = self._callback_filter_edges(graph_data, filter_edges_text)
+                #elif input_id == 'filter_edges':
+                #    graph_data = self._callback_filter_edges(graph_data, filter_edges_text)
                 # If color node text is provided
                 if input_id == 'color_nodes':
                     graph_data, self.node_value_color_mapping = self._callback_color_nodes(graph_data, color_nodes_value)

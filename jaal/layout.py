@@ -240,7 +240,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                            filter_edge_form,
+                           # filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
                         
                         # ---- color section ----
