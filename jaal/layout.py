@@ -25,9 +25,9 @@ DEFAULT_COLOR = '#97C2FC'
 # Taken from https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
 KELLY_COLORS_HEX = [
     "#FFB300", # Vivid Yellow
+    "#A6BDD7", # Very Light Blue
     "#803E75", # Strong Purple
     "#FF6800", # Vivid Orange
-    "#A6BDD7", # Very Light Blue
     "#C10020", # Vivid Red
     "#CEA262", # Grayish Yellow
     "#817066", # Medium Gray
@@ -164,8 +164,8 @@ def get_select_form_layout(id, options, label, description):
     return  dbc.FormGroup([
                 dbc.InputGroup([
                     dbc.InputGroupAddon(label, addon_type="append"),
-                    dbc.Select(id=id,
-                        options=options
+                    dbc.RadioItems(id=id,
+                        options=options, value=options[1].get('value')
                     ),]),
                 dbc.FormText(description, color="secondary",)
             ,])
@@ -240,7 +240,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                            #filter_edge_form,
+                            filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
                         
                         # ---- color section ----

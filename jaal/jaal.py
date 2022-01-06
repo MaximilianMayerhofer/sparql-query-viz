@@ -68,8 +68,7 @@ class Jaal:
             res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
             flat_res_list = [x for l in res_list for x in l]
         except:
-            flat_res_list = []
-            print("Not a valid SPARQL query.")
+            flat_res_list = "Not a valid SPARQL query."
         return 'Result: \n{}'.format(flat_res_list)
 
     def _callback_filter_nodes(self, graph_data, filter_nodes_text):
