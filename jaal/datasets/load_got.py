@@ -94,7 +94,7 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
                         flag_edges = True
                         edge_column[2] = edge_column[2] + ', ' + dp_name
                         edge_column[4] = edge_column[4] + ', ' + dp_name
-                        edge_column[3] = edge_column[3] + 0.1
+                        edge_column[3] = edge_column[3] + 1
             if not flag_edges:
                 for i, value in enumerate(dp_dom_unique):
                     if len(dp_dom_unique) == 1 or not i == 0:

@@ -204,10 +204,11 @@ class Jaal:
             minn = self.scaling_vars['edge'][size_edges_value]['min']
             maxx = self.scaling_vars['edge'][size_edges_value]['max']
             # define the scaling function
-            scale_val = lambda x: 20*(x-minn)/(maxx-minn)
+            #scale_val = lambda x: 20*(x-minn)/(maxx-minn)
             # set the size after scaling
             for edge in self.data['edges']:
-                edge['width'] = scale_val(edge[size_edges_value])
+                # edge['width'] = scale_val(edge[size_edges_value])
+                edge['width'] = edge[size_edges_value]
         # filter the data currently shown
         filtered_edges = [x['id'] for x in self.filtered_data['edges']]
         self.filtered_data['edges'] = [x for x in self.data['edges'] if x['id'] in filtered_edges]
@@ -277,9 +278,9 @@ class Jaal:
         num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
         options = [{'label': opt, 'value': opt} for opt in num_node_features]
         if len(options)>1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
-        # num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
-        # options = [{'label': opt, 'value': opt} for opt in num_edge_features]
-        # if len(options)>1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
+        num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
+        options = [{'label': opt, 'value': opt} for opt in num_edge_features]
+        if len(options)>1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
 
         # create callbacks to toggle legend popover
         @app.callback(

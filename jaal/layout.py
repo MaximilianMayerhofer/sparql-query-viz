@@ -58,8 +58,7 @@ DEFAULT_OPTIONS = {
 
 # Code
 #---------
-#def function(values, id, selected, hovering):
-# values.size = 14
+
 
 def get_options(directed, opts_args):
     opts = DEFAULT_OPTIONS.copy()
