@@ -14,7 +14,7 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
-from .layout import get_app_layout, get_distinct_colors, create_color_legend, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
+from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
 
 
 # class
@@ -195,7 +195,7 @@ class Jaal:
     def _callback_size_edges(self, graph_data, size_edges_value):
         # color option is None, revert back all changes
         if size_edges_value == 'None':
-            # revert to default color
+            # revert to default size
             for edge in self.data['edges']:
                 edge['width'] = DEFAULT_EDGE_SIZE
         else:
@@ -264,6 +264,22 @@ class Jaal:
 
         # define layout
         app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts)
+        
+        # get color_mapping once at the start
+        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
+        options = [{'label': opt, 'value': opt} for opt in cat_node_features]
+        if len(options)>1: self.data, self.node_value_color_mapping = self._callback_color_nodes(self.data, options[1].get('value'))
+        cat_edge_features = get_categorical_features(
+            pd.DataFrame(self.data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20,
+            ['color', 'from', 'to', 'id'])
+        options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
+        if len(options)>1: self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data, options[1].get('value'))
+        num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
+        options = [{'label': opt, 'value': opt} for opt in num_node_features]
+        if len(options)>1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
+        # num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
+        # options = [{'label': opt, 'value': opt} for opt in num_edge_features]
+        # if len(options)>1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
 
         # create callbacks to toggle legend popover
         @app.callback(

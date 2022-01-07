@@ -10,8 +10,6 @@ Data details:
 # imports
 import os
 import pandas as pd
-#from jaal import ontor
-#from jaal.ontor import OntoEditor
 import ontor as ontor
 from ontor import OntoEditor
 import owlready2
@@ -59,13 +57,13 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
     nodelist = []
     node_gen = onto.onto.classes()
     for cl in node_gen:
-        nodelist.append([cl.name, 1, 'dot', 'T'])
+        nodelist.append([cl.name, 1, 'dot', 'T']) # 'T' indicates that this is a tBox
 
     edgelist = []
     node_gen = onto.onto.classes() #mit list keyword kann mehrfach verwendet werden
     for cl in node_gen:
         rellist = list(cl.subclasses())
-        for i in range(len(rellist)): #enumerate
+        for i, value in enumerate(rellist):
             edgelist.append([rellist[i].name,cl.name,'is_a', 1, 'is_a', False])
 
     op_gen = onto.onto.object_properties()
@@ -73,7 +71,7 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
         op_name = op.name
         op_dom = op.domain
         op_ran = op.range
-        for i in range(len(op_ran)):
+        for i, value in enumerate(op_ran):
             if i != 0:
                 edgelist.append([op_dom[0].name, op_ran[i].name, op_name, 1, op_name, True])
 
@@ -81,28 +79,35 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
     for dp in dp_gen:
         dp_name = dp.name
         dp_dom = dp.domain
+        dp_dom_unique = []
+        for dom in dp_dom:
+            if not dom in dp_dom_unique:
+               dp_dom_unique.append(dom)
         dp_ran = dp.range
         try:
             flag_nodes = False
             flag_edges = False
             dp_type = str(dp_ran).split("'")[1]
             for edge_column in edgelist:
-                if edge_column[0] == dp_dom[0].name and edge_column[1] == dp_type:
-                    flag_edges = True
-                    edge_column[2] = edge_column[2] + ', ' + dp_name
-                    edge_column[4] = edge_column[4] + ', ' + dp_name
-                    edge_column[3] = edge_column[3] + 1
-            if flag_edges == False:
-                edgelist.append([dp_dom[0].name, dp_type, dp_name, 1, dp_name, True])
+                for i, value in enumerate(dp_dom_unique):
+                    if edge_column[0] == dp_dom_unique[i].name and edge_column[1] == dp_type and (len(dp_dom_unique) == 1 or not i == 0):
+                        flag_edges = True
+                        edge_column[2] = edge_column[2] + ', ' + dp_name
+                        edge_column[4] = edge_column[4] + ', ' + dp_name
+                        edge_column[3] = edge_column[3] + 0.1
+            if not flag_edges:
+                for i, value in enumerate(dp_dom_unique):
+                    if len(dp_dom_unique) == 1 or not i == 0:
+                        edgelist.append([dp_dom_unique[i].name, dp_type, dp_name, 1, dp_name, True])
 
             for node in nodelist:
                 if node[0] == dp_type:
                     flag_nodes = True
-            if flag_nodes == False:
+            if not flag_nodes:
                 nodelist.append([dp_type, 1, 'triangle', 'T'])
 
         except IndexError:
-            print("One DP was skipped.")
+            print(dp_name, "was skipped.")
 
     if aBox:
         get_inst_rel(nodelist, edgelist, onto)

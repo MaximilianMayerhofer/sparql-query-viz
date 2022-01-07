@@ -161,14 +161,23 @@ def get_select_form_layout(id, options, label, description):
     description: str
         long text detail of the setting
     """
-    return  dbc.FormGroup([
-                dbc.InputGroup([
-                    dbc.InputGroupAddon(label, addon_type="append"),
-                    dbc.RadioItems(id=id,
-                        options=options, value=options[1].get('value')
-                    ),]),
-                dbc.FormText(description, color="secondary",)
-            ,])
+    if len(options)>1:
+        return  dbc.FormGroup([
+                    dbc.InputGroup([
+                        dbc.InputGroupAddon(label, addon_type="append"),
+                        dbc.RadioItems(id=id,
+                            options=options, value=options[1].get('value')
+                        ),]),
+                    dbc.FormText(description, color="secondary",)
+                ,])
+    return dbc.FormGroup([
+                    dbc.InputGroup([
+                        dbc.InputGroupAddon(label, addon_type="append"),
+                        dbc.RadioItems(id=id,
+                            options=options
+                        ),]),
+                    dbc.FormText(description, color="secondary",)
+                ,])
 
 def get_categorical_features(df_, unique_limit=20, blacklist_features=['shape', 'label', 'id']):
     """Identify categorical features for edge or node data and return their names
