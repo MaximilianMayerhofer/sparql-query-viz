@@ -1,1 +1,1 @@
-from .load_got import load_got
+from .load_ontology import load_got

@@ -53,19 +53,23 @@ def load_ontology():
     ontor1.add_instances(ins)
     return ontor1
 
-def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
+def get_tboxes(onto: OntoEditor):
     nodelist = []
     node_gen = onto.onto.classes()
     for cl in node_gen:
-        nodelist.append([cl.name, 1, 'dot', 'T']) # 'T' indicates that this is a tBox
+        nodelist.append([cl.name, 1, 'dot', 'T'])  # 'T' indicates that this is a tBox
+    return nodelist
 
+def get_isa_realtions(onto: OntoEditor):
     edgelist = []
-    node_gen = onto.onto.classes() #mit list keyword kann mehrfach verwendet werden
+    node_gen = onto.onto.classes()  # mit list keyword kann mehrfach verwendet werden
     for cl in node_gen:
         rellist = list(cl.subclasses())
         for i, value in enumerate(rellist):
-            edgelist.append([rellist[i].name,cl.name,'is_a', 1, 'is_a', False])
+            edgelist.append([rellist[i].name, cl.name, 'is_a', 1, 'is_a', False])
+    return edgelist
 
+def get_OPs(onto: OntoEditor, edgelist):
     op_gen = onto.onto.object_properties()
     for op in op_gen:
         op_name = op.name
@@ -74,7 +78,9 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
         for i, value in enumerate(op_ran):
             if i != 0:
                 edgelist.append([op_dom[0].name, op_ran[i].name, op_name, 1, op_name, True])
+    return edgelist
 
+def get_DPs(onto: OntoEditor, nodelist, edgelist):
     dp_gen = onto.onto.data_properties()
     for dp in dp_gen:
         dp_name = dp.name
@@ -82,7 +88,7 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
         dp_dom_unique = []
         for dom in dp_dom:
             if not dom in dp_dom_unique:
-               dp_dom_unique.append(dom)
+                dp_dom_unique.append(dom)
         dp_ran = dp.range
         try:
             flag_nodes = False
@@ -90,7 +96,8 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
             dp_type = str(dp_ran).split("'")[1]
             for edge_column in edgelist:
                 for i, value in enumerate(dp_dom_unique):
-                    if edge_column[0] == dp_dom_unique[i].name and edge_column[1] == dp_type and (len(dp_dom_unique) == 1 or not i == 0):
+                    if edge_column[0] == dp_dom_unique[i].name and edge_column[1] == dp_type and (
+                            len(dp_dom_unique) == 1 or not i == 0):
                         flag_edges = True
                         edge_column[2] = edge_column[2] + ', ' + dp_name
                         edge_column[4] = edge_column[4] + ', ' + dp_name
@@ -107,22 +114,8 @@ def get_df_from_ontology(onto: OntoEditor, aBox: bool = False):
                 nodelist.append([dp_type, 1, 'triangle', 'T'])
 
         except IndexError:
-            print(dp_name, "was skipped.")
-
-    if aBox:
-        get_inst_rel(nodelist, edgelist, onto)
-
-    node_df = pd.DataFrame(nodelist)
-    node_df.columns = ['id', 'importance', 'shape', 'T/A']
-
-    edge_df = pd.DataFrame(edgelist)
-    edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
-
-    get_node_weights(node_df, edge_df)
-
-
-
-    return edge_df, node_df
+            print(dp_name, "was skipped because the range of", dp_name, "is empty or could not be interpreted.")
+    return nodelist, edgelist
 
 def get_node_weights(node_df, edge_df):
     is_there_a_weight_col = False
@@ -143,9 +136,7 @@ def get_node_weights(node_df, edge_df):
 
     return node_df
 
-
-
-def get_inst_rel(nodelist, edgelist, onto: OntoEditor):
+def get_aboxes(onto: OntoEditor, nodelist, edgelist):
     node_gen = onto.onto.classes()
     for node in node_gen:
         ins_list = onto.onto.search(type = node)
@@ -161,10 +152,26 @@ def get_inst_rel(nodelist, edgelist, onto: OntoEditor):
             for cl in nodelist:
                 if cl[0] == ins.name:
                     flag_nodes = True
-            if flag_nodes == False:
+            if not flag_nodes:
                 nodelist.append([ins.name, 1, 'box', 'A'])
             for rel in edgelist:
                 if ins.name == rel[0] and superclass[0].name == rel[1]:
                     flag_edge = True
-            if flag_edge == False:
+            if not flag_edge:
                 edgelist.append([ins.name, superclass[0].name, 'is_a', 1, 'is_a', False])
+    return nodelist, edgelist
+
+def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
+    nodelist = get_tboxes(onto)
+    edgelist = get_isa_realtions(onto)
+    edgelist = get_OPs(onto, edgelist)
+    nodelist, edgelist = get_DPs(onto, nodelist, edgelist)
+    if abox:
+        nodelist, edgelist = get_aboxes(onto, nodelist, edgelist)
+
+    node_df = pd.DataFrame(nodelist)
+    node_df.columns = ['id', 'importance', 'shape', 'T/A']
+    edge_df = pd.DataFrame(edgelist)
+    edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
+    node_df = get_node_weights(node_df, edge_df)
+    return edge_df, node_df
