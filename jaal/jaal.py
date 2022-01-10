@@ -244,6 +244,28 @@ class Jaal:
         #
         return popover_legend_children
 
+    def forced_callback_excecution_at_beginning(self):
+        """This function executes the callback functions for node and edge Coloring and Sizing at start of the app,
+        without andy userinput. This is to ensure a default coloring and sizing of nodes and edges."""
+        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
+        options = [{'label': opt, 'value': opt} for opt in cat_node_features]
+        if len(options) > 1: self.data, self.node_value_color_mapping = self._callback_color_nodes(self.data,
+                                                                                                   options[1].get(
+                                                                                                       'value'))
+        cat_edge_features = get_categorical_features(
+            pd.DataFrame(self.data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20,
+            ['color', 'from', 'to', 'id'])
+        options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
+        if len(options) > 1: self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data,
+                                                                                                   options[1].get(
+                                                                                                       'value'))
+        num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
+        options = [{'label': opt, 'value': opt} for opt in num_node_features]
+        if len(options) > 1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
+        num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
+        options = [{'label': opt, 'value': opt} for opt in num_edge_features]
+        if len(options) > 1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
+
     def create(self, directed=False, vis_opts=None):
         """Create the Jaal app and return it
 
@@ -266,21 +288,8 @@ class Jaal:
         # define layout
         app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts)
         
-        # get color_mapping once at the start
-        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
-        options = [{'label': opt, 'value': opt} for opt in cat_node_features]
-        if len(options)>1: self.data, self.node_value_color_mapping = self._callback_color_nodes(self.data, options[1].get('value'))
-        cat_edge_features = get_categorical_features(
-            pd.DataFrame(self.data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20,
-            ['color', 'from', 'to', 'id'])
-        options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
-        if len(options)>1: self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data, options[1].get('value'))
-        num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
-        options = [{'label': opt, 'value': opt} for opt in num_node_features]
-        if len(options)>1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
-        num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
-        options = [{'label': opt, 'value': opt} for opt in num_edge_features]
-        if len(options)>1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
+        # get color_mapping and size_mapping once at the start
+        self.forced_callback_excecution_at_beginning()
 
         # create callbacks to toggle legend popover
         @app.callback(
