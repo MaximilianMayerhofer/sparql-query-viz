@@ -247,23 +247,40 @@ class Jaal:
     def forced_callback_excecution_at_beginning(self):
         """This function executes the callback functions for node and edge Coloring and Sizing at start of the app,
         without andy userinput. This is to ensure a default coloring and sizing of nodes and edges."""
+
+        # Get list of categorical features from nodes
         cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
+        # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_node_features]
+        # If options has mor then one categorical feature, the callback function for nodes-coloring is executed once,
+        # to set the first option as default value
         if len(options) > 1: self.data, self.node_value_color_mapping = self._callback_color_nodes(self.data,
                                                                                                    options[1].get(
                                                                                                        'value'))
+        # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(
             pd.DataFrame(self.data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20,
             ['color', 'from', 'to', 'id'])
+        # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
+        # If options has mor then one categorical feature, the callback function for edge-coloring is executed once,
+        # to set the first option as default value
         if len(options) > 1: self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data,
                                                                                                    options[1].get(
                                                                                                        'value'))
+        # Get list of numerical features from nodes
         num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
+        # Define label and value for each numerical feature
         options = [{'label': opt, 'value': opt} for opt in num_node_features]
+        # If options has mor then one numerical feature, the callback function for nodes-sizing is executed once,
+        # to set the first option as default value
         if len(options) > 1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
+        # Get list of numerical features from edges
         num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
+        # Define label and value for each numerical feature
         options = [{'label': opt, 'value': opt} for opt in num_edge_features]
+        # If options has mor then one numerical feature, the callback function for edge-sizing is executed once,
+        # to set the first option as default value
         if len(options) > 1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
 
     def create(self, directed=False, vis_opts=None):

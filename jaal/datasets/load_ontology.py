@@ -188,7 +188,7 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
-def get_node_weights(node_df, edge_df):
+def calculate_node_importance(node_df, edge_df):
     """Weights the nodes in nodelist acoording to the number of incoming edges
 
     Parameters
@@ -278,24 +278,34 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
     return nodelist, edgelist
 
 def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
-    """Parses the information given by the ontology into a panda.DataFrame
+    """Parses the information given by the ontology into a panda.DataFrame. Parsed data includes:
+    T-Boxes, is-a relations, object-properties, data-properties and A-Boxes (if abox is True).
 
     Parameters
     -----------
     onto: OntoEditor
        ontology of type OntoEditor from which the information is extracted
     abox: bool
-        Boolean to indicate wheter instances should be included or not"""
+        Boolean to indicate wheter A-Boxes should be included or not"""
 
+    # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)
+    # Get is-a relations from ontology and write them into edgelist
     edgelist = get_isa_realtions(onto)
+    # Get object-properties from ontology and write them into edgelist
     edgelist = get_OPs(onto, edgelist)
+    # Get data-properties from ontology and write them into edgelist
     nodelist, edgelist = get_DPs(onto, nodelist, edgelist)
+    # If abox is True, get A-Boxes from ontology and write them into nodelist
     if abox:
         nodelist, edgelist = get_aboxes(onto, nodelist, edgelist)
+
+    # Parse nodelist into panda.DataFrame, with column-names id, importance, shape and T/A
     node_df = pd.DataFrame(nodelist)
     node_df.columns = ['id', 'importance', 'shape', 'T/A']
+    # Parse edgelist into panda.DataFrame, with column-names from, to, id, weight, label and dashes
     edge_df = pd.DataFrame(edgelist)
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
-    node_df = get_node_weights(node_df, edge_df)
+    # Calculate the importance of nodes in nodelist and write the new importance value into node_df
+    node_df = calculate_node_importance(node_df, edge_df)
     return edge_df, node_df
