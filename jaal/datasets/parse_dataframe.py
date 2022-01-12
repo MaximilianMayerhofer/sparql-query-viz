@@ -4,6 +4,8 @@ Author: Mohit Mayank
 Parse network data from dataframe format into visdcc format 
 """
 
+from dash import dcc, html
+
 def compute_scaling_vars_for_numerical_cols(df):
     """Identify and scale numerical cols"""
     # identify numerical cols
@@ -17,6 +19,10 @@ def compute_scaling_vars_for_numerical_cols(df):
         scaling_vars[col] = {'min': minn, 'max': maxx} 
     # return
     return scaling_vars
+
+def preTitle(text):
+    container = html.Pre(title=text)
+    return container
 
 def parse_dataframe(edge_df, node_df=None):
     """Parse the network dataframe into visdcc format
@@ -57,7 +63,7 @@ def parse_dataframe(edge_df, node_df=None):
         node_df.loc[:, 'id'] = node_df.loc[:, 'id'].astype(str)
         # create the node data
         for node in node_df.to_dict(orient='records'):
-            nodes.append({**node, **{'label': node['id'], 'size': 7}})
+            nodes.append({**node, **{'label': node['id'], 'size': 7, 'title': node['prop-values']}})
 
     # create edges from df
     edges = []
