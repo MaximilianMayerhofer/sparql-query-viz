@@ -1,6 +1,6 @@
 # import
 from jaal import Jaal
-from jaal.datasets.load_got import *
+from jaal.datasets import load_ontology, get_df_from_ontology
 
 # load the data
 onto1 = load_ontology()

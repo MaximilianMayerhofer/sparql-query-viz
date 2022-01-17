@@ -69,7 +69,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     node_gen = onto.onto.classes()
     # All classes from the generator are written into a list with their name, importance, shape and T-Box label
     for cl in node_gen:
-        nodelist.append([cl.name, 1, 'dot', 'T', None])
+        nodelist.append([cl.name, 1, 'dot', 'T', ''])
     #return list of all extracted classes
     return nodelist
 
@@ -180,7 +180,7 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
             # If node_in_list is False, the data-type of the associated data-property will be added to the nodelist
             # with their identifier, weight, shape and T-Box label
             if not node_in_nodelist:
-                nodelist.append([dp_type, 1, 'triangle', 'T', None])
+                nodelist.append([dp_type, 1, 'triangle', 'T', ''])
         # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
         # (not added to the edgelist)
         except IndexError:
@@ -248,16 +248,21 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
             prop_value = ''
             for prop in ins.get_properties():
                 for value in prop[ins]:
-                    if type(value) == float or type(value) == int or type(value) == str:
+                    if type(value) == float or type(value) == int:
                         if prop_value == '' and not (prop.name + ' = ' + str(value)) in prop_value:
                             prop_value = prop.name + ' = ' + str(value)
                         elif not (prop.name + ' = ' + str(value)) in prop_value:
-                            prop_value = prop_value + '/n ' + prop.name + ' = ' + str(value)
-                    else:
-                        if prop_value == '' and not (prop.name + ' = ' + value.name) in prop_value:
-                            prop_value = prop.name + ' = ' + value.name
-                        elif not (prop.name + ' = ' + value.name) in prop_value:
-                            prop_value = prop_value + '/n ' + prop.name + ' = ' + value.name
+                            prop_value = prop_value + ', ' + prop.name + ' = ' + str(value)
+                    elif type(value) == str:
+                        if prop_value == '' and not (prop.name + ' = ' + str(value)) in prop_value:
+                            prop_value = prop.name + ' = ' + str(value)
+                        elif not (prop.name + ' = ' + str(value)) in prop_value:
+                            prop_value = prop_value + ', ' + prop.name + ' = ' + str(value)
+                    #else:
+                    #    if prop_value == '' and not (prop.name + ' = ' + value.name) in prop_value:
+                    #        prop_value = prop.name + ' = ' + value.name
+                    #    elif not (prop.name + ' = ' + value.name) in prop_value:
+                    #        prop_value = prop_value + ', ' + prop.name + ' = ' + value.name
             # Get superclass of instance
             superclass = ins.is_a
             # Iterate over all classes/ nodes in nodelist
@@ -315,7 +320,7 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
 
     # Parse nodelist into panda.DataFrame, with column-names id, importance, shape and T/A
     node_df = pd.DataFrame(nodelist)
-    node_df.columns = ['id', 'importance', 'shape', 'T/A', 'prop-values']
+    node_df.columns = ['id', 'importance', 'shape', 'T/A', 'title']
     # Parse edgelist into panda.DataFrame, with column-names from, to, id, weight, label and dashes
     edge_df = pd.DataFrame(edgelist)
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']

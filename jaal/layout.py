@@ -130,7 +130,8 @@ filter_node_form = dbc.FormGroup([
         ]),
         color="secondary",
     ),
-    html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'})
+    html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+    html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'})
 ])
 
 filter_edge_form = dbc.FormGroup([
@@ -218,7 +219,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
     """
     # Step 1-2: find categorical features of nodes and edges
     cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id'])
-    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20, ['color', 'from', 'to', 'id'])
+    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'to']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))

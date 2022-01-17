@@ -36,6 +36,7 @@ class Jaal:
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}
+        self.sparql_query_history = ''
         self.onto = onto
         print("Done")
 
@@ -102,14 +103,19 @@ class Jaal:
                 graph_data = self.data
             else:
                 for node in self.filtered_data['nodes']:
-                    if node['id'] in res_list:
-                        res.append(node)
+                    for result in flat_res_list:
+                        if node['id'] == result.name:
+                            res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
+            self.sparql_query_history = self.sparql_query_history + '\n' + filter_nodes_text
         except:
             graph_data = self.data
             print("Not a valid SPARQL query.")
         return graph_data
+
+    def _callback_sparql_query_history(self):
+        return '\nQuery History: {}'.format(self.sparql_query_history)
 
     def _callback_filter_edges(self, graph_data, filter_edges_text):
         """Filter the edges based on the Python query syntax
@@ -259,7 +265,7 @@ class Jaal:
                                                                                                        'value'))
         # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(
-            pd.DataFrame(self.data['edges']).drop(columns=['color', 'chosen', 'font', 'to']), 20,
+            pd.DataFrame(self.data['edges']).drop(columns=['color', 'to']), 20,
             ['color', 'from', 'to', 'id'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
@@ -354,7 +360,9 @@ class Jaal:
 
         # create the main callbacks
         @app.callback(
-            [Output('graph', 'data'), Output('color-legend-popup', 'children'), Output('textarea-result-output', 'children')],
+            [Output('graph', 'data'), Output('color-legend-popup', 'children'), 
+             Output('textarea-result-output', 'children'), 
+             Output('sparql_query_history', 'children')],
             [Input('search_graph', 'value'),
             Input('filter_nodes', 'value'),
             # Input('filter_edges', 'value'),
@@ -369,10 +377,11 @@ class Jaal:
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
+            sparql_query_history_children = []
             # if its the first call
             if not ctx.triggered:
                 print("No trigger")
-                return [self.data, self.get_color_popover_legend_children(), flat_res_list_children]
+                return [self.data, self.get_color_popover_legend_children(), flat_res_list_children, sparql_query_history_children]
             else:
                 # find the id of the option which was triggered
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -383,6 +392,7 @@ class Jaal:
                 elif input_id == 'filter_nodes':
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
+                    sparql_query_history_children = self._callback_sparql_query_history()
                 # In case filter edges was triggered
                 #elif input_id == 'filter_edges':
                 #    graph_data = self._callback_filter_edges(graph_data, filter_edges_text)
@@ -401,7 +411,7 @@ class Jaal:
             # create the color legend childrens
             color_popover_legend_children = self.get_color_popover_legend_children(self.node_value_color_mapping, self.edge_value_color_mapping)
             # finally return the modified data
-            return [graph_data, color_popover_legend_children, flat_res_list_children]
+            return [graph_data, color_popover_legend_children, flat_res_list_children, sparql_query_history_children]
         # return server
         return app
 
