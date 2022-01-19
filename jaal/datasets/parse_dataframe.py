@@ -20,10 +20,6 @@ def compute_scaling_vars_for_numerical_cols(df):
     # return
     return scaling_vars
 
-def preTitle(text):
-    container = html.Pre(title=text)
-    return container
-
 def parse_dataframe(edge_df, node_df=None):
     """Parse the network dataframe into visdcc format
 
@@ -61,14 +57,15 @@ def parse_dataframe(edge_df, node_df=None):
     else:
         # convert the node id column to string
         node_df.loc[:, 'id'] = node_df.loc[:, 'id'].astype(str)
+        node_df.loc[:, 'title'] = node_df.loc[:, 'title'].astype(str)
         # create the node data
         for node in node_df.to_dict(orient='records'):
-            nodes.append({**node, **{'label': node['id'], 'size': 7}})
+            nodes.append({**node, **{'label': node['id'], 'title': node['title'], 'size': 7}})
 
     # create edges from df
     edges = []
     for row in edge_df.to_dict(orient='records'):
-        edges.append({**row, **{'id': row['from'] + "__" + row['to'],  'color': {'color': '#97C2FC'}}})
-    
+        edges.append({**row, **{'id': row['id'],  'color': {'color': '#97C2FC'}}})
+        #row['from'] + "__" + row['to']
     # return
     return {'nodes': nodes, 'edges': edges}, scaling_vars

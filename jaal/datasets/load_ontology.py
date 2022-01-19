@@ -69,7 +69,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     node_gen = onto.onto.classes()
     # All classes from the generator are written into a list with their name, importance, shape and T-Box label
     for cl in node_gen:
-        nodelist.append([cl.name, 1, 'dot', 'T', ''])
+        nodelist.append([cl.name, 1, 'dot', 'T', "TEST"])
     #return list of all extracted classes
     return nodelist
 
@@ -171,16 +171,13 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
                     if len(dp_dom_unique) == 1 or not i == 0:
                         identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
                         edgelist.append([dp_dom_unique[i].name, dp_type, identifier, 1, dp.name, True])
-            # Iteration over all nodes in nodelist
-            for node in nodelist:
-                # If the data-type of the associated data-property is already in the nodelist, the boolean to indicate
-                # the node already exists is set to True
-                if node[0] == dp_type:
-                    node_in_nodelist = True
+            # If the data-type of the associated data-property is already in the nodelist, the boolean to indicate
+            # the node already exists is set to True
+            node_in_nodelist = is_already_in_list(dp_type, nodelist)
             # If node_in_list is False, the data-type of the associated data-property will be added to the nodelist
             # with their identifier, weight, shape and T-Box label
             if not node_in_nodelist:
-                nodelist.append([dp_type, 1, 'triangle', 'T', ''])
+                nodelist.append([dp_type, 1, 'triangle', 'T', "TEST"])
         # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
         # (not added to the edgelist)
         except IndexError:
@@ -240,39 +237,32 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
     for node in node_gen:
         # Iteration over all instances of of the associated class
         for ins in onto.onto.search(type = node):
-            # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
-            node_in_nodelist = False
+            # Boolean to indicate, whether edge is already in edgelist is instantiated
             edge_in_edgelist = False
-
-            # TODO: write data-/ object-properties in edge-list
+            # Get superclass of instance
+            superclass = ins.is_a
+            # write property in node or edge list depending on OP or DP
             prop_value = ''
             for prop in ins.get_properties():
                 for value in prop[ins]:
-                    if type(value) == float or type(value) == int:
+                    if type(value) == float or type(value) == int or type(value) == str:
                         if prop_value == '' and not (prop.name + ' = ' + str(value)) in prop_value:
                             prop_value = prop.name + ' = ' + str(value)
                         elif not (prop.name + ' = ' + str(value)) in prop_value:
                             prop_value = prop_value + ', ' + prop.name + ' = ' + str(value)
-                    elif type(value) == str:
-                        if prop_value == '' and not (prop.name + ' = ' + str(value)) in prop_value:
-                            prop_value = prop.name + ' = ' + str(value)
-                        elif not (prop.name + ' = ' + str(value)) in prop_value:
-                            prop_value = prop_value + ', ' + prop.name + ' = ' + str(value)
-                    #else:
-                    #    if prop_value == '' and not (prop.name + ' = ' + value.name) in prop_value:
-                    #        prop_value = prop.name + ' = ' + value.name
-                    #    elif not (prop.name + ' = ' + value.name) in prop_value:
-                    #        prop_value = prop_value + ', ' + prop.name + ' = ' + value.name
-            # Get superclass of instance
-            superclass = ins.is_a
-            # Iterate over all classes/ nodes in nodelist
-            for cl in nodelist:
-                # If there is a class in nodelist that has the same name as the instance node_in_list is set to True
-                if cl[0] == ins.name:
-                    node_in_nodelist = True
+                    else:
+                        identifier = ins.name + ' ' + prop.name + ' ' + value.name
+                        for rel in edgelist:
+                            if rel[2] == identifier:
+                                edge_in_edgelist = True
+                        if not edge_in_edgelist:
+                            edgelist.append([ins.name, value.name, identifier, 1, prop.name, False])
+                        edge_in_edgelist = False
+            # If there is a class in nodelist that has the same name as the instance node_in_list is set to True
+            node_in_nodelist = is_already_in_list(ins.name, nodelist)
             # If node_in_nodelist is False the instance is written in a list with its ID, weight, shape and A-Box label
             if not node_in_nodelist:
-                nodelist.append([ins.name, 1, 'box', 'A', prop_value])
+                nodelist.append([ins.name, 1, 'box', 'A', "TEST"])
             # Iteration over all relations/ edges in edgelist
             for rel in edgelist:
                 # If there is already an edge between the instance and its superclass, edge_in_edgelist is set to True.
@@ -294,6 +284,15 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
                 edgelist.append([ins.name, superclass[0].name, identifier, 1, 'is_a', False])
     # return list of all extracted instances and list of all extracted edges/ relations
     return nodelist, edgelist
+
+def is_already_in_list(nodename, nodelist):
+    '''Checks if a node with a given name, is already in the given list'''
+    # Iterate over all classes in nodelist
+    for cl in nodelist:
+        # If there is a class in nodelist that has the name nodename, True is returned
+        if cl[0] == nodename:
+            return True
+    return False
 
 def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     """Parses the information given by the ontology into a panda.DataFrame. Parsed data includes:

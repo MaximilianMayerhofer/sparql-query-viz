@@ -289,7 +289,7 @@ class Jaal:
         # to set the first option as default value
         if len(options) > 1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
 
-    def create(self, directed=False, vis_opts=None):
+    def create(self, directed=False, vis_opts=None, abox: bool = False):
         """Create the Jaal app and return it
 
         Parameter
@@ -309,7 +309,7 @@ class Jaal:
         app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # define layout
-        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts)
+        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = abox)
         
         # get color_mapping and size_mapping once at the start
         self.forced_callback_excecution_at_beginning()
@@ -357,6 +357,23 @@ class Jaal:
             if n:
                 return not is_open
             return is_open
+
+        @app.callback(
+            Output('edge-selection', 'children'),
+            [Input('graph', 'selection')])
+
+        def show_selected_edge(x):
+            s = ''
+            if len(x['edges']) > 0: s = [s] + [html.Div(i) for i in x['edges']]
+            return s
+
+        @app.callback(
+            Output('node-selection', 'children'),
+            [Input('graph', 'selection')])
+        def show_dp_from_selected_node(x):
+            s = ''
+            if len(x['nodes']) > 0: s = [s] + [html.Div(i) for i in x['nodes']]
+            return s
 
         # create the main callbacks
         @app.callback(
@@ -408,14 +425,14 @@ class Jaal:
                 # If size edge text is provided
                 if input_id == 'size_edges':
                     graph_data = self._callback_size_edges(graph_data, size_edges_value)
-            # create the color legend childrens
+            # create the color legend children
             color_popover_legend_children = self.get_color_popover_legend_children(self.node_value_color_mapping, self.edge_value_color_mapping)
             # finally return the modified data
             return [graph_data, color_popover_legend_children, flat_res_list_children, sparql_query_history_children]
         # return server
         return app
 
-    def plot(self, debug=False, host="127.0.0.1", port="8050", directed=False, vis_opts=None):
+    def plot(self, debug=False, host="127.0.0.1", port="8050", directed=False, vis_opts=None, abox: bool = False):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
         Parameter
@@ -436,6 +453,6 @@ class Jaal:
                 the visual options to be passed to the dash server (default: None)
         """
         # call the create_graph function
-        app = self.create(directed=directed, vis_opts=vis_opts)
+        app = self.create(directed=directed, vis_opts=vis_opts, abox= abox)
         # run the server
         app.run_server(debug=debug, host=host, port=port)

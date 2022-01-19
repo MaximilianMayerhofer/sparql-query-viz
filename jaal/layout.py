@@ -62,8 +62,9 @@ DEFAULT_OPTIONS = {
 
 def get_options(directed, opts_args):
     opts = DEFAULT_OPTIONS.copy()
-    opts['edges'] = {'arrows': {'to': directed}}
-    #opts['edges'] = { 'arrows': { 'to': directed }, 'font': { 'size': 0 }, 'chosen': { 'label': 'function (values,id,selected,hovering) {values.size = 14;}'}}
+    opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
+    #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
+    #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
     if opts_args is not None:
         opts.update(opts_args)
     return opts
@@ -119,6 +120,23 @@ search_form = dbc.FormGroup(
     ]
 )
 
+selected_edge_form = dbc.FormGroup(
+    [
+        dbc.FormText(
+            id = 'edge-selection',
+            color="secondary",
+        ),
+    ]
+)
+
+a_box_dp_form = dbc.FormGroup(
+    [
+        dbc.FormText(
+            id = 'node-selection',
+            color="secondary",
+        ),
+    ]
+)
 filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
     dbc.Textarea(id="filter_nodes", placeholder="Enter SPARQL-query here..."),
@@ -209,7 +227,7 @@ def get_numerical_features(df_, unique_limit=20):
     # return
     return numeric_features
 
-def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False, vis_opts=None):
+def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False, vis_opts=None, abox: bool = False):
     """Create and return the layout of the app
 
     Parameters
@@ -218,8 +236,8 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
         network data in format of visdcc
     """
     # Step 1-2: find categorical features of nodes and edges
-    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id'])
-    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'to']), 20, ['color', 'from', 'to', 'id'])
+    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id', 'title'])
+    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
@@ -228,6 +246,116 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
     this_dir, _ = os.path.split(__file__)
     #image_filename = os.path.join(this_dir, "assest", "logo.png")
     #encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+    layout_with_abox = html.Div([
+            create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
+            create_row(html.H3(children=onto.onto.name)),
+            # create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
+            create_row([
+                dbc.Col([
+                    # setting panel
+                    dbc.Form([
+                        # ---- search section ----
+                        html.H6("Search"),
+                        html.Hr(className="my-2"),
+                        search_form,
+
+                        # ---- selection section ----
+                        html.H6("Selected Edge"),
+                        html.Hr(className="my-2"),
+                        selected_edge_form,
+
+                        # ---- abox data-properties section ----
+                        html.H6("A-Box Data-Propteries"),
+                        html.Hr(className="my-2"),
+                        a_box_dp_form,
+
+                        # ---- filter section ----
+                        create_row([
+                            html.H6("SPARQL"),
+                            dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),  # legend
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Hr(className="my-2"),
+                            filter_node_form,
+                            # filter_edge_form,
+                        ], id="filter-show-toggle", is_open=True),
+
+                        # ---- color section ----
+                        create_row([
+                            html.H6("Color"),  # heading
+                            html.Div([
+                                dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
+                                           size="sm"),  # legend
+                                dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
+                                # legend
+                            ]),
+                            # add the legends popup
+                            dbc.Popover(
+                                children=color_legends,
+                                id="color-legend-popup", is_open=False, target="color-legend-toggle",
+                            ),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Hr(className="my-2"),
+                            get_select_form_layout(
+                                id='color_nodes',
+                                options=[{'label': opt, 'value': opt} for opt in cat_node_features],
+                                label='Color nodes by',
+                                description='Select the categorical node property to color nodes by'
+                            ),
+                            get_select_form_layout(
+                                id='color_edges',
+                                options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
+                                label='Color edges by',
+                                description='Select the categorical edge property to color edges by'
+                            ),
+                        ], id="color-show-toggle", is_open=False),
+
+                        # ---- size section ----
+                        create_row([
+                            html.H6("Size"),  # heading
+                            dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),  # legend
+                            # dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"), # legend
+                            # add the legends popup
+                            # dbc.Popover(
+                            #     children=color_legends,
+                            #     id="color-legend-popup", is_open=False, target="color-legend-toggle",
+                            # ),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Hr(className="my-2"),
+                            get_select_form_layout(
+                                id='size_nodes',
+                                options=[{'label': opt, 'value': opt} for opt in num_node_features],
+                                label='Size nodes by',
+                                description='Select the numerical node property to size nodes by'
+                            ),
+                            get_select_form_layout(
+                                id='size_edges',
+                                options=[{'label': opt, 'value': opt} for opt in num_edge_features],
+                                label='Size edges by',
+                                description='Select the numerical edge property to size edges by'
+                            ),
+                        ], id="size-show-toggle", is_open=False),
+
+                    ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
+                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+                # graph
+                dbc.Col(
+                    visdcc.Network(
+                        id='graph',
+                        data=graph_data,
+                        selection={'nodes': [], 'edges': [], 'event': [], 'items': []},
+                        options=get_options(directed, vis_opts)),
+                    width=9)])
+        ])
+    if abox:
+        return layout_with_abox
     return html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")), # Title
             create_row(html.H3(children=onto.onto.name)),
@@ -241,6 +369,11 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         html.Hr(className="my-2"),
                         search_form,
 
+                        # ---- selection section ----
+                        html.H6("Selected Edge"),
+                        html.Hr(className="my-2"),
+                        selected_edge_form,
+
                         # ---- filter section ----
                         create_row([
                             html.H6("SPARQL"),
@@ -251,7 +384,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             filter_node_form,
                            # filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
-                        
+
                         # ---- color section ----
                         create_row([
                             html.H6("Color"), # heading
@@ -315,6 +448,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                     visdcc.Network(
                         id = 'graph',
                         data = graph_data,
+                        selection={'nodes': [], 'edges': [], 'event': [], 'items': []},
                         options = get_options(directed,vis_opts)),
                         width=9)])
     ])
