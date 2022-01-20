@@ -324,8 +324,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
-                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'})
-                            # filter_edge_form,
+                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
+                            dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
+                                       size="sm"),
                         ], id="history-show-toggle", is_open=False),
 
                         # ---- color section ----

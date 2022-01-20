@@ -343,12 +343,20 @@ class Jaal:
 
         @app.callback(
             Output("result-show-toggle", "is_open"),
-            [Input("result-show-toggle-button", "n_clicks")],
+            [Input("result-show-toggle-button", "n_clicks"),
+             Input('evaluate_query_button', 'n_clicks')],
             [State("result-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n, is_open):
-            if n:
-                return not is_open
+        def toggle_filter_collapse(n_show, n_evaluate, is_open):
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return is_open
+            else:
+                input_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if input_id == "result-show-toggle-button":
+                    return not is_open
+                if input_id == "evaluate_query_button":
+                    return True
             return is_open
 
         @app.callback(
@@ -356,11 +364,19 @@ class Jaal:
             [Input("history-show-toggle-button", "n_clicks")],
             [State("history-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n, is_open):
-            if n:
+        def toggle_filter_collapse(n_show, is_open):
+            if n_show:
                 return not is_open
             return is_open
 
+        #@app.callback(
+        #    #Output("sparql_query_history", "children"),
+        #    [Input("clear-query-history-button", "n_clicks")])
+        #def clear_query_history(n):
+        #    if n:
+        #        self.sparql_query_history = []
+        #    return _callback_sparql_query_history()
+        
         @app.callback(
             Output("select-sparql", "children"),
             [Input("prefix-sparql-button", "n_clicks")],
