@@ -368,14 +368,6 @@ class Jaal:
             if n_show:
                 return not is_open
             return is_open
-
-        #@app.callback(
-        #    #Output("sparql_query_history", "children"),
-        #    [Input("clear-query-history-button", "n_clicks")])
-        #def clear_query_history(n):
-        #    if n:
-        #        self.sparql_query_history = []
-        #    return _callback_sparql_query_history()
         
         @app.callback(
             Output("select-sparql", "children"),
@@ -475,11 +467,12 @@ class Jaal:
             Input('color_edges', 'value'),
             Input('size_nodes', 'value'),
             Input('size_edges', 'value'),
-            Input('evaluate_query_button', 'n_clicks')],
+            Input('evaluate_query_button', 'n_clicks'),
+            Input('clear-query-history-button', 'n_clicks')],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, filter_nodes_text,  
-                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, graph_data):
+                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
@@ -495,9 +488,12 @@ class Jaal:
                 if input_id == "search_graph":
                     graph_data = self._callback_search_graph(graph_data, search_text)
                 # In case filter nodes was triggered
-                elif input_id == 'evaluate_query_button':
+                elif input_id == 'evaluate_query_button' and n_evaluate:
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
+                    sparql_query_history_children = self._callback_sparql_query_history()
+                if input_id == "clear-query-history-button" and n_clear:
+                    self.sparql_query_history = ""
                     sparql_query_history_children = self._callback_sparql_query_history()
                 # In case filter edges was triggered
                 #elif input_id == 'filter_edges':
