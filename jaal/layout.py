@@ -139,7 +139,31 @@ a_box_dp_form = dbc.FormGroup(
 )
 filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
+    create_row([
+        dbc.Button("Add", id="add_to_query_button", outline=True, color="secondary",size="sm"),
+    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+        'justify-content': 'space-between'}),
     dbc.Textarea(id="filter_nodes", placeholder="Enter SPARQL-query here..."),
+    create_row([
+        dbc.Button("PREFIX", id="prefix-sparql-button", outline=True, color="secondary",
+                   size="sm"),
+        dbc.Button("SELECT", id="select-sparql-button", outline=True, color="secondary",
+                   size="sm"),
+        dbc.Button("COUNT", id="count-sparql-button", outline=True, color="secondary",
+                   size="sm"),
+        dbc.Button("AS", id="as-sparql-button", outline=True, color="secondary",
+                   size="sm"),
+        dbc.Button("FILTER", id="filter-sparql-button", outline=True, color="secondary",
+                   size="sm"),
+    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+        'justify-content': 'space-between'}),
+    html.Div(id='select-sparql', style={'whiteSpace': 'pre-line'}),
+    html.Hr(className="my-2"),
+    create_row([
+        dbc.Button("Delete", id="delete_query_button", outline=True, color="secondary",size="sm"),
+        dbc.Button("Evaluate Query", id="evaluate_query_button", outline=True, color="secondary",size="sm"),
+    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+        'justify-content': 'space-between'}),
     dbc.FormText(
         html.P([
             "Filter graph data by using ",
@@ -148,8 +172,6 @@ filter_node_form = dbc.FormGroup([
         ]),
         color="secondary",
     ),
-    html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
-    html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'})
 ])
 
 filter_edge_form = dbc.FormGroup([
@@ -269,9 +291,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         html.Hr(className="my-2"),
                         a_box_dp_form,
 
-                        # ---- filter section ----
+                        # ---- SPARQL Query section ----
                         create_row([
-                            html.H6("SPARQL"),
+                            html.H6("SPARQL Query"),
                             dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
                                        size="sm"),  # legend
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
@@ -279,8 +301,32 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                            # filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
+
+                        # ---- SPARQL Result section ----
+                        create_row([
+                            html.H6("SPARQL Result"),
+                            dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),  # legend
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Hr(className="my-2"),
+                            html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+                        ], id="result-show-toggle", is_open=False),
+
+                        # ---- SPARQL History section ----
+                        create_row([
+                            html.H6("SPARQL History"),
+                            dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Hr(className="my-2"),
+                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'})
+                            # filter_edge_form,
+                        ], id="history-show-toggle", is_open=False),
 
                         # ---- color section ----
                         create_row([

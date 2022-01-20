@@ -36,6 +36,7 @@ class Jaal:
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}
+        self.sparql_query = ''
         self.sparql_query_history = ''
         self.onto = onto
         print("Done")
@@ -68,9 +69,12 @@ class Jaal:
         try:
             res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
             flat_res_list = [x for l in res_list for x in l]
+            result = ""
+            for res in flat_res_list:
+                result = result + str(res.name) + "\n"
         except:
-            flat_res_list = "Not a valid SPARQL query."
-        return 'Result: \n{}'.format(flat_res_list)
+            result = "Not a valid SPARQL query."
+        return result
 
     def _callback_filter_nodes(self, graph_data, filter_nodes_text):
         """Filter the nodes based on the Python query syntax
@@ -90,7 +94,7 @@ class Jaal:
         #    print("wrong node filter query!!")
 
         try:
-            res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
+            res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             res = []
             res_is_int = True
@@ -108,14 +112,15 @@ class Jaal:
                             res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
-            self.sparql_query_history = self.sparql_query_history + '\n' + filter_nodes_text
+            self.sparql_query_history = self.sparql_query_history + '\n' + self.sparql_query
+            self.sparql_query = ""
         except:
             graph_data = self.data
             print("Not a valid SPARQL query.")
         return graph_data
 
     def _callback_sparql_query_history(self):
-        return '\nQuery History: {}'.format(self.sparql_query_history)
+        return 'Query History: {}'.format(self.sparql_query_history)
 
     def _callback_filter_edges(self, graph_data, filter_edges_text):
         """Filter the edges based on the Python query syntax
@@ -335,6 +340,72 @@ class Jaal:
             if n:
                 return not is_open
             return is_open
+
+        @app.callback(
+            Output("result-show-toggle", "is_open"),
+            [Input("result-show-toggle-button", "n_clicks")],
+            [State("result-show-toggle", "is_open")],
+        )
+        def toggle_filter_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+        @app.callback(
+            Output("history-show-toggle", "is_open"),
+            [Input("history-show-toggle-button", "n_clicks")],
+            [State("history-show-toggle", "is_open")],
+        )
+        def toggle_filter_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+        @app.callback(
+            Output("select-sparql", "children"),
+            [Input("prefix-sparql-button", "n_clicks")],
+            [Input("select-sparql-button", "n_clicks")],
+            [Input("add_to_query_button", "n_clicks")],
+            [Input("count-sparql-button", "n_clicks")],
+            [Input("delete_query_button", "n_clicks")],
+            [Input("as-sparql-button", "n_clicks")],
+            [Input("filter-sparql-button", "n_clicks")],
+            [State("filter_nodes", "value")],
+        )
+        def insert_select_sparql_keyword(n_prefix, n_select, n_add, n_count, n_delete, n_as, n_filter, value):
+            ctx = dash.callback_context
+            if self.sparql_query is None:
+                self.sparql_query = ""
+
+            if not ctx.triggered:
+                return self.sparql_query
+            else:
+                # find the id of the option which was triggered
+                input_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                # perform operation depending on which sparql button was triggered
+                if input_id == "select-sparql-button":
+                    if n_select:
+                        self.sparql_query = self.sparql_query + "\n SELECT "
+                elif input_id == "count-sparql-button":
+                    if n_count:
+                        self.sparql_query = self.sparql_query + "COUNT "
+                elif input_id == "prefix-sparql-button":
+                    if n_prefix:
+                        self.sparql_query = self.sparql_query + "PREFIX : <" + self.onto.iri + "#>"
+                elif input_id == "as-sparql-button":
+                    if n_as:
+                        self.sparql_query = self.sparql_query + "AS "
+                elif input_id == "filter-sparql-button":
+                    if n_filter:
+                        self.sparql_query = self.sparql_query + "FILTER "
+                elif input_id == "add_to_query_button":
+                    if n_add and value is not None:
+                        self.sparql_query = self.sparql_query + value
+                elif input_id == "delete_query_button":
+                    if n_delete:
+                        self.sparql_query = ""
+
+            return self.sparql_query
         
         # create callbacks to toggle hide/show sections - COLOR section
         @app.callback(
@@ -364,7 +435,8 @@ class Jaal:
 
         def show_selected_edge(x):
             s = ''
-            if len(x['edges']) > 0: s = [s] + [html.Div(i) for i in x['edges']]
+            if len(x['edges']) > 0:
+                s = [s] + [html.Div(i) for i in x['edges']]
             return s
 
         @app.callback(
@@ -372,7 +444,8 @@ class Jaal:
             [Input('graph', 'selection')])
         def show_dp_from_selected_node(x):
             s = ''
-            if len(x['nodes']) > 0: s = [s] + [html.Div(i) for i in x['nodes']]
+            if len(x['nodes']) > 0:
+                s = [s] + [html.Div(i) for i in x['nodes']]
             return s
 
         # create the main callbacks
@@ -382,15 +455,15 @@ class Jaal:
              Output('sparql_query_history', 'children')],
             [Input('search_graph', 'value'),
             Input('filter_nodes', 'value'),
-            # Input('filter_edges', 'value'),
             Input('color_nodes', 'value'),
             Input('color_edges', 'value'),
             Input('size_nodes', 'value'),
-            Input('size_edges', 'value')],
+            Input('size_edges', 'value'),
+            Input('evaluate_query_button', 'n_clicks')],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, filter_nodes_text,  
-                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, graph_data):
+                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
@@ -406,7 +479,7 @@ class Jaal:
                 if input_id == "search_graph":
                     graph_data = self._callback_search_graph(graph_data, search_text)
                 # In case filter nodes was triggered
-                elif input_id == 'filter_nodes':
+                elif input_id == 'evaluate_query_button':
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
                     sparql_query_history_children = self._callback_sparql_query_history()
