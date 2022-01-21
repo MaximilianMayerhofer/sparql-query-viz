@@ -117,23 +117,23 @@ class Jaal:
                             res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
-            number_of_shown_queries = 3
-            if (self.counter_query_history + 1) > number_of_shown_queries:
-                seperator = str(self.counter_query_history-(number_of_shown_queries-2)) + ": "
-                partition = self.sparql_query_history.partition(seperator)
-                self.counter_query_history = self.counter_query_history + 1
-                self.sparql_query_history = partition[1] + partition[2] + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
-            else:
-                self.counter_query_history = self.counter_query_history + 1
-                self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
+            self.counter_query_history = self.counter_query_history + 1
+            self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
             self.sparql_query = ""
         except:
             graph_data = self.data
             print("Not a valid SPARQL query.")
         return graph_data
 
-    def _callback_sparql_query_history(self):
-        return self.sparql_query_history
+    def _callback_sparql_query_history(self, number_of_shown_queries):
+        sparql_query_history = self.sparql_query_history
+        if self.counter_query_history > number_of_shown_queries:
+            separator = str(self.counter_query_history - (number_of_shown_queries - 1)) + ": "
+            partition = sparql_query_history.partition(separator)
+            shown_sparql_query_history = partition[1] + partition[2]
+        else:
+            shown_sparql_query_history = sparql_query_history
+        return shown_sparql_query_history
 
     def _callback_filter_edges(self, graph_data, filter_edges_text):
         """Filter the edges based on the Python query syntax
@@ -481,11 +481,12 @@ class Jaal:
             Input('size_nodes', 'value'),
             Input('size_edges', 'value'),
             Input('evaluate_query_button', 'n_clicks'),
-            Input('clear-query-history-button', 'n_clicks')],
+            Input('clear-query-history-button', 'n_clicks'),
+            Input('query-history-length-slider','value')],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, filter_nodes_text,  
-                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, graph_data):
+                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
@@ -501,14 +502,14 @@ class Jaal:
                 if input_id == "search_graph":
                     graph_data = self._callback_search_graph(graph_data, search_text)
                 # In case filter nodes was triggered
-                elif input_id == 'evaluate_query_button' and n_evaluate:
+                elif (input_id == 'evaluate_query_button' and n_evaluate) or input_id == 'query-history-length-slider':
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
-                    sparql_query_history_children = self._callback_sparql_query_history()
+                    sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                 if input_id == "clear-query-history-button" and n_clear:
                     self.counter_query_history= 0
                     self.sparql_query_history = ""
-                    sparql_query_history_children = self._callback_sparql_query_history()
+                    sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                 # In case filter edges was triggered
                 #elif input_id == 'filter_edges':
                 #    graph_data = self._callback_filter_edges(graph_data, filter_edges_text)

@@ -324,6 +324,21 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
+                            dcc.Slider(
+                                id='query-history-length-slider',
+                                min=1,
+                                max=5,
+                                step=1,
+                                value=3,
+                                marks={
+                                    1: '1',
+                                    2: '2',
+                                    3: '3',
+                                    4: '4',
+                                    5: '5'
+                                },
+
+                            ),
                             html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
                             dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
                                        size="sm"),
