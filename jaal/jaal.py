@@ -38,6 +38,7 @@ class Jaal:
         self.edge_value_color_mapping = {}
         self.sparql_query = ''
         self.sparql_query_history = ''
+        self.counter_query_history = 0
         self.onto = onto
         print("Done")
 
@@ -70,8 +71,12 @@ class Jaal:
             res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
             flat_res_list = [x for l in res_list for x in l]
             result = ""
-            for res in flat_res_list:
-                result = result + str(res.name) + "\n"
+            try:
+                for res in flat_res_list:
+                    result = result + str(res.name) + "\n"
+            except:
+                for res in flat_res_list:
+                    result = result + str(res) + "\n"
         except:
             result = "Not a valid SPARQL query."
         return result
@@ -112,7 +117,15 @@ class Jaal:
                             res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
-            self.sparql_query_history = self.sparql_query_history + '\n' + self.sparql_query
+            number_of_shown_queries = 3
+            if (self.counter_query_history + 1) > number_of_shown_queries:
+                seperator = str(self.counter_query_history-(number_of_shown_queries-2)) + ": "
+                partition = self.sparql_query_history.partition(seperator)
+                self.counter_query_history = self.counter_query_history + 1
+                self.sparql_query_history = partition[1] + partition[2] + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
+            else:
+                self.counter_query_history = self.counter_query_history + 1
+                self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
             self.sparql_query = ""
         except:
             graph_data = self.data
@@ -120,7 +133,7 @@ class Jaal:
         return graph_data
 
     def _callback_sparql_query_history(self):
-        return 'Query History: {}'.format(self.sparql_query_history)
+        return self.sparql_query_history
 
     def _callback_filter_edges(self, graph_data, filter_edges_text):
         """Filter the edges based on the Python query syntax
@@ -493,6 +506,7 @@ class Jaal:
                     flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
                     sparql_query_history_children = self._callback_sparql_query_history()
                 if input_id == "clear-query-history-button" and n_clear:
+                    self.counter_query_history= 0
                     self.sparql_query_history = ""
                     sparql_query_history_children = self._callback_sparql_query_history()
                 # In case filter edges was triggered
