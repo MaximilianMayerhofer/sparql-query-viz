@@ -159,8 +159,8 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
                             len(dp_dom_unique) == 1 or not i == 0):
                         edge_in_edgelist = True
                         identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
-                        edge[2] = edge[2] + ', ' + identifier
-                        edge[4] = edge[4] + ', ' + dp.name
+                        edge[2] = edge[2] + ',\n ' + identifier
+                        edge[4] = edge[4] + ',\n ' + dp.name
                         edge[3] = edge[3] + 1
             # If there is not already a relation between two corresponding domains and data-types,
             # and it is not the first domain of the associated data-property (unless there is only one), the new
@@ -249,7 +249,7 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
                         if prop_value == '' and not (prop.name + ' = ' + str(value)) in prop_value:
                             prop_value = prop.name + ' = ' + str(value)
                         elif not (prop.name + ' = ' + str(value)) in prop_value:
-                            prop_value = prop_value + ', ' + prop.name + ' = ' + str(value)
+                            prop_value = prop_value + ',\n ' + prop.name + ' = ' + str(value)
                     else:
                         identifier = ins.name + ' ' + prop.name + ' ' + value.name
                         for rel in edgelist:
@@ -274,8 +274,8 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
                     # The new relation is added to the existing edge with its ID and label and the weight
                     # is increased by one, if there is not already an relationship with the same ID
                     if not identifier == rel[2]:
-                        rel[2] = rel[2] + ', ' + identifier
-                        rel[4] = rel[4] + ', ' + 'is_a'
+                        rel[2] = rel[2] + ',\n ' + identifier
+                        rel[4] = rel[4] + ',\n ' + 'is_a'
                         rel[3] = rel[3] + 1
             # If edge_in_edgelist is False, the new instance is written into a list
             # with its name, its superclasses' name, identifier, weight, label and dashes-boolean
@@ -286,7 +286,7 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
     return nodelist, edgelist
 
 def is_already_in_list(nodename, nodelist):
-    '''Checks if a node with a given name, is already in the given list'''
+    """Checks if a node with a given name, is already in the given list"""
     # Iterate over all classes in nodelist
     for cl in nodelist:
         # If there is a class in nodelist that has the name nodename, True is returned

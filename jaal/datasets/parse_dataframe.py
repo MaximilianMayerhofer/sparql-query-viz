@@ -66,6 +66,5 @@ def parse_dataframe(edge_df, node_df=None):
     edges = []
     for row in edge_df.to_dict(orient='records'):
         edges.append({**row, **{'id': row['id'],  'color': {'color': '#97C2FC'}}})
-        #row['from'] + "__" + row['to']
     # return
     return {'nodes': nodes, 'edges': edges}, scaling_vars

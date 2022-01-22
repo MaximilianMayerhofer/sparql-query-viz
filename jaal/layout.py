@@ -295,7 +295,8 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         create_row([
                             html.H6("SPARQL Query"),
                             dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),  # legend
+                                       size="sm"),
+                            dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
@@ -307,7 +308,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         create_row([
                             html.H6("SPARQL Result"),
                             dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),  # legend
+                                       size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
@@ -337,7 +338,6 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                                     4: '4',
                                     5: '5'
                                 },
-
                             ),
                             html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
                             dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
@@ -356,7 +356,8 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             # add the legends popup
                             dbc.Popover(
                                 children=color_legends,
-                                id="color-legend-popup", is_open=False, target="color-legend-toggle",
+                                id="color-legend-popup", is_open=False,
+                                target="color-legend-toggle"
                             ),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
@@ -380,13 +381,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         create_row([
                             html.H6("Size"),  # heading
                             dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),  # legend
-                            # dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"), # legend
-                            # add the legends popup
-                            # dbc.Popover(
-                            #     children=color_legends,
-                            #     id="color-legend-popup", is_open=False, target="color-legend-toggle",
-                            # ),
+                                       size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
@@ -457,7 +452,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             # add the legends popup
                             dbc.Popover(
                                 children=color_legends,
-                                id="color-legend-popup", is_open=False, target="color-legend-toggle",
+                                id="color-legend-popup", is_open=False, target="color-legend-toggle"
                             ),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right':0, 'justify-content': 'space-between'}),
                         dbc.Collapse([

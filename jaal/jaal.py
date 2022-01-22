@@ -252,9 +252,20 @@ class Jaal:
             # add values if present
             if len(legends) > 0:
                 for key, value in legends.items():
-                    _popover_legend_children.append(
-                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
-                        create_color_legend(key, value)
+                    partition = key.partition(',\n ')
+                    if partition[2] == '':
+                        _popover_legend_children.append(
+                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                            create_color_legend(key, value)
+                            )
+                    else:
+                        _popover_legend_children.append(
+                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                            create_color_legend(partition[0], value)
+                        )
+                        _popover_legend_children.append(
+                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                            create_color_legend(partition[2], value)
                         )
             else: # otherwise add filler
                 _popover_legend_children.append(dbc.PopoverBody(f"no {title.lower()} colored!"))
@@ -283,29 +294,30 @@ class Jaal:
                                                                                                        'value'))
         # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(
-            pd.DataFrame(self.data['edges']).drop(columns=['color', 'to']), 20,
+            pd.DataFrame(self.data['edges']).drop(columns=['color', 'from', 'to', 'id']), 20,
             ['color', 'from', 'to', 'id'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
         # If options has mor then one categorical feature, the callback function for edge-coloring is executed once,
         # to set the first option as default value
-        if len(options) > 1: self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data,
-                                                                                                   options[1].get(
-                                                                                                       'value'))
+        if len(options) > 1:
+            self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data, options[1].get('value'))
         # Get list of numerical features from nodes
         num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
         # Define label and value for each numerical feature
         options = [{'label': opt, 'value': opt} for opt in num_node_features]
         # If options has mor then one numerical feature, the callback function for nodes-sizing is executed once,
         # to set the first option as default value
-        if len(options) > 1: self.data = self._callback_size_nodes(self.data, options[1].get('value'))
+        if len(options) > 1:
+            self.data = self._callback_size_nodes(self.data, options[1].get('value'))
         # Get list of numerical features from edges
         num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
         # Define label and value for each numerical feature
         options = [{'label': opt, 'value': opt} for opt in num_edge_features]
         # If options has mor then one numerical feature, the callback function for edge-sizing is executed once,
         # to set the first option as default value
-        if len(options) > 1: self.data = self._callback_size_edges(self.data, options[1].get('value'))
+        if len(options) > 1:
+            self.data = self._callback_size_edges(self.data, options[1].get('value'))
 
     def create(self, directed=False, vis_opts=None, abox: bool = False):
         """Create the Jaal app and return it
@@ -482,11 +494,12 @@ class Jaal:
             Input('size_edges', 'value'),
             Input('evaluate_query_button', 'n_clicks'),
             Input('clear-query-history-button', 'n_clicks'),
-            Input('query-history-length-slider','value')],
+            Input('query-history-length-slider','value'),
+             Input("color-legend-toggle", "n_clicks")],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, filter_nodes_text,  
-                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length, graph_data):
+                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length, n_legend, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
