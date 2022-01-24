@@ -407,7 +407,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                     visdcc.Network(
                         id='graph',
                         data=graph_data,
-                        selection={'nodes': [], 'edges': [], 'event': [], 'items': []},
+                        selection={'nodes': [], 'edges': []},
                         options=get_options(directed, vis_opts)),
                     width=9)])
         ])

@@ -69,7 +69,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     node_gen = onto.onto.classes()
     # All classes from the generator are written into a list with their name, importance, shape and T-Box label
     for cl in node_gen:
-        nodelist.append([cl.name, 1, 'dot', 'T', "TEST"])
+        nodelist.append([cl.name, 1, 'dot', 'T', ""])
     #return list of all extracted classes
     return nodelist
 
@@ -177,7 +177,7 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
             # If node_in_list is False, the data-type of the associated data-property will be added to the nodelist
             # with their identifier, weight, shape and T-Box label
             if not node_in_nodelist:
-                nodelist.append([dp_type, 1, 'triangle', 'T', "TEST"])
+                nodelist.append([dp_type, 1, 'triangle', 'T', ""])
         # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
         # (not added to the edgelist)
         except IndexError:
@@ -262,7 +262,7 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
             node_in_nodelist = is_already_in_list(ins.name, nodelist)
             # If node_in_nodelist is False the instance is written in a list with its ID, weight, shape and A-Box label
             if not node_in_nodelist:
-                nodelist.append([ins.name, 1, 'box', 'A', "TEST"])
+                nodelist.append([ins.name, 1, 'box', 'A', prop_value])
             # Iteration over all relations/ edges in edgelist
             for rel in edgelist:
                 # If there is already an edge between the instance and its superclass, edge_in_edgelist is set to True.

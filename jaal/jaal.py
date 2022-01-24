@@ -469,7 +469,9 @@ class Jaal:
         def show_selected_edge(x):
             s = ''
             if len(x['edges']) > 0:
-                s = [s] + [html.Div(i) for i in x['edges']]
+                for edge in self.data['edges']:
+                    if [edge['id']] == x['edges']:
+                        s = [s] + [html.Div([edge['label']] + [': '] + x['edges'])]
             return s
 
         @app.callback(
@@ -478,7 +480,9 @@ class Jaal:
         def show_dp_from_selected_node(x):
             s = ''
             if len(x['nodes']) > 0:
-                s = [s] + [html.Div(i) for i in x['nodes']]
+                for node in self.data['nodes']:
+                    if [node['id']] == x['nodes']:
+                        s = [s] + [html.Div(x['nodes'] + [': '] + [node['title']])] + ['\n']
             return s
 
         # create the main callbacks
