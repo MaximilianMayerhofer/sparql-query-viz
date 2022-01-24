@@ -8,6 +8,7 @@ Layout code for the application
 import os
 import visdcc
 import base64
+import random
 import pandas as pd
 from dash import dcc, html
 import dash_bootstrap_components as dbc
@@ -77,8 +78,15 @@ def get_distinct_colors(n):
     n: int
         the distinct colors required
     """
-    if n <= 20:
-        return KELLY_COLORS_HEX[:n]
+    if n <= 7:
+        colors = KELLY_COLORS_HEX[:7].copy()
+        random.shuffle(colors)
+        return colors[:n]
+    elif n <= 20:
+        colors = KELLY_COLORS_HEX[:20].copy()
+        random.shuffle(colors)
+        return colors[:n]
+
 
 def create_card(id, value, description):
     """Creates card for high level stats
@@ -175,7 +183,7 @@ filter_node_form = dbc.FormGroup([
         html.P([
             "Filter graph data by using ",
             html.A("SPARQL Query syntax",
-            href="https://owlready2.readthedocs.io/en/v0.35/sparql.html"),
+            href="https://www.w3.org/TR/sparql11-query/#grammar"),
         ]),
         color="secondary",
     ),
