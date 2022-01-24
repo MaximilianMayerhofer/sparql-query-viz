@@ -283,13 +283,13 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
 
                         # ---- selection section ----
                         html.H6("Selected Edge"),
-                        html.Hr(className="my-2"),
                         selected_edge_form,
+                        html.Hr(className="my-2"),
 
                         # ---- abox data-properties section ----
                         html.H6("A-Box Data-Propteries"),
-                        html.Hr(className="my-2"),
                         a_box_dp_form,
+                        html.Hr(className="my-2"),
 
                         # ---- SPARQL Query section ----
                         create_row([
@@ -312,8 +312,8 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
-                            html.Hr(className="my-2"),
                             html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+                            html.Hr(className="my-2"),
                         ], id="result-show-toggle", is_open=False),
 
                         # ---- SPARQL History section ----
@@ -324,7 +324,6 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
-                            html.Hr(className="my-2"),
                             dcc.Slider(
                                 id='query-history-length-slider',
                                 min=1,
@@ -340,6 +339,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                                 },
                             ),
                             html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
+                            html.Hr(className="my-2"),
                             dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
                                        size="sm"),
                         ], id="history-show-toggle", is_open=False),
@@ -414,9 +414,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
     if abox:
         return layout_with_abox
     return html.Div([
-            create_row(html.H2(children="SPARQL Visualization Tool")), # Title
+            create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
             create_row(html.H3(children=onto.onto.name)),
-            #create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
+            # create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
             create_row([
                 dbc.Col([
                     # setting panel
@@ -428,33 +428,79 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
 
                         # ---- selection section ----
                         html.H6("Selected Edge"),
-                        html.Hr(className="my-2"),
                         selected_edge_form,
+                        html.Hr(className="my-2"),
 
-                        # ---- filter section ----
+                        # ---- SPARQL Query section ----
                         create_row([
-                            html.H6("SPARQL"),
-                            dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary", size="sm"), # legend
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right':0, 'justify-content': 'space-between'}),
+                            html.H6("SPARQL Query"),
+                            dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                            dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                           # filter_edge_form,
                         ], id="filter-show-toggle", is_open=True),
+
+                        # ---- SPARQL Result section ----
+                        create_row([
+                            html.H6("SPARQL Result"),
+                            dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+                            html.Hr(className="my-2"),
+                        ], id="result-show-toggle", is_open=False),
+
+                        # ---- SPARQL History section ----
+                        create_row([
+                            html.H6("SPARQL History"),
+                            dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            dcc.Slider(
+                                id='query-history-length-slider',
+                                min=1,
+                                max=5,
+                                step=1,
+                                value=3,
+                                marks={
+                                    1: '1',
+                                    2: '2',
+                                    3: '3',
+                                    4: '4',
+                                    5: '5'
+                                },
+                            ),
+                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
+                            html.Hr(className="my-2"),
+                            dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], id="history-show-toggle", is_open=False),
 
                         # ---- color section ----
                         create_row([
-                            html.H6("Color"), # heading
+                            html.H6("Color"),  # heading
                             html.Div([
-                                dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary", size="sm"), # legend
-                                dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"), # legend
+                                dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
+                                           size="sm"),  # legend
+                                dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
+                                # legend
                             ]),
                             # add the legends popup
                             dbc.Popover(
                                 children=color_legends,
-                                id="color-legend-popup", is_open=False, target="color-legend-toggle"
+                                id="color-legend-popup", is_open=False,
+                                target="color-legend-toggle"
                             ),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right':0, 'justify-content': 'space-between'}),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
@@ -473,15 +519,11 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
 
                         # ---- size section ----
                         create_row([
-                            html.H6("Size"), # heading
-                            dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary", size="sm"), # legend
-                            # dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"), # legend
-                            # add the legends popup
-                            # dbc.Popover(
-                            #     children=color_legends,
-                            #     id="color-legend-popup", is_open=False, target="color-legend-toggle",
-                            # ),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right':0, 'justify-content': 'space-between'}),
+                            html.H6("Size"),  # heading
+                            dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
@@ -503,9 +545,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                 # graph
                 dbc.Col(
                     visdcc.Network(
-                        id = 'graph',
-                        data = graph_data,
-                        selection={'nodes': [], 'edges': [], 'event': [], 'items': []},
-                        options = get_options(directed,vis_opts)),
-                        width=9)])
-    ])
+                        id='graph',
+                        data=graph_data,
+                        selection={'nodes': [], 'edges': []},
+                        options=get_options(directed, vis_opts)),
+                    width=9)])
+        ])
