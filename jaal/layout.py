@@ -101,6 +101,13 @@ def create_color_legend(text, color):
         html.Div(text, style={'padding-left': '10px'}),
     ])
 
+def create_info_text(text):
+    """Individual row for the color legend
+    """
+    return create_row([
+        html.Div(text, style={'padding-left': '10px'}),
+    ])
+
 def fetch_flex_row_style():
     return {'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center', 'align-items': 'center'}
 
@@ -299,6 +306,14 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                             dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
+                        dbc.Popover(
+                            children=create_info_text("To write an SPARQL query, type in a valid query in the text "
+                                                      "field and click 'Add'. Or use the provided keywords to build "
+                                                      "up the query. To see the result click 'Evaluate query'. "
+                                                      "To erase the entered text click 'Delete'."),
+                            id="info-sparql-popup", is_open=False,
+                            target="info-sparql-query-button"
+                        ),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,

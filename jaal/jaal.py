@@ -355,6 +355,16 @@ class Jaal:
                 return not is_open
             return is_open
 
+        @app.callback(
+            Output("info-sparql-popup", "is_open"),
+            [Input("info-sparql-query-button", "n_clicks")],
+            [State("info-sparql-popup", "is_open")],
+        )
+        def toggle_popover(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
         # create callbacks to toggle hide/show sections - FILTER section
         @app.callback(
             Output("filter-show-toggle", "is_open"),
