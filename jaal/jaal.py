@@ -406,16 +406,16 @@ class Jaal:
         
         @app.callback(
             Output("select-sparql", "children"),
-            [Input("prefix-sparql-button", "n_clicks")],
-            [Input("select-sparql-button", "n_clicks")],
-            [Input("add_to_query_button", "n_clicks")],
-            [Input("count-sparql-button", "n_clicks")],
-            [Input("delete_query_button", "n_clicks")],
-            [Input("as-sparql-button", "n_clicks")],
-            [Input("filter-sparql-button", "n_clicks")],
+            [Input("sparql-keywords-dropdown","value"),
+             Input("sparql-variables-dropdown", "value"),
+             Input("sparql-syntax-dropdown", "value"),
+             Input("add_to_query_button", "n_clicks"),
+             Input("delete_query_button", "n_clicks"),
+             Input("add_node_edge_to_query_button", "on"),
+             Input('graph', 'selection')],
             [State("filter_nodes", "value")],
         )
-        def insert_select_sparql_keyword(n_prefix, n_select, n_add, n_count, n_delete, n_as, n_filter, value):
+        def insert_select_sparql_keyword(kw_value, var_value, syn_value, n_add, n_delete, on_select, selection, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -426,28 +426,35 @@ class Jaal:
                 # find the id of the option which was triggered
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
                 # perform operation depending on which sparql button was triggered
-                if input_id == "select-sparql-button":
-                    if n_select:
-                        self.sparql_query = self.sparql_query + "\n SELECT "
-                elif input_id == "count-sparql-button":
-                    if n_count:
-                        self.sparql_query = self.sparql_query + "COUNT "
-                elif input_id == "prefix-sparql-button":
-                    if n_prefix:
-                        self.sparql_query = self.sparql_query + "PREFIX : <" + self.onto.iri + "#>"
-                elif input_id == "as-sparql-button":
-                    if n_as:
-                        self.sparql_query = self.sparql_query + "AS "
-                elif input_id == "filter-sparql-button":
-                    if n_filter:
-                        self.sparql_query = self.sparql_query + "FILTER "
+                if input_id == "sparql-keywords-dropdown":
+                    if kw_value is not None:
+                        if kw_value == "PREFIX":
+                            self.sparql_query = self.sparql_query + " PREFIX : <" + self.onto.iri + "#>"
+                        elif kw_value == "SELECT":
+                            self.sparql_query = self.sparql_query + "\n SELECT"
+                        else:
+                            self.sparql_query = self.sparql_query + " " + kw_value
+                elif input_id == "sparql-variables-dropdown":
+                    if var_value is not None:
+                        self.sparql_query = self.sparql_query + " " + var_value
+                elif input_id == "sparql-syntax-dropdown":
+                    if syn_value is not None:
+                        self.sparql_query = self.sparql_query + " " + syn_value
                 elif input_id == "add_to_query_button":
                     if n_add and value is not None:
-                        self.sparql_query = self.sparql_query + value
+                        self.sparql_query = self.sparql_query + ' ' + value
                 elif input_id == "delete_query_button":
                     if n_delete:
                         self.sparql_query = ""
-
+                elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
+                    if len(selection['nodes']) > 0:
+                        for node in self.data['nodes']:
+                            if [node['id']] == selection['nodes']:
+                                self.sparql_query = self.sparql_query + ' :' + node['id']
+                    if len(selection['edges']) > 0:
+                        for edge in self.data['edges']:
+                            if [edge['id']] == selection['edges']:
+                                self.sparql_query = self.sparql_query + ' :' + edge['label']
             return self.sparql_query
         
         # create callbacks to toggle hide/show sections - COLOR section

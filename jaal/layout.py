@@ -13,6 +13,7 @@ import pandas as pd
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 from ontor import OntoEditor
+import dash_daq as daq
 
 # Constants
 #--------------
@@ -156,20 +157,43 @@ filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
     create_row([
         dbc.Button("Add", id="add_to_query_button", outline=True, color="secondary",size="sm"),
+        daq.BooleanSwitch(id='add_node_edge_to_query_button', on=False, color="#FFB300",
+                          label="Select Edge/Node", labelPosition="top"),
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
     dbc.Textarea(id="filter_nodes", placeholder="Enter SPARQL-query here..."),
     create_row([
-        dbc.Button("PREFIX", id="prefix-sparql-button", outline=True, color="secondary",
-                   size="sm"),
-        dbc.Button("SELECT", id="select-sparql-button", outline=True, color="secondary",
-                   size="sm"),
-        dbc.Button("COUNT", id="count-sparql-button", outline=True, color="secondary",
-                   size="sm"),
-        dbc.Button("AS", id="as-sparql-button", outline=True, color="secondary",
-                   size="sm"),
-        dbc.Button("FILTER", id="filter-sparql-button", outline=True, color="secondary",
-                   size="sm"),
+        dcc.Dropdown(
+            id='sparql-keywords-dropdown',
+            options=[
+                {'label': 'Prefix', 'value': 'PREFIX'},
+                {'label': 'Select', 'value': 'SELECT'},
+                {'label': 'Count', 'value': 'COUNT'},
+                {'label': 'As', 'value': 'AS'},
+                {'label': 'Filter', 'value': 'FILTER'}
+            ],
+            placeholder="Keywords",
+            style={'width': '102px'},
+        ),
+        dcc.Dropdown(
+            id='sparql-variables-dropdown',
+            options=[
+                {'label': 'X', 'value': '?x'},
+                {'label': 'Y', 'value': '?y'},
+                {'label': 'Z', 'value': '?z'}
+            ],
+            placeholder="Variables",
+            style={'width': '97px'},
+        ),
+        dcc.Dropdown(
+            id='sparql-syntax-dropdown',
+            options=[
+                {'label': '{', 'value': '{'},
+                {'label': '}', 'value': '}'},
+            ],
+            placeholder="Syntax",
+            style={'width': '81px'},
+        )
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
     html.Div(id='select-sparql', style={'whiteSpace': 'pre-line'}),
