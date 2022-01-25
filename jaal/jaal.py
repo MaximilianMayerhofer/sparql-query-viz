@@ -481,7 +481,18 @@ class Jaal:
             if len(x['edges']) > 0:
                 for edge in self.data['edges']:
                     if [edge['id']] == x['edges']:
-                        s = [s] + [html.Div([edge['label']] + [': '] + x['edges'])]
+                        separator = ',\n '
+                        partition_id = edge['id'].partition(separator)
+                        partition_label = edge['label'].partition(separator)
+                        if (separator in edge['id']) and (separator in edge['label']):
+                            s = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+                            while (separator in partition_id[2]) and (separator in partition_label[2]):
+                                partition_id = partition_id[2].partition(separator)
+                                partition_label = partition_label[2].partition(separator)
+                                s = s + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+                            s = s + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
+                        else:
+                            s = [html.Div([edge['label']] + [': '] + [edge['id']])]
             return s
 
         @app.callback(
@@ -492,7 +503,21 @@ class Jaal:
             if len(x['nodes']) > 0:
                 for node in self.data['nodes']:
                     if [node['id']] == x['nodes']:
-                        s = [s] + [html.Div(x['nodes'] + [': '] + [node['title']])] + ['\n']
+                        if node['T/A'] == 'T':
+                            return s
+                        s = [html.Div(x['nodes'] + [': '])]
+                        if node['title'] == '':
+                            return s + [html.Div(['No Data-Properties for this A-Box'])]
+                        separator = ',\n '
+                        partition = node['title'].partition(separator)
+                        if separator in node['title']:
+                            s = s + [html.Div([partition[0]])]
+                            while separator in partition[2]:
+                                partition = partition[2].partition(separator)
+                                s = s + [html.Div([partition[0]])]
+                            s = s + [html.Div([partition[2]])]
+                        else:
+                            s = s + [html.Div([node['title']])]
             return s
 
         # create the main callbacks
