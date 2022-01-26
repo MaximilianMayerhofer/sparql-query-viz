@@ -5,6 +5,7 @@ Layout code for the application
 """
 # Import
 #---------
+import logging
 import os
 import visdcc
 import base64
@@ -465,7 +466,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                     width=9)])
         ])
     if abox:
+        logging.info("app-layout with section for A-Box Data-Properties created")
         return layout_with_abox
+    logging.info("standard app-layout created")
     return html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
             create_row(html.H3(children=onto.onto.name)),

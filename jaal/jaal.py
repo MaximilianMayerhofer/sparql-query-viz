@@ -4,6 +4,7 @@ Author: Mohit Mayank
 Main class for Jaal network visualization dashboard
 """
 # import
+import logging
 from ontor import OntoEditor
 import dash
 import visdcc
@@ -40,6 +41,8 @@ class Jaal:
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.onto = onto
+        self.filename = onto.path.split(sep="/")[-1]
+        self.logger = logging.getLogger(self.filename.split(".")[0])
         print("Done")
 
     def _callback_search_graph(self, graph_data, search_text):
@@ -66,9 +69,9 @@ class Jaal:
 
         return graph_data
 
-    def _callback_filter_nodes_output(self, graph_data, filter_nodes_text):
+    def _callback_filter_nodes_output(self):
         try:
-            res_list = list(self.onto.onto_world.sparql(filter_nodes_text))
+            res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             result = ""
             try:
@@ -119,7 +122,6 @@ class Jaal:
                 graph_data = self.filtered_data
             self.counter_query_history = self.counter_query_history + 1
             self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
-            self.sparql_query = ""
         except:
             graph_data = self.data
             print("Not a valid SPARQL query.")
@@ -563,15 +565,12 @@ class Jaal:
                 # In case filter nodes was triggered
                 elif (input_id == 'evaluate_query_button' and n_evaluate) or input_id == 'query-history-length-slider':
                     graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
-                    flat_res_list_children = self._callback_filter_nodes_output(graph_data, filter_nodes_text)
+                    flat_res_list_children = self._callback_filter_nodes_output()
                     sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                 if input_id == "clear-query-history-button" and n_clear:
                     self.counter_query_history= 0
                     self.sparql_query_history = ""
                     sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
-                # In case filter edges was triggered
-                #elif input_id == 'filter_edges':
-                #    graph_data = self._callback_filter_edges(graph_data, filter_edges_text)
                 # If color node text is provided
                 if input_id == 'color_nodes':
                     graph_data, self.node_value_color_mapping = self._callback_color_nodes(graph_data, color_nodes_value)

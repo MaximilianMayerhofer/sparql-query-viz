@@ -8,6 +8,8 @@ Data details:
 """
 
 # imports
+import logging
+import datetime
 import os
 import pandas as pd
 import ontor as ontor
@@ -33,6 +35,9 @@ def load_got(filter_conections_threshold=10):
 
 def load_ontology():
     """Loads the Pizza-example ontology wih classes, with classes, instances, object- and data-properties"""
+
+    logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+    logging.basicConfig(filename=logfile, level=logging.INFO)
 
     this_dir, _ = os.path.split(__file__)
     iri = "http://example.org/onto-got.owl"
@@ -71,6 +76,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     for cl in node_gen:
         nodelist.append([cl.name, 1, 'dot', 'T', ""])
     #return list of all extracted classes
+    logging.info("successfully parsed T-Boxes from .owl-file")
     return nodelist
 
 def get_isa_realtions(onto: OntoEditor, edgelist = []):
@@ -94,6 +100,7 @@ def get_isa_realtions(onto: OntoEditor, edgelist = []):
             identifier = rellist[i].name + ' is_a ' + cl.name
             edgelist.append([rellist[i].name, cl.name, identifier, 1, 'is_a', False])
     # return list of all extracted edges/ relations
+    logging.info("successfully parsed IS_A-relations from .owl-file")
     return edgelist
 
 def get_OPs(onto: OntoEditor, edgelist = []):
@@ -117,6 +124,7 @@ def get_OPs(onto: OntoEditor, edgelist = []):
                 identifier = op.domain[0].name + ' ' + op.name + ' ' + op.range[i].name
                 edgelist.append([op.domain[0].name, op.range[i].name, identifier, 1, op.name, True])
     # return list of all extracted edges/ relations
+    logging.info("successfully parsed Object-Properties from .owl-file")
     return edgelist
 
 def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
@@ -180,8 +188,10 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
                 nodelist.append([dp_type, 1, 'triangle', 'T', ""])
         # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
         # (not added to the edgelist)
+            logging.info("successfully parsed Data-Properties from .owl-file")
         except IndexError:
-            print(dp.name, "was skipped because the range of", dp.name, "is empty or could not be interpreted.")
+            logging.warning("at least one Data-Property was skipped")
+            #print(dp.name, "was skipped because the range of", dp.name, "is empty or could not be interpreted.")
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
@@ -217,6 +227,7 @@ def calculate_node_importance(node_df, edge_df):
             if counter != 0:
                 node_df.loc[node_index,'importance'] = counter
     # return node_df with new importance values
+    logging.info("successfully calculated weights for A-/T-Boxes")
     return node_df
 
 def get_aboxes(onto: OntoEditor, nodelist, edgelist):
@@ -282,6 +293,7 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
             if not edge_in_edgelist:
                 identifier = ins.name + ' is_a ' + superclass[0].name
                 edgelist.append([ins.name, superclass[0].name, identifier, 1, 'is_a', False])
+    logging.info('successfully parsed A-Boxes from .owl-file')
     # return list of all extracted instances and list of all extracted edges/ relations
     return nodelist, edgelist
 
@@ -304,7 +316,9 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
        ontology of type OntoEditor from which the information is extracted
     abox: bool
         Boolean to indicate wheter A-Boxes should be included or not"""
-
+    # Set basic Configuration for Logger (if its not already set)
+    logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+    logging.basicConfig(filename=logfile, level=logging.INFO)
     # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)
     # Get is-a relations from ontology and write them into edgelist
@@ -325,4 +339,5 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
     # Calculate the importance of nodes in nodelist and write the new importance value into node_df
     node_df = calculate_node_importance(node_df, edge_df)
+    logging.info("successfully parsed Ontology from .owl-file to Dataframes")
     return edge_df, node_df
