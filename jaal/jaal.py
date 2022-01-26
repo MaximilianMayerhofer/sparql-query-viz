@@ -431,7 +431,7 @@ class Jaal:
                         if kw_value == "PREFIX":
                             self.sparql_query = self.sparql_query + " PREFIX : <" + self.onto.iri + "#>"
                         elif kw_value == "SELECT":
-                            self.sparql_query = self.sparql_query + "\n SELECT"
+                            self.sparql_query = self.sparql_query + " SELECT"
                         else:
                             self.sparql_query = self.sparql_query + " " + kw_value
                 elif input_id == "sparql-variables-dropdown":
@@ -451,7 +451,7 @@ class Jaal:
                         for node in self.data['nodes']:
                             if [node['id']] == selection['nodes']:
                                 self.sparql_query = self.sparql_query + ' :' + node['id']
-                    if len(selection['edges']) > 0:
+                    elif len(selection['edges']) > 0:
                         for edge in self.data['edges']:
                             if [edge['id']] == selection['edges']:
                                 self.sparql_query = self.sparql_query + ' :' + edge['label']

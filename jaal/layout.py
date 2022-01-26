@@ -170,7 +170,8 @@ filter_node_form = dbc.FormGroup([
                 {'label': 'Select', 'value': 'SELECT'},
                 {'label': 'Count', 'value': 'COUNT'},
                 {'label': 'As', 'value': 'AS'},
-                {'label': 'Filter', 'value': 'FILTER'}
+                {'label': 'Filter', 'value': 'FILTER'},
+                {'label': 'Where', 'value': 'WHERE'}
             ],
             placeholder="Keywords",
             style={'width': '102px'},
@@ -190,12 +191,17 @@ filter_node_form = dbc.FormGroup([
             options=[
                 {'label': '{', 'value': '{'},
                 {'label': '}', 'value': '}'},
+                {'label': '(', 'value': '('},
+                {'label': ')', 'value': ')'},
+                {'label': '.', 'value': '.'},
+                {'label': 'Return', 'value': '\n'},
             ],
-            placeholder="Syntax",
+            placeholder="Symbols",
             style={'width': '81px'},
         )
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
+    html.H6("SPARQL Query to evaluate:"),
     html.Div(id='select-sparql', style={'whiteSpace': 'pre-line'}),
     html.Hr(className="my-2"),
     create_row([
