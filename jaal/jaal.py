@@ -16,6 +16,7 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
+from .datasets.load_ontology import *
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
 
 
@@ -23,7 +24,7 @@ from .layout import get_app_layout, get_distinct_colors, create_color_legend, ge
 class Jaal:
     """The main visualization class
     """
-    def __init__(self, edge_df, onto: OntoEditor, node_df=None):
+    def __init__(self, onto: OntoEditor = ontor.OntoEditor("http://example.org/onto-ex.owl", "./onto-ex.owl"), abox: bool = True):
         """
         Parameters
         -------------
@@ -35,8 +36,10 @@ class Jaal:
         """
         self.filename = onto.path.split(sep="/")[-1]
         self.logger = logging.getLogger(self.filename.split(".")[0])
+        self.abox = abox
+        self.edge_df, self.node_df = get_df_from_ontology(onto, self.abox)
         self.logger.info("begin parsing data from dataframes to visdcc-dataformat...")
-        self.data, self.scaling_vars = parse_dataframe(edge_df, node_df)
+        self.data, self.scaling_vars = parse_dataframe(self.edge_df, self.node_df)
         self.logger.info("...successfully parsed data from dataframes to visdcc-dataformat")
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
@@ -125,7 +128,6 @@ class Jaal:
             for node in self.data['nodes']:
                 node['color'] = DEFAULT_COLOR
         else:
-            print("inside color node", color_nodes_value)
             unique_values = pd.DataFrame(self.data['nodes'])[color_nodes_value].unique()
             colors = get_distinct_colors(len(unique_values))
             value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
@@ -145,7 +147,6 @@ class Jaal:
             for node in self.data['nodes']:
                 node['size'] = DEFAULT_NODE_SIZE
         else:
-            print("Modifying node size using ", size_nodes_value)
             # fetch the scaling value
             minn = self.scaling_vars['node'][size_nodes_value]['min']
             maxx = self.scaling_vars['node'][size_nodes_value]['max']
@@ -168,7 +169,6 @@ class Jaal:
             for edge in self.data['edges']:
                 edge['color']['color'] = DEFAULT_COLOR
         else:
-            print("inside color edge", color_edges_value)
             unique_values = pd.DataFrame(self.data['edges'])[color_edges_value].unique()
             colors = get_distinct_colors(len(unique_values))
             value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
@@ -187,7 +187,6 @@ class Jaal:
             for edge in self.data['edges']:
                 edge['width'] = DEFAULT_EDGE_SIZE
         else:
-            print("Modifying edge size using ", size_edges_value)
             # fetch the scaling value
             minn = self.scaling_vars['edge'][size_edges_value]['min']
             maxx = self.scaling_vars['edge'][size_edges_value]['max']
@@ -285,7 +284,7 @@ class Jaal:
             self.data = self._callback_size_edges(self.data, options[1].get('value'))
             self.logger.info("Edges were initially sized")
 
-    def create(self, directed=False, vis_opts=None, abox: bool = False):
+    def create(self, directed=False, vis_opts=None):
         """Create the Jaal app and return it
 
         Parameter
@@ -305,7 +304,7 @@ class Jaal:
         app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # define layout
-        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = abox)
+        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
         
         # get color_mapping and size_mapping once at the start
         self.forced_callback_excecution_at_beginning()
@@ -598,7 +597,7 @@ class Jaal:
         # return server
         return app
 
-    def plot(self, debug=False, host="127.0.0.1", port="8050", directed=False, vis_opts=None, abox: bool = False):
+    def plot(self, debug=False, host="127.0.0.1", port="8050", directed=False, vis_opts=None):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
         Parameter
@@ -619,6 +618,6 @@ class Jaal:
                 the visual options to be passed to the dash server (default: None)
         """
         # call the create_graph function
-        app = self.create(directed=directed, vis_opts=vis_opts, abox= abox)
+        app = self.create(directed=directed, vis_opts=vis_opts)
         # run the server
         app.run_server(debug=debug, host=host, port=port)
