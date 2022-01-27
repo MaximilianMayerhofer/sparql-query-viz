@@ -76,7 +76,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     for cl in node_gen:
         nodelist.append([cl.name, 1, 'dot', 'T', ""])
     #return list of all extracted classes
-    logging.info("successfully parsed T-Boxes from .owl-file")
+    logging.info("successfully parsed T-Boxes from ontology specified")
     return nodelist
 
 def get_isa_realtions(onto: OntoEditor, edgelist = []):
@@ -100,7 +100,7 @@ def get_isa_realtions(onto: OntoEditor, edgelist = []):
             identifier = rellist[i].name + ' is_a ' + cl.name
             edgelist.append([rellist[i].name, cl.name, identifier, 1, 'is_a', False])
     # return list of all extracted edges/ relations
-    logging.info("successfully parsed IS_A-relations from .owl-file")
+    logging.info("successfully parsed IS_A-relations from ontology specified")
     return edgelist
 
 def get_OPs(onto: OntoEditor, edgelist = []):
@@ -124,7 +124,7 @@ def get_OPs(onto: OntoEditor, edgelist = []):
                 identifier = op.domain[0].name + ' ' + op.name + ' ' + op.range[i].name
                 edgelist.append([op.domain[0].name, op.range[i].name, identifier, 1, op.name, True])
     # return list of all extracted edges/ relations
-    logging.info("successfully parsed Object-Properties from .owl-file")
+    logging.info("successfully parsed Object-Properties from ontology specified")
     return edgelist
 
 def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
@@ -188,7 +188,7 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
                 nodelist.append([dp_type, 1, 'triangle', 'T', ""])
         # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
         # (not added to the edgelist)
-            logging.info("successfully parsed Data-Properties from .owl-file")
+            logging.info("successfully parsed Data-Properties from ontology specified")
         except IndexError:
             logging.warning("at least one Data-Property was skipped")
             #print(dp.name, "was skipped because the range of", dp.name, "is empty or could not be interpreted.")
@@ -293,7 +293,7 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
             if not edge_in_edgelist:
                 identifier = ins.name + ' is_a ' + superclass[0].name
                 edgelist.append([ins.name, superclass[0].name, identifier, 1, 'is_a', False])
-    logging.info('successfully parsed A-Boxes from .owl-file')
+    logging.info('successfully parsed A-Boxes from ontology specified')
     # return list of all extracted instances and list of all extracted edges/ relations
     return nodelist, edgelist
 
@@ -339,5 +339,5 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
     # Calculate the importance of nodes in nodelist and write the new importance value into node_df
     node_df = calculate_node_importance(node_df, edge_df)
-    logging.info("successfully parsed Ontology from .owl-file to Dataframes")
+    logging.info("successfully parsed ontology-data from ontology specified to dataframes")
     return edge_df, node_df

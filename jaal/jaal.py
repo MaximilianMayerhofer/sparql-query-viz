@@ -5,6 +5,7 @@ Main class for Jaal network visualization dashboard
 """
 # import
 import logging
+import owlready2.rply
 from ontor import OntoEditor
 import dash
 import visdcc
@@ -32,8 +33,11 @@ class Jaal:
         node_df: pandas dataframe (optional)
             The network node data stored in format of pandas dataframe
         """
-        print("Parsing the data...", end="")
+        self.filename = onto.path.split(sep="/")[-1]
+        self.logger = logging.getLogger(self.filename.split(".")[0])
+        self.logger.info("parsing the data...")
         self.data, self.scaling_vars = parse_dataframe(edge_df, node_df)
+        self.logger.info("done")
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}
@@ -41,9 +45,6 @@ class Jaal:
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.onto = onto
-        self.filename = onto.path.split(sep="/")[-1]
-        self.logger = logging.getLogger(self.filename.split(".")[0])
-        print("Done")
 
     def _callback_search_graph(self, graph_data, search_text):
         """Only show the nodes which match the search text
@@ -69,63 +70,45 @@ class Jaal:
 
         return graph_data
 
-    def _callback_filter_nodes_output(self):
-        try:
-            res_list = list(self.onto.onto_world.sparql(self.sparql_query))
-            flat_res_list = [x for l in res_list for x in l]
-            result = ""
-            try:
-                for res in flat_res_list:
-                    result = result + str(res.name) + "\n"
-            except:
-                for res in flat_res_list:
-                    result = result + str(res) + "\n"
-        except:
-            result = "Not a valid SPARQL query."
-        return result
-
     def _callback_filter_nodes(self, graph_data, filter_nodes_text):
         """Filter the nodes based on the Python query syntax
         """
         self.filtered_data = self.data.copy()
-        #node_df = pd.DataFrame(self.filtered_data['nodes'])
-        #try:
-        #    node_list = node_df.query(filter_nodes_text)['id'].tolist()
-        #    nodes = []
-        #    for node in self.filtered_data['nodes']:
-        #        if node['id'] in node_list:
-        #            nodes.append(node)
-        #    self.filtered_data['nodes'] = nodes
-        #    graph_data = self.filtered_data
-        #except:
-        #    graph_data = self.data
-        #    print("wrong node filter query!!")
-
         try:
             res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             res = []
-            res_is_int = True
-            for result in flat_res_list:
-                if type(result) is not int:
-                    res_is_int = False
-                    
-            if res_is_int:
-                print("SPARQL-query result:", flat_res_list)
-                graph_data = self.data
-            else:
+            result = ""
+            res_is_no_data_object = False
+            for flat_res in flat_res_list:
+                try:
+                    result = result + str(flat_res.name) + "\n"
+                    self.logger.info("result is a valid node/edge of graph")
+                except AttributeError:
+                    graph_data = self.data
+                    result = result + str(flat_res) + "\n"
+                    self.logger.info("result is not valid node/edge of graph (e.g. an integer)")
+                    res_is_no_data_object = True
+
+            if not res_is_no_data_object:
                 for node in self.filtered_data['nodes']:
-                    for result in flat_res_list:
-                        if node['id'] == result.name:
+                    for flat_res in flat_res_list:
+                        if node['id'] == flat_res.name:
                             res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
             self.counter_query_history = self.counter_query_history + 1
             self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
-        except:
+            self.logger.info("valid sparql query successfully evaluated")
+        except owlready2.rply.ParsingError:
             graph_data = self.data
-            print("Not a valid SPARQL query.")
-        return graph_data
+            result = "No SPARQL query entered"
+            self.logger.warning("sparql query passed from user is empty")
+        except owlready2.rply.LexingError:
+            graph_data = self.data
+            result = "Not a valid SPARQL query."
+            self.logger.warning("sparql query passed from user is not valid")
+        return graph_data, result
 
     def _callback_sparql_query_history(self, number_of_shown_queries):
         sparql_query_history = self.sparql_query_history
@@ -562,10 +545,10 @@ class Jaal:
                 # perform operation in case of search graph option
                 if input_id == "search_graph":
                     graph_data = self._callback_search_graph(graph_data, search_text)
+                    self.logger.info("shown graph data filtered by user with search function")
                 # In case filter nodes was triggered
                 elif (input_id == 'evaluate_query_button' and n_evaluate) or input_id == 'query-history-length-slider':
-                    graph_data = self._callback_filter_nodes(graph_data, filter_nodes_text)
-                    flat_res_list_children = self._callback_filter_nodes_output()
+                    graph_data, flat_res_list_children = self._callback_filter_nodes(graph_data, filter_nodes_text)
                     sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                 if input_id == "clear-query-history-button" and n_clear:
                     self.counter_query_history= 0

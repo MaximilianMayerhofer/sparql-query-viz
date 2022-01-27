@@ -70,6 +70,7 @@ def get_options(directed, opts_args):
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
     if opts_args is not None:
         opts.update(opts_args)
+    logging.info("returning visdcc-graph options")
     return opts
 
 def get_distinct_colors(n):
@@ -83,10 +84,12 @@ def get_distinct_colors(n):
     if n <= 7:
         colors = KELLY_COLORS_HEX[:7].copy()
         random.shuffle(colors)
+        logging.info("returning randomized standard colors")
         return colors[:n]
     elif n <= 20:
         colors = KELLY_COLORS_HEX[:20].copy()
         random.shuffle(colors)
+        logging.info("returning randomized extended colors")
         return colors[:n]
 
 
@@ -310,14 +313,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
     # Step 5: create and return the layout
-    # resolve path
-    this_dir, _ = os.path.split(__file__)
-    #image_filename = os.path.join(this_dir, "assest", "logo.png")
-    #encoded_image = base64.b64encode(open(image_filename, 'rb').read())
     layout_with_abox = html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
-            create_row(html.H3(children=onto.onto.name)),
-            # create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
+            create_row(html.H3(children=onto.onto.name)), # Subtitle
             create_row([
                 dbc.Col([
                     # setting panel
@@ -466,9 +464,9 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                     width=9)])
         ])
     if abox:
-        logging.info("app-layout with section for A-Box Data-Properties created")
+        logging.info("returning app-layout with section for A-Box Data-Properties")
         return layout_with_abox
-    logging.info("standard app-layout created")
+    logging.info("returning standard app-layout")
     return html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
             create_row(html.H3(children=onto.onto.name)),
