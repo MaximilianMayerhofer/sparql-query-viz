@@ -110,7 +110,13 @@ class Jaal:
         self.sparql_query = ''
         self.sparql_query_history = ''
         self.counter_query_history = 0
+        self.sparql_query_result = ''
         self.onto = onto
+
+    def add_to_query_history(self):
+        self.counter_query_history = self.counter_query_history + 1
+        self.sparql_query_history = self.sparql_query_history + str(
+            self.counter_query_history) + ": " + self.sparql_query + '\n'
 
     def _callback_filter_nodes(self, graph_data):
         """Filter the nodes based on the Python query syntax
@@ -129,9 +135,9 @@ class Jaal:
                 except AttributeError:
                     graph_data = self.data
                     result = result + str(flat_res) + "\n"
-                    self.logger.info("result is not a valid node/edge of graph (e.g. of type integer)")
+                    self.logger.info("result is not an object (A-/ T-Box) in graph (different data-type)")
                     res_is_no_data_object = True
-
+            self.sparql_query_result = result
             if not res_is_no_data_object:
                 for node in self.filtered_data['nodes']:
                     for flat_res in flat_res_list:
@@ -139,16 +145,17 @@ class Jaal:
                             res.append(node)
                 self.filtered_data['nodes'] = res
                 graph_data = self.filtered_data
-            self.counter_query_history = self.counter_query_history + 1
-            self.sparql_query_history = self.sparql_query_history + str(self.counter_query_history) + ": " + self.sparql_query + '\n'
+            self.add_to_query_history()
             self.logger.info("valid sparql query successfully evaluated")
         except owlready2.rply.ParsingError:
             graph_data = self.data
             result = "No SPARQL query entered"
+            self.sparql_query_result = result
             self.logger.warning("sparql query passed from user is empty")
         except owlready2.rply.LexingError:
             graph_data = self.data
             result = "Not a valid SPARQL query."
+            self.sparql_query_result = result
             self.logger.warning("sparql query passed from user is not valid")
         return graph_data, result
 
@@ -552,7 +559,7 @@ class Jaal:
                                   n_legend, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
-            flat_res_list_children = []
+            flat_res_list_children = self.sparql_query_result
             sparql_query_history_children = []
             # if its the first call
             if not ctx.triggered:
@@ -567,31 +574,20 @@ class Jaal:
                     graph_data = _callback_search_graph(graph_data, search_text)
                     self.logger.info("shown graph data filtered, triggered by user")
                 # In case filter nodes was triggered
-                elif (input_id == 'evaluate_query_button' and n_evaluate) or input_id == 'query-history-length-slider':
+                elif input_id == 'evaluate_query_button' and n_evaluate:
                     graph_data, flat_res_list_children = self._callback_filter_nodes(graph_data)
-                    sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
-                    self.logger.info("query history is shown with a length of %i", query_history_length)
                 if input_id == "clear-query-history-button" and n_clear:
                     self.counter_query_history= 0
                     self.sparql_query_history = ""
-                    sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                     self.logger.info("query history was cleared, triggered by user")
                 # If color node text is provided
-                if input_id == 'color_nodes' or (input_id == 'color-legend-toggle' and n_legend):
-                    if input_id == 'color_nodes':
-                        graph_data, self.node_value_color_mapping = self._callback_color_nodes(color_nodes_value)
-                        self.logger.info("Nodes were recolored, triggered by user")
-                    color_popover_legend_children = get_color_popover_legend_children(
-                        self.node_value_color_mapping, self.edge_value_color_mapping)
-                    self.logger.info("color legend was updated, triggered by user")
+                if input_id == 'color_nodes':
+                    graph_data, self.node_value_color_mapping = self._callback_color_nodes(color_nodes_value)
+                    self.logger.info("Nodes were recolored, triggered by user")
                 # If color edge text is provided
-                if input_id == 'color_edges' or (input_id == 'color-legend-toggle' and n_legend):
-                    if input_id == 'color_edges':
-                        graph_data, self.edge_value_color_mapping = self._callback_color_edges(color_edges_value)
-                        self.logger.info("Edges were recolored, triggered by user")
-                    color_popover_legend_children = get_color_popover_legend_children(
-                        self.node_value_color_mapping, self.edge_value_color_mapping)
-                    self.logger.info("color legend was updated, triggered by user")
+                if input_id == 'color_edges':
+                    graph_data, self.edge_value_color_mapping = self._callback_color_edges(color_edges_value)
+                    self.logger.info("Edges were recolored, triggered by user")
                 # If size node text is provided
                 if input_id == 'size_nodes':
                     graph_data = self._callback_size_nodes(size_nodes_value)
@@ -601,9 +597,12 @@ class Jaal:
                     graph_data = self._callback_size_edges(size_edges_value)
                     self.logger.info("Edges were resized, triggered by user")
             # create the color legend children
-            #color_popover_legend_children = get_color_popover_legend_children(
-            #    self.node_value_color_mapping, self.edge_value_color_mapping)
-            #self.logger.info("color legend was updated, triggered by user")
+            color_popover_legend_children = get_color_popover_legend_children(
+                self.node_value_color_mapping, self.edge_value_color_mapping)
+            self.logger.info("color legend was updated, triggered by user")
+            # update the sparql query history
+            sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
+            self.logger.info("query history is shown with a length of %i", query_history_length)
             # finally return the modified data
             return [graph_data, color_popover_legend_children, flat_res_list_children, sparql_query_history_children]
         # return server
