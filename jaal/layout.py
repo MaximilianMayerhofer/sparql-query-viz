@@ -70,7 +70,6 @@ def get_options(directed, opts_args):
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
     if opts_args is not None:
         opts.update(opts_args)
-    logging.info("returning visdcc-graph options")
     return opts
 
 def get_distinct_colors(n):
@@ -84,12 +83,10 @@ def get_distinct_colors(n):
     if n <= 7:
         colors = KELLY_COLORS_HEX[:7].copy()
         random.shuffle(colors)
-        logging.info("returning randomized standard colors")
         return colors[:n]
     elif n <= 20:
         colors = KELLY_COLORS_HEX[:20].copy()
         random.shuffle(colors)
-        logging.info("returning randomized extended colors")
         return colors[:n]
 
 

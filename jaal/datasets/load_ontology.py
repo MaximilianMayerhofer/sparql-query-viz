@@ -138,7 +138,8 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
         list of all classes/ instances that were already extracted from the ontology
     edgelist: list
         list of all relations that were already extracted from the ontology"""
-
+    counter_skipped = 0
+    counter_parsed = 0
     # Generator of all data-properties in the ontology is created
     dp_gen = onto.onto.data_properties()
     # Iteration over all data-properties from the generator
@@ -186,12 +187,12 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
             # with their identifier, weight, shape and T-Box label
             if not node_in_nodelist:
                 nodelist.append([dp_type, 1, 'triangle', 'T', ""])
-        # If an IndexError is thrown, an warning will be shown, that the one data-property was skipped
-        # (not added to the edgelist)
-            logging.info("successfully parsed Data-Properties from ontology specified")
+            counter_parsed = counter_parsed + 1
+        # If an IndexError is thrown, an warning will be logged, that the one data-property was skipped
         except IndexError:
-            logging.warning("at least one Data-Property was skipped")
-            #print(dp.name, "was skipped because the range of", dp.name, "is empty or could not be interpreted.")
+            counter_skipped = counter_skipped + 1
+    logging.info("successfully parsed %i Data-Properties from ontology specified", counter_parsed)
+    logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
@@ -319,6 +320,7 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     # Set basic Configuration for Logger (if its not already set)
     logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
     logging.basicConfig(filename=logfile, level=logging.INFO)
+    logging.info("begin parsing data from specified ontology to dataframes...")
     # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)
     # Get is-a relations from ontology and write them into edgelist
@@ -339,5 +341,5 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
     # Calculate the importance of nodes in nodelist and write the new importance value into node_df
     node_df = calculate_node_importance(node_df, edge_df)
-    logging.info("successfully parsed ontology-data from ontology specified to dataframes")
+    logging.info("...successfully parsed data from ontology specified to dataframes")
     return edge_df, node_df
