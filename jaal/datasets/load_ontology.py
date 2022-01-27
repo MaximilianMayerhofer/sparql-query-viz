@@ -43,15 +43,15 @@ def load_ontology():
     iri = "http://example.org/onto-got.owl"
     fname = "./onto-got.owl"
     ontor1 = OntoEditor(iri, fname)
-    classes = [["company", None, None, None, None, None, None], \
-               ["pizza_company", "company", None, None, None, None, False], \
-               ["margherita_company", "pizza_company", None, None, None, None, False], \
+    classes = [["company", None, None, None, None, None, None],
+               ["pizza_company", "company", None, None, None, None, False],
+               ["margherita_company", "pizza_company", None, None, None, None, False],
                ["quattro_stagioni", "pizza", None, None, None, None, False]]
-    ins = [["Her_pizza", "quattro_stagioni", None, None, None], \
-           ["Jane", "human", "likes", "Her_pizza", None], \
-           ["Faulty_pizza", None, None, None, None], \
-           ["Her_pizza", "quattro_stagioni", "weight_in_grams", "430.0", "float"], \
-           ["Her_pizza", "quattro_stagioni", "diameter_in_cm", "32", "integer"], \
+    ins = [["Her_pizza", "quattro_stagioni", None, None, None],
+           ["Jane", "human", "likes", "Her_pizza", None],
+           ["Faulty_pizza", None, None, None, None],
+           ["Her_pizza", "quattro_stagioni", "weight_in_grams", "430.0", "float"],
+           ["Her_pizza", "quattro_stagioni", "diameter_in_cm", "32", "integer"],
            ["Her_pizza", "quattro_stagioni", "description", "jane's pizza", "string"]]
     ontor1.add_axioms(classes)
     ontor1.add_ops(ontor.load_json(os.path.join(this_dir, "example_ontology", "props.json"))["op"])
@@ -151,7 +151,6 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
                 dp_dom_unique.append(dom)
         try:
             # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
-            node_in_nodelist = False
             edge_in_edgelist = False
             # The datatype of the associated data-property is written into a string-variable
             dp_type = str(dp.range).split("'")[1]

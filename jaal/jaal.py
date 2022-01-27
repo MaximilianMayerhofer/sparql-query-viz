@@ -21,6 +21,69 @@ from .layout import get_app_layout, get_distinct_colors, create_color_legend, ge
 
 
 # class
+def _callback_search_graph(graph_data, search_text):
+    """Only show the nodes which match the search text
+    """
+    nodes = graph_data['nodes']
+    edges = graph_data['edges']
+    for node in nodes:
+        if search_text not in node['label'].lower():
+            node['hidden'] = True
+        else:
+            node['hidden'] = False
+    for edge in edges:
+        if search_text in edge['label'].lower():
+            for node in nodes:
+                if edge['from'].lower() == node['label'].lower():
+                    node['hidden'] = False
+                elif edge['to'].lower() == node['label'].lower():
+                    node['hidden'] = False
+    graph_data['nodes'] = nodes
+    graph_data['edges'] = edges
+    return graph_data
+
+
+def get_color_popover_legend_children(node_value_color_mapping={}, edge_value_color_mapping={}):
+    """Get the popover legends for node and edge based on the color setting
+    """
+    # var
+    popover_legend_children = []
+
+    # common function
+    def create_legends_for(title="Node", legends={}):
+        # add title
+        _popover_legend_children = [dbc.PopoverHeader(f"{title} legends")]
+        # add values if present
+        if len(legends) > 0:
+            for key, value in legends.items():
+                partition = key.partition(',\n ')
+                if partition[2] == '':
+                    _popover_legend_children.append(
+                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                        create_color_legend(key, value)
+                        )
+                else:
+                    _popover_legend_children.append(
+                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                        create_color_legend(partition[0], value)
+                    )
+                    _popover_legend_children.append(
+                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
+                        create_color_legend(partition[2], value)
+                    )
+        else: # otherwise add filler
+            _popover_legend_children.append(dbc.PopoverBody(f"no {title.lower()} colored!"))
+        #
+        return _popover_legend_children
+
+    # add node color legends
+    popover_legend_children.extend(create_legends_for("Node", node_value_color_mapping))
+    # add edge color legends
+    popover_legend_children.extend(create_legends_for("Edge", edge_value_color_mapping))
+    #
+    return popover_legend_children
+
+
 class Jaal:
     """The main visualization class
     """
@@ -48,27 +111,6 @@ class Jaal:
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.onto = onto
-
-    def _callback_search_graph(self, graph_data, search_text):
-        """Only show the nodes which match the search text
-        """
-        nodes = graph_data['nodes']
-        edges = graph_data['edges']
-        for node in nodes:
-            if search_text not in node['label'].lower():
-                node['hidden'] = True
-            else:
-                node['hidden'] = False
-        for edge in edges:
-            if search_text in edge['label'].lower():
-                for node in nodes:
-                    if edge['from'].lower() == node['label'].lower():
-                        node['hidden'] = False
-                    elif edge['to'].lower() == node['label'].lower():
-                        node['hidden'] = False
-        graph_data['nodes'] = nodes
-        graph_data['edges'] = edges
-        return graph_data
 
     def _callback_filter_nodes(self, graph_data):
         """Filter the nodes based on the Python query syntax
@@ -120,7 +162,7 @@ class Jaal:
             shown_sparql_query_history = sparql_query_history
         return shown_sparql_query_history
 
-    def _callback_color_nodes(self, graph_data, color_nodes_value):
+    def _callback_color_nodes(self, color_nodes_value):
         value_color_mapping = {}
         # color option is None, revert back all changes
         if color_nodes_value == 'None':
@@ -139,7 +181,7 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data, value_color_mapping
     
-    def _callback_size_nodes(self, graph_data, size_nodes_value):
+    def _callback_size_nodes(self, size_nodes_value):
 
         # color option is None, revert back all changes
         if size_nodes_value == 'None':
@@ -161,7 +203,7 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data
 
-    def _callback_color_edges(self, graph_data, color_edges_value):
+    def _callback_color_edges(self, color_edges_value):
         value_color_mapping = {}
         # color option is None, revert back all changes
         if color_edges_value == 'None':
@@ -180,7 +222,7 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data, value_color_mapping
 
-    def _callback_size_edges(self, graph_data, size_edges_value):
+    def _callback_size_edges(self, size_edges_value):
         # color option is None, revert back all changes
         if size_edges_value == 'None':
             # revert to default size
@@ -188,8 +230,8 @@ class Jaal:
                 edge['width'] = DEFAULT_EDGE_SIZE
         else:
             # fetch the scaling value
-            minn = self.scaling_vars['edge'][size_edges_value]['min']
-            maxx = self.scaling_vars['edge'][size_edges_value]['max']
+            #minn = self.scaling_vars['edge'][size_edges_value]['min']
+            #maxx = self.scaling_vars['edge'][size_edges_value]['max']
             # define the scaling function
             #scale_val = lambda x: 20*(x-minn)/(maxx-minn)
             # set the size after scaling
@@ -202,47 +244,7 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data
 
-    def get_color_popover_legend_children(self, node_value_color_mapping={}, edge_value_color_mapping={}):
-        """Get the popover legends for node and edge based on the color setting
-        """
-        # var
-        popover_legend_children = []
-
-        # common function
-        def create_legends_for(title="Node", legends={}):
-            # add title
-            _popover_legend_children = [dbc.PopoverHeader(f"{title} legends")]
-            # add values if present
-            if len(legends) > 0:
-                for key, value in legends.items():
-                    partition = key.partition(',\n ')
-                    if partition[2] == '':
-                        _popover_legend_children.append(
-                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
-                            create_color_legend(key, value)
-                            )
-                    else:
-                        _popover_legend_children.append(
-                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
-                            create_color_legend(partition[0], value)
-                        )
-                        _popover_legend_children.append(
-                            # dbc.PopoverBody(f"Key: {key}, Value: {value}")
-                            create_color_legend(partition[2], value)
-                        )
-            else: # otherwise add filler
-                _popover_legend_children.append(dbc.PopoverBody(f"no {title.lower()} colored!"))
-            #
-            return _popover_legend_children
-
-        # add node color legends
-        popover_legend_children.extend(create_legends_for("Node", node_value_color_mapping))
-        # add edge color legends
-        popover_legend_children.extend(create_legends_for("Edge", edge_value_color_mapping))
-        #
-        return popover_legend_children
-
-    def forced_callback_excecution_at_beginning(self):
+    def forced_callback_execution_at_beginning(self):
         """This function executes the callback functions for node and edge Coloring and Sizing at start of the app,
         without andy userinput. This is to ensure a default coloring and sizing of nodes and edges."""
 
@@ -253,7 +255,7 @@ class Jaal:
         # If options has more then one categorical feature, the callback function for nodes-coloring is executed once,
         # to set the first option as default value
         if len(options) > 1:
-            self.data, self.node_value_color_mapping = self._callback_color_nodes(self.data, options[1].get('value'))
+            self.data, self.node_value_color_mapping = self._callback_color_nodes(options[1].get('value'))
             self.logger.info("Nodes were initially colored")
         # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(pd.DataFrame(self.data['edges']).drop(
@@ -263,7 +265,7 @@ class Jaal:
         # If options has mor then one categorical feature, the callback function for edge-coloring is executed once,
         # to set the first option as default value
         if len(options) > 1:
-            self.data, self.edge_value_color_mapping = self._callback_color_edges(self.data, options[1].get('value'))
+            self.data, self.edge_value_color_mapping = self._callback_color_edges(options[1].get('value'))
             self.logger.info("Edges were initially colored")
         # Get list of numerical features from nodes
         num_node_features = get_numerical_features(pd.DataFrame(self.data['nodes']))
@@ -272,7 +274,7 @@ class Jaal:
         # If options has mor then one numerical feature, the callback function for nodes-sizing is executed once,
         # to set the first option as default value
         if len(options) > 1:
-            self.data = self._callback_size_nodes(self.data, options[1].get('value'))
+            self.data = self._callback_size_nodes(options[1].get('value'))
             self.logger.info("Nodes were initially sized")
         # Get list of numerical features from edges
         num_edge_features = get_numerical_features(pd.DataFrame(self.data['edges']))
@@ -281,7 +283,7 @@ class Jaal:
         # If options has mor then one numerical feature, the callback function for edge-sizing is executed once,
         # to set the first option as default value
         if len(options) > 1:
-            self.data = self._callback_size_edges(self.data, options[1].get('value'))
+            self.data = self._callback_size_edges(options[1].get('value'))
             self.logger.info("Edges were initially sized")
 
     def create(self, directed=False, vis_opts=None):
@@ -304,10 +306,10 @@ class Jaal:
         app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         # define layout
-        app.layout = get_app_layout(self.data, self.onto, color_legends=self.get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
+        app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
         
         # get color_mapping and size_mapping once at the start
-        self.forced_callback_excecution_at_beginning()
+        self.forced_callback_execution_at_beginning()
 
         # create callbacks to toggle legend popover
         @app.callback(
@@ -365,13 +367,13 @@ class Jaal:
                 return is_open
             else:
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
-                if input_id == "result-show-toggle-button":
+                if input_id == "result-show-toggle-button" and n_show:
                     if is_open:
                         self.logger.info("sparql result section was hidden, triggered by user")
                     else:
                         self.logger.info("sparql result section was shown, triggered by user")
                     return not is_open
-                if input_id == "evaluate_query_button":
+                if input_id == "evaluate_query_button" and n_evaluate:
                     self.logger.info("sparql result section was shown, because evaluation button was triggered")
                     return True
             return is_open
@@ -535,7 +537,6 @@ class Jaal:
              Output('textarea-result-output', 'children'), 
              Output('sparql_query_history', 'children')],
             [Input('search_graph', 'value'),
-            Input('filter_nodes', 'value'),
             Input('color_nodes', 'value'),
             Input('color_edges', 'value'),
             Input('size_nodes', 'value'),
@@ -546,8 +547,9 @@ class Jaal:
              Input("color-legend-toggle", "n_clicks")],
             [State('graph', 'data')]
         )
-        def setting_pane_callback(search_text, filter_nodes_text,  
-                    color_nodes_value, color_edges_value, size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length, n_legend, graph_data):
+        def setting_pane_callback(search_text, color_nodes_value, color_edges_value,
+                                  size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length,
+                                  n_legend, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = []
@@ -555,13 +557,14 @@ class Jaal:
             # if its the first call
             if not ctx.triggered:
                 self.logger.info("no trigger by user")
-                return [self.data, self.get_color_popover_legend_children(), flat_res_list_children, sparql_query_history_children]
+                return [self.data, get_color_popover_legend_children(),
+                        flat_res_list_children, sparql_query_history_children]
             else:
                 # find the id of the option which was triggered
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
                 # perform operation in case of search graph option
                 if input_id == "search_graph":
-                    graph_data = self._callback_search_graph(graph_data, search_text)
+                    graph_data = _callback_search_graph(graph_data, search_text)
                     self.logger.info("shown graph data filtered, triggered by user")
                 # In case filter nodes was triggered
                 elif (input_id == 'evaluate_query_button' and n_evaluate) or input_id == 'query-history-length-slider':
@@ -574,30 +577,39 @@ class Jaal:
                     sparql_query_history_children = self._callback_sparql_query_history(query_history_length)
                     self.logger.info("query history was cleared, triggered by user")
                 # If color node text is provided
-                if input_id == 'color_nodes':
-                    graph_data, self.node_value_color_mapping = self._callback_color_nodes(graph_data, color_nodes_value)
-                    self.logger.info("Nodes were recolored, triggered by user")
+                if input_id == 'color_nodes' or (input_id == 'color-legend-toggle' and n_legend):
+                    if input_id == 'color_nodes':
+                        graph_data, self.node_value_color_mapping = self._callback_color_nodes(color_nodes_value)
+                        self.logger.info("Nodes were recolored, triggered by user")
+                    color_popover_legend_children = get_color_popover_legend_children(
+                        self.node_value_color_mapping, self.edge_value_color_mapping)
+                    self.logger.info("color legend was updated, triggered by user")
                 # If color edge text is provided
-                if input_id == 'color_edges':
-                    graph_data, self.edge_value_color_mapping = self._callback_color_edges(graph_data, color_edges_value)
-                    self.logger.info("Edges were recolored, triggered by user")
+                if input_id == 'color_edges' or (input_id == 'color-legend-toggle' and n_legend):
+                    if input_id == 'color_edges':
+                        graph_data, self.edge_value_color_mapping = self._callback_color_edges(color_edges_value)
+                        self.logger.info("Edges were recolored, triggered by user")
+                    color_popover_legend_children = get_color_popover_legend_children(
+                        self.node_value_color_mapping, self.edge_value_color_mapping)
+                    self.logger.info("color legend was updated, triggered by user")
                 # If size node text is provided
                 if input_id == 'size_nodes':
-                    graph_data = self._callback_size_nodes(graph_data, size_nodes_value)
+                    graph_data = self._callback_size_nodes(size_nodes_value)
                     self.logger.info("Nodes were resized, triggered by user")
                 # If size edge text is provided
                 if input_id == 'size_edges':
-                    graph_data = self._callback_size_edges(graph_data, size_edges_value)
+                    graph_data = self._callback_size_edges(size_edges_value)
                     self.logger.info("Edges were resized, triggered by user")
             # create the color legend children
-            color_popover_legend_children = self.get_color_popover_legend_children(self.node_value_color_mapping, self.edge_value_color_mapping)
-            self.logger.info("color legend was updated, triggered by user")
+            #color_popover_legend_children = get_color_popover_legend_children(
+            #    self.node_value_color_mapping, self.edge_value_color_mapping)
+            #self.logger.info("color legend was updated, triggered by user")
             # finally return the modified data
             return [graph_data, color_popover_legend_children, flat_res_list_children, sparql_query_history_children]
         # return server
         return app
 
-    def plot(self, debug=False, host="127.0.0.1", port="8050", directed=False, vis_opts=None):
+    def plot(self, debug=False, host="127.0.0.1", port=8050, directed=False, vis_opts=None):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
         Parameter
