@@ -202,6 +202,7 @@ filter_node_form = dbc.FormGroup([
         )
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
+    html.Hr(className="my-2"),
     html.H6("SPARQL Query to evaluate:"),
     html.Div(id='select-sparql', style={'whiteSpace': 'pre-line'}),
     html.Hr(className="my-2"),
