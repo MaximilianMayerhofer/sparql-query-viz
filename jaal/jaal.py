@@ -502,53 +502,115 @@ class Jaal:
                 return not is_open
             return is_open
 
+        # create callbacks to toggle hide/show sections - Template section
         @app.callback(
-            Output('edge-selection', 'children'),
-            [Input('graph', 'selection')])
+            Output("template-show-toggle", "is_open"),
+            [Input("template-show-toggle-button", "n_clicks")],
+            [State("template-show-toggle", "is_open")],
+        )
+        def toggle_template_collapse(n, is_open):
+            if n:
+                if is_open:
+                    self.logger.info("template section was hidden, triggered by user")
+                else:
+                    self.logger.info("template section was shown, triggered by user")
+                return not is_open
+            return is_open
 
-        def show_selected_edge(x):
-            s = ''
-            if len(x['edges']) > 0:
+        # create callbacks to toggle hide/show sections - A-Box-DP section
+        @app.callback(
+            Output("abox-dp-show-toggle", "is_open"),
+            [Input("abox-dp-show-toggle-button", "n_clicks")],
+            [State("abox-dp-show-toggle", "is_open")],
+        )
+        def toggle_template_collapse(n, is_open):
+            if n:
+                if is_open:
+                    self.logger.info("A-Box Data Property section was hidden, triggered by user")
+                else:
+                    self.logger.info("A-Box Data Property section was shown, triggered by user")
+                return not is_open
+            return is_open
+
+        # create callbacks to toggle hide/show sections - Edge Selection section
+        @app.callback(
+            Output("edge-selection-show-toggle", "is_open"),
+            [Input("edge-selection-show-toggle-button", "n_clicks")],
+            [State("edge-selection-show-toggle", "is_open")],
+        )
+        def toggle_template_collapse(n, is_open):
+            if n:
+                if is_open:
+                    self.logger.info("edge selection section was hidden, triggered by user")
+                else:
+                    self.logger.info("edge selection section was shown, triggered by user")
+                return not is_open
+            return is_open
+
+        #@app.callback(
+        #    Output('edge-selection', 'children'),
+        #    [Input('graph', 'selection')])
+
+        #def show_selected_edge(x):
+        #    s = ''
+        #    if len(x['edges']) > 0:
+        #        for edge in self.data['edges']:
+        #            if [edge['id']] == x['edges']:
+        #                separator = ',\n '
+        #                partition_id = edge['id'].partition(separator)
+        #                partition_label = edge['label'].partition(separator)
+        #                if (separator in edge['id']) and (separator in edge['label']):
+        #                    s = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+        #                    while (separator in partition_id[2]) and (separator in partition_label[2]):
+        #                        partition_id = partition_id[2].partition(separator)
+        #                        partition_label = partition_label[2].partition(separator)
+        #                        s = s + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+        #                    s = s + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
+        #                else:
+        #                    s = [html.Div([edge['label']] + [': '] + [edge['id']])]
+        #    return s
+
+        @app.callback(
+            [Output('node-selection', 'children'),
+             Output('edge-selection', 'children')],
+            [Input('graph', 'selection')])
+        def show_dp_from_selected_node(x):
+            s_node = ''
+            s_edge = ''
+            if len(x['nodes']) > 0:
+                for node in self.data['nodes']:
+                    if [node['id']] == x['nodes']:
+                        if node['T/A'] == 'T':
+                            return s_node, s_edge
+                        s_node = [html.Div(x['nodes'] + [': '])]
+                        if node['title'] == '':
+                            return s_node + [html.Div(['No Data-Properties for this A-Box'])], s_edge
+                        separator = ',\n '
+                        partition = node['title'].partition(separator)
+                        if separator in node['title']:
+                            s_node = s_node + [html.Div([partition[0]])]
+                            while separator in partition[2]:
+                                partition = partition[2].partition(separator)
+                                s_node = s_node + [html.Div([partition[0]])]
+                            s_node = s_node + [html.Div([partition[2]])]
+                        else:
+                            s_node = s_node + [html.Div([node['title']])]
+            elif len(x['edges']) > 0:
                 for edge in self.data['edges']:
                     if [edge['id']] == x['edges']:
                         separator = ',\n '
                         partition_id = edge['id'].partition(separator)
                         partition_label = edge['label'].partition(separator)
                         if (separator in edge['id']) and (separator in edge['label']):
-                            s = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+                            s_edge = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
                             while (separator in partition_id[2]) and (separator in partition_label[2]):
                                 partition_id = partition_id[2].partition(separator)
                                 partition_label = partition_label[2].partition(separator)
-                                s = s + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
-                            s = s + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
+                                s_edge = s_edge + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+                            s_edge = s_edge + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
                         else:
-                            s = [html.Div([edge['label']] + [': '] + [edge['id']])]
-            return s
-
-        @app.callback(
-            Output('node-selection', 'children'),
-            [Input('graph', 'selection')])
-        def show_dp_from_selected_node(x):
-            s = ''
-            if len(x['nodes']) > 0:
-                for node in self.data['nodes']:
-                    if [node['id']] == x['nodes']:
-                        if node['T/A'] == 'T':
-                            return s
-                        s = [html.Div(x['nodes'] + [': '])]
-                        if node['title'] == '':
-                            return s + [html.Div(['No Data-Properties for this A-Box'])]
-                        separator = ',\n '
-                        partition = node['title'].partition(separator)
-                        if separator in node['title']:
-                            s = s + [html.Div([partition[0]])]
-                            while separator in partition[2]:
-                                partition = partition[2].partition(separator)
-                                s = s + [html.Div([partition[0]])]
-                            s = s + [html.Div([partition[2]])]
-                        else:
-                            s = s + [html.Div([node['title']])]
-            return s
+                            s_edge = [html.Div([edge['label']] + [': '] + [edge['id']])]
+            return s_node, s_edge
 
         # create the main callbacks
         @app.callback(

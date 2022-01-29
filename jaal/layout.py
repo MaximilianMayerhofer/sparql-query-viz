@@ -221,15 +221,9 @@ filter_node_form = dbc.FormGroup([
     ),
 ])
 
-filter_edge_form = dbc.FormGroup([
-    # dbc.Label("Filter edges", html_for="filter_edges"),
-    dbc.Textarea(id="filter_edges", placeholder="Prev: Filter edges (will be deleted)"),
+sparql_template_form = dbc.FormGroup([
     dbc.FormText(
-        html.P([
-            "Filter on edges properties by using ",
-            html.A("Pandas Query syntax",
-            href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html"),
-        ]),
+        dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary",size="sm"),
         color="secondary",
     ),
 ])
@@ -323,15 +317,41 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         html.Hr(className="my-2"),
                         search_form,
 
-                        # ---- selection section ----
-                        html.H6("Selected Edge"),
-                        selected_edge_form,
-                        html.Hr(className="my-2"),
+                        # ---- edge selection section ----
+                        create_row([
+                            html.H6("Selected Edge"),
+                            dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            selected_edge_form,
+                            html.Hr(className="my-2"),
+                        ], id="edge-selection-show-toggle", is_open=True),
 
                         # ---- abox data-properties section ----
-                        html.H6("A-Box Data-Propteries"),
-                        a_box_dp_form,
-                        html.Hr(className="my-2"),
+                        create_row([
+                            html.H6("A-Box Data-Propteries"),
+                            dbc.Button("Hide/Show", id="abox-dp-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            a_box_dp_form,
+                            html.Hr(className="my-2"),
+                        ], id="abox-dp-show-toggle", is_open=True),
+
+                        # ---- SPARQL Template section ----
+                        create_row([
+                            html.H6("SPARQL Templates"),
+                            dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            sparql_template_form,
+                            html.Hr(className="my-2"),
+                        ], id="template-show-toggle", is_open=False),
 
                         # ---- SPARQL Query section ----
                         create_row([
@@ -352,7 +372,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                        ], id="filter-show-toggle", is_open=True),
+                        ], id="filter-show-toggle", is_open=False),
 
                         # ---- SPARQL Result section ----
                         create_row([
