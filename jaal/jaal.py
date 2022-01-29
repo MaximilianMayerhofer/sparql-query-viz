@@ -419,10 +419,12 @@ class Jaal:
              Input("add_to_query_button", "n_clicks"),
              Input("delete_query_button", "n_clicks"),
              Input("add_node_edge_to_query_button", "on"),
-             Input('graph', 'selection')],
+             Input('graph', 'selection'),
+             Input('sparql_template_1','n_clicks')],
             [State("filter_nodes", "value")],
         )
-        def edit_sparql_query(kw_value, var_value, syn_value, n_add, n_delete, on_select, selection, value):
+        def edit_sparql_query(kw_value, var_value, syn_value, n_add,
+                              n_delete, on_select, selection, n_template1, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -459,6 +461,9 @@ class Jaal:
                     if n_delete:
                         self.sparql_query = ""
                         self.logger.info("sparql query deleted by user")
+                elif input_id == "sparql_template_1" and n_template1:
+                    self.sparql_query = "SELECT (COUNT(?x) AS ?nb) \n{ ?x a owl:Class . }"
+                    self.logger.info("template1 added to sparql query")
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
                     if len(selection['nodes']) > 0:
                         for node in self.data['nodes']:
@@ -546,29 +551,6 @@ class Jaal:
                     self.logger.info("edge selection section was shown, triggered by user")
                 return not is_open
             return is_open
-
-        #@app.callback(
-        #    Output('edge-selection', 'children'),
-        #    [Input('graph', 'selection')])
-
-        #def show_selected_edge(x):
-        #    s = ''
-        #    if len(x['edges']) > 0:
-        #        for edge in self.data['edges']:
-        #            if [edge['id']] == x['edges']:
-        #                separator = ',\n '
-        #                partition_id = edge['id'].partition(separator)
-        #                partition_label = edge['label'].partition(separator)
-        #                if (separator in edge['id']) and (separator in edge['label']):
-        #                    s = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
-        #                    while (separator in partition_id[2]) and (separator in partition_label[2]):
-        #                        partition_id = partition_id[2].partition(separator)
-        #                        partition_label = partition_label[2].partition(separator)
-        #                        s = s + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
-        #                    s = s + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
-        #                else:
-        #                    s = [html.Div([edge['label']] + [': '] + [edge['id']])]
-        #    return s
 
         @app.callback(
             [Output('node-selection', 'children'),
