@@ -127,7 +127,53 @@ class Jaal:
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.sparql_query_result = ''
+        self.nodes_selected_for_template = 0
+        self.selected_node_for_template = ''
+        self.edges_selected_for_template = 0
+        self.selected_edge_for_template = ''
         self.onto = onto
+
+    def clear_selection_for_template_query(self):
+        self.nodes_selected_for_template = 0
+        self.selected_node_for_template = ''
+        self.edges_selected_for_template = 0
+        self.selected_edge_for_template = ''
+
+    def complete_sparql_query_with_selection(self, selection: dict):
+        if len(selection['nodes']) > 0:
+            for node in self.data['nodes']:
+                if [node['id']] == selection['nodes']:
+                    if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
+                            and self.nodes_selected_for_template == 0:
+                        if self.selected_edge_for_template != 0:
+                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
+                                                "SELECT ?x WHERE { ?x" + \
+                                                self.selected_edge_for_template + ' :' + node['id'] + " .}"
+                        else:
+                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
+                                                "SELECT ?x WHERE { ?x" " :[...]" + ' :' + node['id'] + " .}"
+                        self.nodes_selected_for_template = self.nodes_selected_for_template + 1
+                        self.selected_node_for_template = ' :' + node['id']
+                    else:
+                        self.sparql_query = self.sparql_query + ' :' + node['id']
+                    self.logger.info("%s added to sparql query", node['id'])
+        elif len(selection['edges']) > 0:
+            for edge in self.data['edges']:
+                if [edge['id']] == selection['edges']:
+                    if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
+                            and self.edges_selected_for_template == 0:
+                        if self.nodes_selected_for_template != 0:
+                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
+                                                "SELECT ?x WHERE { ?x" + ' :' + \
+                                                edge['label'] + self.selected_node_for_template + " .}"
+                        else:
+                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
+                                                "SELECT ?x WHERE { ?x" + ' :' + edge['label'] + " :[...] .}"
+                        self.edges_selected_for_template = self.edges_selected_for_template + 1
+                        self.selected_edge_for_template = ' :' + edge['label']
+                    else:
+                        self.sparql_query = self.sparql_query + ' :' + edge['label']
+                    self.logger.info("%s added to sparql query", edge['label'])
 
     def add_to_query_history(self):
         self.counter_query_history = self.counter_query_history + 1
@@ -143,6 +189,12 @@ class Jaal:
             res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             result = ""
+            if not flat_res_list:
+                graph_data = self.data
+                result = "No results for this SPARQL query."
+                self.sparql_query_result = result
+                self.logger.info("result for passed sparql query is empty")
+                return graph_data, result, selection
             res_is_no_data_object = False
             for flat_res in flat_res_list:
                 try:
@@ -165,6 +217,11 @@ class Jaal:
             self.sparql_query_result = result
             self.logger.warning("sparql query passed from user is empty")
         except owlready2.rply.LexingError:
+            graph_data = self.data
+            result = "Not a valid SPARQL query."
+            self.sparql_query_result = result
+            self.logger.warning("sparql query passed from user is not valid")
+        except ValueError:
             graph_data = self.data
             result = "Not a valid SPARQL query."
             self.sparql_query_result = result
@@ -420,11 +477,12 @@ class Jaal:
              Input("delete_query_button", "n_clicks"),
              Input("add_node_edge_to_query_button", "on"),
              Input('graph', 'selection'),
-             Input('sparql_template_1','n_clicks')],
+             Input('sparql_template_1','n_clicks'),
+             Input('sparql_template_2','n_clicks')],
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
-                              n_delete, on_select, selection, n_template1, value):
+                              n_delete, on_select, selection, n_template1, n_template2, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -461,20 +519,17 @@ class Jaal:
                     if n_delete:
                         self.sparql_query = ""
                         self.logger.info("sparql query deleted by user")
+                        self.clear_selection_for_template_query()
                 elif input_id == "sparql_template_1" and n_template1:
                     self.sparql_query = "SELECT (COUNT(?x) AS ?nb) \n{ ?x a owl:Class . }"
+                    self.clear_selection_for_template_query()
                     self.logger.info("template1 added to sparql query")
+                elif input_id == "sparql_template_2" and n_template2:
+                    self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[...] :[...] .}"
+                    self.clear_selection_for_template_query()
+                    self.logger.info("template2 added to sparql query")
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
-                    if len(selection['nodes']) > 0:
-                        for node in self.data['nodes']:
-                            if [node['id']] == selection['nodes']:
-                                self.sparql_query = self.sparql_query + ' :' + node['id']
-                                self.logger.info("%s added to sparql query", node['id'])
-                    elif len(selection['edges']) > 0:
-                        for edge in self.data['edges']:
-                            if [edge['id']] == selection['edges']:
-                                self.sparql_query = self.sparql_query + ' :' + edge['label']
-                                self.logger.info("%s added to sparql query", edge['label'])
+                    self.complete_sparql_query_with_selection(selection)
             return self.sparql_query
         
         # create callbacks to toggle hide/show sections - COLOR section
@@ -584,14 +639,18 @@ class Jaal:
                         partition_id = edge['id'].partition(separator)
                         partition_label = edge['label'].partition(separator)
                         if (separator in edge['id']) and (separator in edge['label']):
-                            s_edge = [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
+                            s_edge = [html.Div([partition_label[0]] + [': '])]
+                            s_edge = s_edge + [html.Div([partition_id[0]])]
                             while (separator in partition_id[2]) and (separator in partition_label[2]):
                                 partition_id = partition_id[2].partition(separator)
                                 partition_label = partition_label[2].partition(separator)
-                                s_edge = s_edge + [html.Div([partition_label[0]] + [': '] + [partition_id[0]])]
-                            s_edge = s_edge + [html.Div([partition_label[2]] + [': '] + [partition_id[2]])]
+                                s_edge = s_edge + [html.Div([partition_label[0]] + [': '])]
+                                s_edge = s_edge + [html.Div([partition_id[0]])]
+                            s_edge = s_edge + [html.Div([partition_label[2]] + [': '])]
+                            s_edge = s_edge + [html.Div([partition_id[2]])]
                         else:
-                            s_edge = [html.Div([edge['label']] + [': '] + [edge['id']])]
+                            s_edge = [html.Div([edge['label']] + [': '])]
+                            s_edge = s_edge + [html.Div([edge['id']])]
             return s_node, s_edge
 
         # create the main callbacks

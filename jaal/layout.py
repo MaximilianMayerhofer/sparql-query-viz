@@ -223,7 +223,12 @@ filter_node_form = dbc.FormGroup([
 
 sparql_template_form = dbc.FormGroup([
     dbc.FormText(
-        dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary",size="sm"),
+        create_row([
+            dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary", size="sm"),
+            dbc.Button("Find selected Node with selected OP", id="sparql_template_2", outline=True, color="secondary",
+                       size="sm"),
+        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+        'justify-content': 'space-between'}),
         color="secondary",
     ),
 ])
