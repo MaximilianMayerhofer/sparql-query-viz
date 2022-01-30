@@ -124,6 +124,7 @@ class Jaal:
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}
         self.sparql_query = ''
+        self.sparql_query_last_input = ['']
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.sparql_query_result = ''
@@ -143,25 +144,27 @@ class Jaal:
         if len(selection['nodes']) > 0:
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
+                    self.sparql_query_last_input.append(' :' + node['id'])
                     if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.nodes_selected_for_template == 0:
-                        self.sparql_query = self.sparql_query.replace(':[node]', ' :' + node['id'])
+                        self.sparql_query = self.sparql_query.replace(':[node]', self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
-                        self.selected_node_for_template = ' :' + node['id']
+                        self.selected_node_for_template = self.sparql_query_last_input[-1]
                     else:
-                        self.sparql_query = self.sparql_query + ' :' + node['id']
-                    self.logger.info("%s added to sparql query", node['id'])
+                        self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                    self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
         elif len(selection['edges']) > 0:
             for edge in self.data['edges']:
                 if [edge['id']] == selection['edges']:
+                    self.sparql_query_last_input.append(' :' + edge['label'])
                     if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.edges_selected_for_template == 0:
-                        self.sparql_query = self.sparql_query.replace(':[edge]',' :' + edge['label'])
+                        self.sparql_query = self.sparql_query.replace(':[edge]', self.sparql_query_last_input[-1])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
-                        self.selected_edge_for_template = ' :' + edge['label']
+                        self.selected_edge_for_template = self.sparql_query_last_input[-1]
                     else:
-                        self.sparql_query = self.sparql_query + ' :' + edge['label']
-                    self.logger.info("%s added to sparql query", edge['label'])
+                        self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                    self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
 
     def add_to_query_history(self):
         self.counter_query_history = self.counter_query_history + 1
@@ -462,6 +465,7 @@ class Jaal:
              Input("sparql-variables-dropdown", "value"),
              Input("sparql-syntax-dropdown", "value"),
              Input("add_to_query_button", "n_clicks"),
+             Input("clear_query_button", "n_clicks"),
              Input("delete_query_button", "n_clicks"),
              Input("add_node_edge_to_query_button", "on"),
              Input('graph', 'selection'),
@@ -470,7 +474,7 @@ class Jaal:
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
-                              n_delete, on_select, selection, n_template1, n_template2, value):
+                              n_clear, n_delete, on_select, selection, n_template1, n_template2, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -485,40 +489,52 @@ class Jaal:
                 if input_id == "sparql-keywords-dropdown":
                     if kw_value is not None:
                         if kw_value == "PREFIX":
-                            self.sparql_query = self.sparql_query + " PREFIX : <" + self.onto.iri + "#>"
+                            self.sparql_query_last_input.append(" PREFIX : <" + self.onto.iri + "#>")
                         elif kw_value == "SELECT":
-                            self.sparql_query = self.sparql_query + " SELECT"
+                            self.sparql_query_last_input.append(" SELECT")
                         else:
-                            self.sparql_query = self.sparql_query + " " + kw_value
-                        self.logger.info("%s - keyword added to sparql query", kw_value)
+                            self.sparql_query_last_input.append(" " + kw_value)
+                        self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.logger.info("%s - keyword added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql-variables-dropdown":
                     if var_value is not None:
+                        self.sparql_query_last_input.append(" " + var_value)
                         if 'COUNT ( ?[...] ) AS' in self.sparql_query:
-                            self.sparql_query = self.sparql_query.replace('?[...]', var_value)
+                            self.sparql_query = self.sparql_query.replace(' ?[...]', self.sparql_query_last_input[-1])
                         else:
-                            self.sparql_query = self.sparql_query + " " + var_value
-                        self.logger.info("%s - variable added to sparql query", var_value)
+                            self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.logger.info("%s - variable added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql-syntax-dropdown":
                     if syn_value is not None:
-                        self.sparql_query = self.sparql_query + " " + syn_value
-                        self.logger.info("%s - syntax added to sparql query", syn_value)
+                        self.sparql_query_last_input.append(" " + syn_value)
+                        self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.logger.info("%s - syntax added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "add_to_query_button":
                     if n_add and value is not None:
-                        self.sparql_query = self.sparql_query + ' ' + value
-                        self.logger.info("user-text-input added to sparql query")
+                        self.sparql_query_last_input.append(' ' + value)
+                        self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.logger.info("user-text-input %s added to sparql query", self.sparql_query_last_input[-1])
+                elif input_id == "clear_query_button":
+                    if n_clear:
+                        self.sparql_query_last_input = ['']
+                        self.sparql_query = ''
+                        self.logger.info("sparql query cleared by user")
+                        self.clear_selection_for_template_query()
                 elif input_id == "delete_query_button":
                     if n_delete:
-                        self.sparql_query = ""
-                        self.logger.info("sparql query deleted by user")
-                        self.clear_selection_for_template_query()
+                        self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], '')
+                        self.sparql_query_last_input.remove(self.sparql_query_last_input[-1])
+                        self.logger.info('last input from user deleted from sparql query, triggered by user')
                 elif input_id == "sparql_template_1" and n_template1:
-                    self.sparql_query = "SELECT (COUNT(?x) AS ?nb) \n{ ?x a owl:Class . }"
+                    self.sparql_query_last_input.append("SELECT (COUNT(?x) AS ?nb) \n{ ?x a owl:Class . }")
+                    self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
-                    self.logger.info("template1 added to sparql query")
+                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_template_2" and n_template2:
-                    self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[edge] :[node] .}"
+                    self.sparql_query_last_input.append(" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[edge] :[node] .}")
+                    self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
-                    self.logger.info("template2 added to sparql query")
+                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
                     self.complete_sparql_query_with_selection(selection)
             return self.sparql_query

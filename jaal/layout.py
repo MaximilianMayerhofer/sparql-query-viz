@@ -89,7 +89,6 @@ def get_distinct_colors(n):
         random.shuffle(colors)
         return colors[:n]
 
-
 def create_card(id, value, description):
     """Creates card for high level stats
 
@@ -207,6 +206,7 @@ filter_node_form = dbc.FormGroup([
     html.Hr(className="my-2"),
     create_row([
         dbc.Button("Delete", id="delete_query_button", outline=True, color="secondary",size="sm"),
+        dbc.Button("Clear", id="clear_query_button", outline=True, color="secondary",size="sm"),
         dbc.Button("Evaluate Query", id="evaluate_query_button", outline=True, color="secondary",size="sm"),
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
@@ -331,7 +331,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             selected_edge_form,
                             html.Hr(className="my-2"),
-                        ], id="edge-selection-show-toggle", is_open=True),
+                        ], id="edge-selection-show-toggle", is_open=False),
 
                         # ---- abox data-properties section ----
                         create_row([
@@ -343,7 +343,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         dbc.Collapse([
                             a_box_dp_form,
                             html.Hr(className="my-2"),
-                        ], id="abox-dp-show-toggle", is_open=True),
+                        ], id="abox-dp-show-toggle", is_open=False),
 
                         # ---- SPARQL Template section ----
                         create_row([
