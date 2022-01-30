@@ -169,8 +169,7 @@ filter_node_form = dbc.FormGroup([
             options=[
                 {'label': 'Prefix', 'value': 'PREFIX'},
                 {'label': 'Select', 'value': 'SELECT'},
-                {'label': 'Count', 'value': 'COUNT'},
-                {'label': 'As', 'value': 'AS'},
+                {'label': 'Count as', 'value': 'COUNT ( ?[...] ) AS'},
                 {'label': 'Filter', 'value': 'FILTER'},
                 {'label': 'Where', 'value': 'WHERE'}
             ],

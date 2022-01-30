@@ -145,13 +145,7 @@ class Jaal:
                 if [node['id']] == selection['nodes']:
                     if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.nodes_selected_for_template == 0:
-                        if self.selected_edge_for_template != 0:
-                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
-                                                "SELECT ?x WHERE { ?x" + \
-                                                self.selected_edge_for_template + ' :' + node['id'] + " .}"
-                        else:
-                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
-                                                "SELECT ?x WHERE { ?x" " :[...]" + ' :' + node['id'] + " .}"
+                        self.sparql_query = self.sparql_query.replace(':[node]', ' :' + node['id'])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = ' :' + node['id']
                     else:
@@ -162,13 +156,7 @@ class Jaal:
                 if [edge['id']] == selection['edges']:
                     if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.edges_selected_for_template == 0:
-                        if self.nodes_selected_for_template != 0:
-                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
-                                                "SELECT ?x WHERE { ?x" + ' :' + \
-                                                edge['label'] + self.selected_node_for_template + " .}"
-                        else:
-                            self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + \
-                                                "SELECT ?x WHERE { ?x" + ' :' + edge['label'] + " :[...] .}"
+                        self.sparql_query = self.sparql_query.replace(':[edge]',' :' + edge['label'])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
                         self.selected_edge_for_template = ' :' + edge['label']
                     else:
@@ -505,7 +493,10 @@ class Jaal:
                         self.logger.info("%s - keyword added to sparql query", kw_value)
                 elif input_id == "sparql-variables-dropdown":
                     if var_value is not None:
-                        self.sparql_query = self.sparql_query + " " + var_value
+                        if 'COUNT ( ?[...] ) AS' in self.sparql_query:
+                            self.sparql_query = self.sparql_query.replace('?[...]', var_value)
+                        else:
+                            self.sparql_query = self.sparql_query + " " + var_value
                         self.logger.info("%s - variable added to sparql query", var_value)
                 elif input_id == "sparql-syntax-dropdown":
                     if syn_value is not None:
@@ -525,7 +516,7 @@ class Jaal:
                     self.clear_selection_for_template_query()
                     self.logger.info("template1 added to sparql query")
                 elif input_id == "sparql_template_2" and n_template2:
-                    self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[...] :[...] .}"
+                    self.sparql_query = " PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[edge] :[node] .}"
                     self.clear_selection_for_template_query()
                     self.logger.info("template2 added to sparql query")
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
