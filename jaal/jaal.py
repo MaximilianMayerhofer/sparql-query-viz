@@ -260,7 +260,7 @@ class Jaal:
 
         # color option is None, revert back all changes
         if size_nodes_value == 'None':
-            # revert to default color
+            # revert to default size
             for node in self.data['nodes']:
                 node['size'] = DEFAULT_NODE_SIZE
         else:
@@ -298,21 +298,24 @@ class Jaal:
         return graph_data, value_color_mapping
 
     def _callback_size_edges(self, size_edges_value):
-        # color option is None, revert back all changes
-        if size_edges_value == 'None':
+        # fetch the scaling value
+        minn = self.scaling_vars['edge'][size_edges_value]['min']
+        maxx = self.scaling_vars['edge'][size_edges_value]['max']
+        # if color option is None or minn and maxx is the same, revert back all changes
+        if size_edges_value == 'None' or minn == maxx:
             # revert to default size
             for edge in self.data['edges']:
                 edge['width'] = DEFAULT_EDGE_SIZE
         else:
-            # fetch the scaling value
-            #minn = self.scaling_vars['edge'][size_edges_value]['min']
-            #maxx = self.scaling_vars['edge'][size_edges_value]['max']
             # define the scaling function
-            #scale_val = lambda x: 20*(x-minn)/(maxx-minn)
+            scale_val = lambda x: 5*(x-minn)/(maxx-minn)
             # set the size after scaling
             for edge in self.data['edges']:
-                # edge['width'] = scale_val(edge[size_edges_value])
-                edge['width'] = edge[size_edges_value]
+                if edge[size_edges_value] == minn:
+                    edge['width'] = DEFAULT_EDGE_SIZE
+                else:
+                    edge['width'] = scale_val(edge[size_edges_value])
+                # edge['width'] = edge[size_edges_value]
         # filter the data currently shown
         filtered_edges = [x['id'] for x in self.filtered_data['edges']]
         self.filtered_data['edges'] = [x for x in self.data['edges'] if x['id'] in filtered_edges]
