@@ -134,6 +134,14 @@ class Jaal:
         self.selected_edge_for_template = ''
         self.onto = onto
 
+    def edit_edge_appearance(self, directed = True):
+        for edge in self.data['edges']:
+            if edge['label'] == 'is_a':
+                arrow_type = {'arrows': {'to': {'enabled': directed, 'type': 'circle'}}}
+            else:
+                arrow_type = {'arrows': {'to': {'enabled': directed, 'type': 'arrow'}}}
+            edge.update(arrow_type)
+
     def clear_selection_for_template_query(self):
         self.nodes_selected_for_template = 0
         self.selected_node_for_template = ''
@@ -311,10 +319,12 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data
 
-    def forced_callback_execution_at_beginning(self):
+    def forced_callback_execution_at_beginning(self, directed=True):
         """This function executes the callback functions for node and edge Coloring and Sizing at start of the app,
         without andy userinput. This is to ensure a default coloring and sizing of nodes and edges."""
 
+        # Give all is_a edges a circle as arrowhead
+        self.edit_edge_appearance(directed=directed)
         # Get list of categorical features from nodes
         cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
         # Define label and value for each categorical feature
@@ -326,7 +336,7 @@ class Jaal:
             self.logger.info("Nodes were initially colored")
         # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(pd.DataFrame(self.data['edges']).drop(
-            columns=['color', 'from', 'to', 'id']), 20,['color', 'from', 'to', 'id'])
+            columns=['color', 'from', 'to', 'id','arrows']), 20,['color', 'from', 'to', 'id'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
         # If options has mor then one categorical feature, the callback function for edge-coloring is executed once,
@@ -372,11 +382,11 @@ class Jaal:
         # create the app
         app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+        # get color_mapping and size_mapping once at the start
+        self.forced_callback_execution_at_beginning(directed=directed)
+
         # define layout
         app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
-        
-        # get color_mapping and size_mapping once at the start
-        self.forced_callback_execution_at_beginning()
 
         # create callbacks to toggle legend popover
         @app.callback(
