@@ -72,7 +72,7 @@ def get_options(directed, opts_args):
         opts.update(opts_args)
     return opts
 
-def get_distinct_colors(n):
+def get_distinct_colors(n, for_nodes = True):
     """Return distict colors, currently atmost 20
 
     Parameters
@@ -80,14 +80,12 @@ def get_distinct_colors(n):
     n: int
         the distinct colors required
     """
-    if n <= 7:
-        colors = KELLY_COLORS_HEX[:7].copy()
-        random.shuffle(colors)
-        return colors[:n]
-    elif n <= 20:
-        colors = KELLY_COLORS_HEX[:20].copy()
-        random.shuffle(colors)
-        return colors[:n]
+    if for_nodes:
+        colors = KELLY_COLORS_HEX[:]
+        return colors
+    else:
+        colors = KELLY_COLORS_HEX[2:(n+2)]
+        return colors
 
 def create_card(id, value, description):
     """Creates card for high level stats
@@ -297,6 +295,10 @@ def get_numerical_features(df_, unique_limit=20):
         numeric_features.remove('size')
     except:
         pass
+    try:
+        numeric_features.remove('width')
+    except:
+        pass
     # return
     return numeric_features
 
@@ -309,7 +311,7 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
         network data in format of visdcc
     """
     # Step 1-2: find categorical features of nodes and edges
-    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id', 'title'])
+    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id', 'title', 'color'])
     cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id','arrows']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))

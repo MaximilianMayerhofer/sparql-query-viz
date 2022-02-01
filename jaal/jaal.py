@@ -246,7 +246,7 @@ class Jaal:
                 node['color'] = DEFAULT_COLOR
         else:
             unique_values = pd.DataFrame(self.data['nodes'])[color_nodes_value].unique()
-            colors = get_distinct_colors(len(unique_values))
+            colors = get_distinct_colors(len(unique_values), for_nodes=True)
             value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
             for node in self.data['nodes']:
                 node['color'] = value_color_mapping[node[color_nodes_value]]
@@ -287,7 +287,7 @@ class Jaal:
                 edge['color']['color'] = DEFAULT_COLOR
         else:
             unique_values = pd.DataFrame(self.data['edges'])[color_edges_value].unique()
-            colors = get_distinct_colors(len(unique_values))
+            colors = get_distinct_colors(len(unique_values), for_nodes=False)
             value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
             for edge in self.data['edges']:
                 edge['color']['color'] = value_color_mapping[edge[color_edges_value]]
@@ -298,9 +298,12 @@ class Jaal:
         return graph_data, value_color_mapping
 
     def _callback_size_edges(self, size_edges_value):
+        minn = 0
+        maxx = 100
         # fetch the scaling value
-        minn = self.scaling_vars['edge'][size_edges_value]['min']
-        maxx = self.scaling_vars['edge'][size_edges_value]['max']
+        if size_edges_value != 'None':
+            minn = self.scaling_vars['edge'][size_edges_value]['min']
+            maxx = self.scaling_vars['edge'][size_edges_value]['max']
         # if color option is None or minn and maxx is the same, revert back all changes
         if size_edges_value == 'None' or minn == maxx:
             # revert to default size
@@ -329,7 +332,7 @@ class Jaal:
         # Give all is_a edges a circle as arrowhead
         self.edit_edge_appearance(directed=directed)
         # Get list of categorical features from nodes
-        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id'])
+        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id', 'title', 'color'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_node_features]
         # If options has more then one categorical feature, the callback function for nodes-coloring is executed once,
