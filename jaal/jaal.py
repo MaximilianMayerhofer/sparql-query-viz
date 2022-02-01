@@ -383,7 +383,8 @@ class Jaal:
                 the Jaal app
         """
         # create the app
-        app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+        #app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
+        app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
 
         # get color_mapping and size_mapping once at the start
         self.forced_callback_execution_at_beginning(directed=directed)

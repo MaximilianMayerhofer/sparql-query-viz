@@ -105,10 +105,7 @@ def create_card(id, value, description):
 def create_color_legend(text, color):
     """Individual row for the color legend
     """
-    return create_row([
-        html.Div(style={'width': '10px', 'height': '10px', 'background-color': color}),
-        html.Div(text, style={'padding-left': '10px'}),
-    ])
+    return html.Div(text, style={'padding-left': '10px', 'width': '200px', 'background-color': color})
 
 def create_info_text(text):
     """Individual row for the color legend
@@ -366,12 +363,12 @@ def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False,
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Popover(
-                            children=create_info_text("To write an SPARQL query, type in a valid query in the text "
+                            html.Div("To write an SPARQL query, type in a valid query in the text "
                                                       "field and click 'Add'. Or use the provided keywords to build "
                                                       "up the query. To see the result click 'Evaluate query'. "
                                                       "To erase the entered text click 'Delete'."),
                             id="info-sparql-popup", is_open=False,
-                            target="info-sparql-query-button"
+                            target="info-sparql-query-button",style={'padding-left': '10px', 'width': '230px'}
                         ),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
