@@ -423,16 +423,26 @@ class Jaal:
         # create callbacks to toggle hide/show sections - FILTER section
         @app.callback(
             Output("filter-show-toggle", "is_open"),
-            [Input("filter-show-toggle-button", "n_clicks")],
+            [Input("filter-show-toggle-button", "n_clicks"),
+             Input('sparql_template_1', 'n_clicks'),
+             Input('sparql_template_2', 'n_clicks')],
             [State("filter-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n, is_open):
-            if n:
-                if is_open:
-                    self.logger.info("sparql query section was hidden, triggered by user")
-                else:
-                    self.logger.info("sparql query section was shown, triggered by user")
-                return not is_open
+        def toggle_filter_collapse(n_show, n_template1, n_template2, is_open):
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return is_open
+            else:
+                input_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if input_id == "filter-show-toggle-button" and n_show:
+                    if is_open:
+                        self.logger.info("sparql query section was hidden, triggered by user")
+                    else:
+                        self.logger.info("sparql query section was shown, triggered by user")
+                    return not is_open
+                if input_id == "sparql_template_1" or input_id == "sparql_template_2":
+                    self.logger.info("sparql query section was shown, because template button was triggered")
+                    return True
             return is_open
 
         @app.callback(
