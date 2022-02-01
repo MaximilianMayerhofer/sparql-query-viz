@@ -122,34 +122,29 @@ def create_row(children, style=fetch_flex_row_style()):
                    style=style,
                    className="column flex-display")
 
-search_form = dbc.FormGroup(
-    [
-        # dbc.Label("Search", html_for="search_graph"),
-        dbc.Input(type="search", id="search_graph", placeholder="Search node or edge in graph..."),
-        dbc.FormText(
-            "Show the node or edge you are looking for",
-            color="secondary",
-        ),
-    ]
-)
+search_form = dbc.FormGroup([
+    # dbc.Label("Search", html_for="search_graph"),
+    dbc.Input(type="search", id="search_graph", placeholder="Search node or edge in graph..."),
+    dbc.FormText(
+         "Show the node or edge you are looking for",
+         color="secondary",
+    )
+])
 
-selected_edge_form = dbc.FormGroup(
-    [
-        dbc.FormText(
-            id = 'edge-selection',
-            color="secondary",
-        ),
-    ]
-)
+selected_edge_form = dbc.FormGroup([
+    dbc.FormText(
+        id = 'edge-selection',
+        color="secondary",
+    ),
+])
 
-a_box_dp_form = dbc.FormGroup(
-    [
-        dbc.FormText(
-            id = 'node-selection',
-            color="secondary",
-        ),
-    ]
-)
+a_box_dp_form = dbc.FormGroup([
+    dbc.FormText(
+        id = 'node-selection',
+        color="secondary",
+    ),
+])
+
 filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
     create_row([
@@ -165,8 +160,15 @@ filter_node_form = dbc.FormGroup([
             options=[
                 {'label': 'Prefix', 'value': 'PREFIX'},
                 {'label': 'Select', 'value': 'SELECT'},
+                {'label': 'Insert', 'value': 'INSERT'},
+                {'label': 'Delete', 'value': 'DELETE'},
+                {'label': 'Union', 'value': 'UNION'},
                 {'label': 'Count as', 'value': 'COUNT ( ?[...] ) AS'},
                 {'label': 'Filter', 'value': 'FILTER'},
+                {'label': 'Filter Exists', 'value': 'FILTER EXISTS'},
+                {'label': 'Filter not Exists', 'value': 'FILTER NOT EXISTS'},
+                {'label': 'Bind', 'value': 'BIND'},
+                {'label': 'Values', 'value': 'VALUES'},
                 {'label': 'Where', 'value': 'WHERE'}
             ],
             placeholder="Keywords",
@@ -190,7 +192,14 @@ filter_node_form = dbc.FormGroup([
                 {'label': '(', 'value': '('},
                 {'label': ')', 'value': ')'},
                 {'label': '.', 'value': '.'},
-                {'label': 'Return', 'value': '\n'},
+                {'label': 'rdf', 'value': 'rdf:'},
+                {'label': 'rdfs', 'value': 'rdfs:'},
+                {'label': 'owl', 'value': 'owl:'},
+                {'label': 'owlready', 'value': 'owlready:'},
+                {'label': 'xsd', 'value': 'xsd:'},
+                {'label': 'obo', 'value': 'obo:'},
+                {'label': 'subClassOf', 'value': 'rdfs:subClassOf*'},
+                {'label': 'label', 'value': 'rdfs:label'}
             ],
             placeholder="Symbols",
             style={'width': '81px'},
