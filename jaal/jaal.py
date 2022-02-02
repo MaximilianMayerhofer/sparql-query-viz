@@ -91,22 +91,25 @@ def get_color_popover_legend_children(node_value_color_mapping=None, edge_value_
 
 def get_nodes_to_be_shown(res_list: list, data: dict, number_of_edges_to_be_shown_around_result: int = 1):
     filtered_node_data = []
-    #n = 1
+    n = 1
     for node in data['nodes']:
         for result in res_list:
             if node['id'] == result.name:
                 filtered_node_data.append(node)
     node_selection = filtered_node_data.copy()
-    #while n <= number_of_edges_to_be_shown_around_result:
-    #globals()['%s_center_node_list' % n] = res_list
-    for result in res_list:
-        for edge in data['edges']:
-            if edge['from'] == result.name:
-                for node in data['nodes']:
-                    if node['id'] == edge['to']:
-                        filtered_node_data.append(node)
-                        #globals()['%s_center_node_list' % str(n+1)].append(node['id'])
-
+    current_level_res_list = node_selection.copy()
+    next_level_res_list = []
+    while n <= number_of_edges_to_be_shown_around_result:
+        for result in current_level_res_list:
+            for edge in data['edges']:
+                if edge['from'] == result['id']:
+                    for node in data['nodes']:
+                        if node['id'] == edge['to']:
+                            filtered_node_data.append(node)
+                            next_level_res_list.append(node)
+        current_level_res_list = next_level_res_list.copy()
+        next_level_res_list = []
+        n = n+1
     return filtered_node_data, node_selection
 
 class Jaal:
