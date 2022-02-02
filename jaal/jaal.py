@@ -89,7 +89,7 @@ def get_color_popover_legend_children(node_value_color_mapping=None, edge_value_
     #
     return popover_legend_children
 
-def get_nodes_to_be_shown(res_list: list, data: dict, number_of_edges_to_be_shown_around_result: int = 1):
+def get_nodes_to_be_shown(data: dict, res_list: list=[], number_of_edges_to_be_shown_around_result: int = 1):
     filtered_node_data = []
     n = 1
     for node in data['nodes']:
@@ -139,6 +139,7 @@ class Jaal:
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.sparql_query_result = ''
+        self.sparql_query_result_list = []
         self.nodes_selected_for_template = 0
         self.selected_node_for_template = ''
         self.edges_selected_for_template = 0
@@ -190,7 +191,7 @@ class Jaal:
         self.sparql_query_history = self.sparql_query_history + str(
             self.counter_query_history) + ": " + self.sparql_query + '\n'
 
-    def _callback_filter_nodes(self, graph_data):
+    def _callback_filter_nodes(self, graph_data, shown_result_level: int):
         """Filter the nodes based on the Python query syntax
         """
         self.filtered_data = self.data.copy()
@@ -198,6 +199,7 @@ class Jaal:
         try:
             res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
+            self.sparql_query_result_list = flat_res_list
             result = ""
             if not flat_res_list:
                 graph_data = self.data
@@ -217,7 +219,7 @@ class Jaal:
                     res_is_no_data_object = True
             self.sparql_query_result = result
             if not res_is_no_data_object:
-                self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(flat_res_list,self.filtered_data)
+                self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data, flat_res_list, shown_result_level)
                 graph_data = self.filtered_data
             self.add_to_query_history()
             self.logger.info("valid sparql query successfully evaluated")
@@ -714,12 +716,13 @@ class Jaal:
              Input('evaluate_query_button', 'n_clicks'),
              Input('clear-query-history-button', 'n_clicks'),
              Input('query-history-length-slider','value'),
-             Input("color-legend-toggle", "n_clicks")],
+             Input("color-legend-toggle", "n_clicks"),
+             Input('result-level-slider','value'),],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, color_nodes_value, color_edges_value,
                                   size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length,
-                                  n_legend, graph_data):
+                                  n_legend,shown_result_level, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = self.sparql_query_result
@@ -739,7 +742,9 @@ class Jaal:
                     self.logger.info("shown graph data filtered, triggered by user")
                 # In case filter nodes was triggered
                 elif input_id == 'evaluate_query_button' and n_evaluate:
-                    graph_data, flat_res_list_children, selection = self._callback_filter_nodes(graph_data)
+                    graph_data, flat_res_list_children, selection = self._callback_filter_nodes(graph_data, shown_result_level)
+                elif input_id == 'result-level-slider':
+                    graph_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.data, self.sparql_query_result_list, shown_result_level)
                 if input_id == "clear-query-history-button" and n_clear:
                     self.counter_query_history= 0
                     self.sparql_query_history = ""

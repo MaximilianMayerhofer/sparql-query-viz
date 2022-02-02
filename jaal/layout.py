@@ -411,6 +411,20 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
+                            dcc.Slider(
+                                id='result-level-slider',
+                                min=0,
+                                max=4,
+                                step=1,
+                                value=1,
+                                marks={
+                                    0: '0',
+                                    1: '1',
+                                    2: '2',
+                                    3: '3',
+                                    4: '4'
+                                },
+                            ),
                             html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
                             html.Hr(className="my-2"),
                         ], id="result-show-toggle", is_open=False),
