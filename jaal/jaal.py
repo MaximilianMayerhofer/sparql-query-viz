@@ -5,6 +5,9 @@ Main class for Jaal network visualization dashboard
 """
 # import
 import logging
+import datetime
+logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+logging.basicConfig(filename=logfile, level=logging.INFO)
 import owlready2.rply
 from ontor import OntoEditor
 import dash
@@ -40,15 +43,21 @@ def _callback_search_graph(graph_data, search_text):
     graph_data['edges'] = edges
     return graph_data
 
-def get_color_popover_legend_children(node_value_color_mapping={}, edge_value_color_mapping={}):
+def get_color_popover_legend_children(node_value_color_mapping=None, edge_value_color_mapping=None):
     """Get the popover legends for node and edge based on the color setting
     """
     # var
+    if edge_value_color_mapping is None:
+        edge_value_color_mapping = {}
+    if node_value_color_mapping is None:
+        node_value_color_mapping = {}
     popover_legend_children = []
 
     # common function
-    def create_legends_for(title="Node", legends={}):
+    def create_legends_for(title="Node", legends=None):
         # add title
+        if legends is None:
+            legends = {}
         _popover_legend_children = [dbc.PopoverHeader(f"{title} legends")]
         # add values if present
         if len(legends) > 0:
@@ -113,8 +122,7 @@ class Jaal:
         node_df: pandas dataframe (optional)
             The network node data stored in format of pandas dataframe
         """
-        self.filename = onto.path.split(sep="/")[-1]
-        self.logger = logging.getLogger(self.filename.split(".")[0])
+        self.logger = logging.getLogger('jaal-app')
         self.abox = abox
         self.edge_df, self.node_df = get_df_from_ontology(onto, self.abox)
         self.logger.info("begin parsing data from dataframes to visdcc-dataformat...")
@@ -444,7 +452,8 @@ class Jaal:
                     else:
                         self.logger.info("sparql query section was shown, triggered by user")
                     return not is_open
-                if input_id == "sparql_template_1" or input_id == "sparql_template_2":
+                if (input_id == "sparql_template_1" and n_template1)\
+                        or (input_id == "sparql_template_2" and n_template2):
                     self.logger.info("sparql query section was shown, because template button was triggered")
                     return True
             return is_open

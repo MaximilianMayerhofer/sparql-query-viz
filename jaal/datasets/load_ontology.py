@@ -17,13 +17,8 @@ from ontor import OntoEditor
 import owlready2
 
 # data load and return function
-def load_got(filter_conections_threshold=10):
+def load_got():
     """Load the first book of the Got Dataset
-
-    Parameters
-    -----------
-    filter_conections_threshold: int
-        keep the connections in GoT dataset with weights greater than this threshold
     """
     # resolve path
     this_dir, _ = os.path.split(__file__)
@@ -35,9 +30,6 @@ def load_got(filter_conections_threshold=10):
 
 def load_ontology():
     """Loads the Pizza-example ontology wih classes, with classes, instances, object- and data-properties"""
-
-    logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
-    logging.basicConfig(filename=logfile, level=logging.INFO)
 
     this_dir, _ = os.path.split(__file__)
     iri = "http://example.org/onto-got.owl"
@@ -60,7 +52,7 @@ def load_ontology():
     ontor1.add_instances(ins)
     return ontor1
 
-def get_tboxes(onto: OntoEditor, nodelist = []):
+def get_tboxes(onto: OntoEditor, nodelist=None):
     """Extracts T-Boxes from ontology and returns them in a list.
 
     Parameters
@@ -71,6 +63,8 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
         list of all classes/ instances that were already extracted from the ontology"""
 
     # Generator of all classes in the ontology is created
+    if nodelist is None:
+        nodelist = []
     node_gen = onto.onto.classes()
     # All classes from the generator are written into a list with their name, importance, shape and T-Box label
     for cl in node_gen:
@@ -79,7 +73,7 @@ def get_tboxes(onto: OntoEditor, nodelist = []):
     logging.info("successfully parsed T-Boxes from ontology specified")
     return nodelist
 
-def get_isa_realtions(onto: OntoEditor, edgelist = []):
+def get_isa_realtions(onto: OntoEditor, edgelist=None):
     """Extracts all 'is_a'-relations from ontology and returns them in a list.
 
     Parameters
@@ -90,6 +84,8 @@ def get_isa_realtions(onto: OntoEditor, edgelist = []):
         list of all relations that were already extracted from the ontology"""
 
     # Generator of all classes in the ontology is created
+    if edgelist is None:
+        edgelist = []
     node_gen = onto.onto.classes()
     # For all classes from the generator the associated subclasses are written into a list
     for cl in node_gen:
@@ -103,7 +99,7 @@ def get_isa_realtions(onto: OntoEditor, edgelist = []):
     logging.info("successfully parsed IS_A-relations from ontology specified")
     return edgelist
 
-def get_OPs(onto: OntoEditor, edgelist = []):
+def get_OPs(onto: OntoEditor, edgelist=None):
     """Extracts all object-properties from ontology and returns them in a list that is passed to the function.
 
     Parameters
@@ -114,6 +110,8 @@ def get_OPs(onto: OntoEditor, edgelist = []):
         list of all relations that were already extracted from the ontology"""
 
     # Generator of all object-properties in the ontology is created
+    if edgelist is None:
+        edgelist = []
     op_gen = onto.onto.object_properties()
     # Iteration over all object-properties from the generator
     for op in op_gen:
@@ -127,7 +125,7 @@ def get_OPs(onto: OntoEditor, edgelist = []):
     logging.info("successfully parsed Object-Properties from ontology specified")
     return edgelist
 
-def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
+def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
     """Extracts all data-properties from ontology and returns them in a list that is passed to the function.
 
     Parameters
@@ -138,6 +136,10 @@ def get_DPs(onto: OntoEditor, nodelist = [], edgelist = []):
         list of all classes/ instances that were already extracted from the ontology
     edgelist: list
         list of all relations that were already extracted from the ontology"""
+    if edgelist is None:
+        edgelist = []
+    if nodelist is None:
+        nodelist = []
     counter_skipped = 0
     counter_parsed = 0
     # Generator of all data-properties in the ontology is created
@@ -316,9 +318,6 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
        ontology of type OntoEditor from which the information is extracted
     abox: bool
         Boolean to indicate wheter A-Boxes should be included or not"""
-    # Set basic Configuration for Logger (if its not already set)
-    logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
-    logging.basicConfig(filename=logfile, level=logging.INFO)
     logging.info("begin parsing data from specified ontology to dataframes...")
     # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)

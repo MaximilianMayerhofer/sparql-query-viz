@@ -63,9 +63,10 @@ DEFAULT_OPTIONS = {
 #---------
 
 
-def get_options(directed, opts_args):
+def get_options(directed: bool, opts_args):
     opts = DEFAULT_OPTIONS.copy()
-    opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
+    size = 0
+    opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': size}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
     if opts_args is not None:
@@ -78,14 +79,14 @@ def get_distinct_colors(n, for_nodes = True):
     Parameters
     -----------
     n: int
-        the distinct colors required
+        number of distinct colors required
+    for_nodes: bool
+        boolean indicates whether nodes or edges will be colored
     """
     if for_nodes:
-        colors = KELLY_COLORS_HEX[:]
-        return colors
+        return KELLY_COLORS_HEX[:n]
     else:
-        colors = KELLY_COLORS_HEX[2:(n+2)]
-        return colors
+        return KELLY_COLORS_HEX[2:(n+2)]
 
 def create_card(id, value, description):
     """Creates card for high level stats
@@ -115,7 +116,9 @@ def create_info_text(text):
 def fetch_flex_row_style():
     return {'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center', 'align-items': 'center'}
 
-def create_row(children, style=fetch_flex_row_style()):
+def create_row(children, style=None):
+    if style is None:
+        style = fetch_flex_row_style()
     return dbc.Row(children,
                    style=style,
                    className="column flex-display")
@@ -268,22 +271,24 @@ def get_select_form_layout(id, options, label, description):
                     dbc.FormText(description, color="secondary",)
                 ,])
 
-def get_categorical_features(df_, unique_limit=20, blacklist_features=['shape', 'label', 'id']):
+def get_categorical_features(df_, unique_limit=20, blacklist_features=None):
     """Identify categorical features for edge or node data and return their names
     Additional logics: (1) cardinality should be within `unique_limit`, (2) remove blacklist_features
     """
     # identify the rel cols + None
+    if blacklist_features is None:
+        blacklist_features = ['shape', 'label', 'id']
     cat_features = ['None'] + df_.columns[(df_.dtypes == 'object') & (df_.apply(pd.Series.nunique) <= unique_limit)].tolist()
     # remove irrelevant cols
     try:
         for col in blacklist_features:
             cat_features.remove(col)
-    except:
+    except ValueError:
         pass
     # return
     return cat_features
 
-def get_numerical_features(df_, unique_limit=20):
+def get_numerical_features(df_):
     """Identify numerical features for edge or node data and return their names
     """
     # supported numerical cols
@@ -293,24 +298,36 @@ def get_numerical_features(df_, unique_limit=20):
     # remove blacklist cols (for nodes)
     try:
         numeric_features.remove('size')
-    except:
+    except ValueError:
         pass
     try:
         numeric_features.remove('width')
-    except:
+    except ValueError:
         pass
     # return
     return numeric_features
 
-def get_app_layout(graph_data,onto: OntoEditor,color_legends=[], directed=False, vis_opts=None, abox: bool = False):
+def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: bool=False, vis_opts: dict=None, abox: bool = False):
     """Create and return the layout of the app
 
     Parameters
     --------------
     graph_data: dict{nodes, edges}
         network data in format of visdcc
+    onto: OntoEditor
+        Ontology
+    color_legends: list
+        list of legend elements
+    directed: bool
+        boolean that indicates whether the graph is directed
+    vis_opts: dict
+        additional visualization options to pass to the Network options
+    abox: bool
+        boolean that indicates whether A-Boxes are visualized
     """
     # Step 1-2: find categorical features of nodes and edges
+    if color_legends is None:
+        color_legends = []
     cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']), 20, ['shape', 'label', 'id', 'title', 'color'])
     cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id','arrows']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
