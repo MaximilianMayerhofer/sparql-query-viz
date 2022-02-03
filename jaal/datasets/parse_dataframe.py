@@ -4,6 +4,8 @@ Author: Mohit Mayank
 Parse network data from dataframe format into visdcc format 
 """
 
+from dash import dcc, html
+
 def compute_scaling_vars_for_numerical_cols(df):
     """Identify and scale numerical cols"""
     # identify numerical cols
@@ -41,7 +43,7 @@ def parse_dataframe(edge_df, node_df=None):
     # Data post processing - convert the from and to columns in edge data as string for searching
     edge_df.loc[:, ['from', 'to']] = edge_df.loc[:, ['from', 'to']].astype(str)
 
-    # Data pot processing (scaling numerical cols in nodes and edge)
+    # Data post processing (scaling numerical cols in nodes and edge)
     scaling_vars = {'node': None, 'edge': None}
     if node_df is not None:
         scaling_vars['node'] = compute_scaling_vars_for_numerical_cols(node_df)
@@ -55,14 +57,14 @@ def parse_dataframe(edge_df, node_df=None):
     else:
         # convert the node id column to string
         node_df.loc[:, 'id'] = node_df.loc[:, 'id'].astype(str)
+        node_df.loc[:, 'title'] = node_df.loc[:, 'title'].astype(str)
         # create the node data
         for node in node_df.to_dict(orient='records'):
-            nodes.append({**node, **{'label': node['id'], 'shape': 'dot', 'size': 7}})
-    
+            nodes.append({**node, **{'label': node['id'], 'title': node['title'], 'size': 7}})
+
     # create edges from df
     edges = []
     for row in edge_df.to_dict(orient='records'):
-        edges.append({**row, **{'id': row['from'] + "__" + row['to'],  'color': {'color': '#97C2FC'}}})
-    
+        edges.append({**row, **{'id': row['id'],  'color': {'color': '#97C2FC'}}})
     # return
     return {'nodes': nodes, 'edges': edges}, scaling_vars

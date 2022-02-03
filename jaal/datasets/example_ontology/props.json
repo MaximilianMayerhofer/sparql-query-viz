@@ -1,0 +1,17 @@
+{
+	"op": [
+		["likes", null, "human", "pizza", false, false, false, false, false, false, false, null],
+		["part", null, null, null, false, false, false, false, false, false, false, null],
+		["has_base", "part", "pizza", "pizza_base", true, false, false, false, false, false, false, null],
+		["has_topping", "part", "pizza", "pizza_topping", false, false, false, false, false, false, false, null],
+		["produces", null, "company", "pizza", false, false, false, false, false, false, false, null]
+
+	],
+	"dp": [
+		["diameter_in_cm", null, true, "pizza", "integer", null, null, null, null, null],
+		["weight_in_grams", null, true, "pizza", "float", null, null, null, null, null],
+		["description", null, false, "food", "string", null, null, null, null, null],
+		["topping_weight_in_grams", null, true, "pizza_topping", "float", 0, null, null, null, null],
+		["faulty_dp", "weight_in_grams", true, "pizza", "float", 10, null, 10, null, null]
+	]
+}
