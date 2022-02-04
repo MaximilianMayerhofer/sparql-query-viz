@@ -6,7 +6,9 @@ Main class for Jaal network visualization dashboard
 # import
 import logging
 import datetime
-logfile = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+import os
+dir = os.path.dirname(__file__)
+logfile = dir.replace('/jaal/jaal', '/jaal/docs/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 import owlready2.rply
 from ontor import OntoEditor

@@ -28,7 +28,7 @@ def load_got():
     #return
     return edge_df, node_df
 
-def load_ontology():
+def build_example_ontology():
     """Loads the Pizza-example ontology wih classes, with classes, instances, object- and data-properties"""
 
     this_dir, _ = os.path.split(__file__)
@@ -126,7 +126,7 @@ def get_OPs(onto: OntoEditor, edgelist=None):
     return edgelist
 
 def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
-    """Extracts all data-properties from ontology and returns them in a list that is passed to the function.
+    """ Extracts all data-properties from ontology and returns them in a list that is passed to the function.
 
     Parameters
     -----------
@@ -136,6 +136,9 @@ def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
         list of all classes/ instances that were already extracted from the ontology
     edgelist: list
         list of all relations that were already extracted from the ontology"""
+
+    # TODO: Filter DPs that have no valid structure (wenn min/max exclusive gegeben und exakter wert gegeben muss
+    #  zu Fehler führen Bsp. faulty dp)
     if edgelist is None:
         edgelist = []
     if nodelist is None:
@@ -151,49 +154,53 @@ def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
         for dom in dp.domain:
             if not dom in dp_dom_unique:
                 dp_dom_unique.append(dom)
+        #try:
+        # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
+        edge_in_edgelist = False
+        # The datatype of the associated data-property is written into a string-variable
         try:
-            # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
-            edge_in_edgelist = False
-            # The datatype of the associated data-property is written into a string-variable
             dp_type = str(dp.range).split("'")[1]
-            # Iteration over all relations in edgelist
-            for edge in edgelist:
-                # Iteration over all unique domains of the associated data-property
-                for i, value in enumerate(dp_dom_unique):
-                    # If there is already a relation between two corresponding domains and data-types,
-                    # and it is not the first domain of the associated data-property (unless there is only one),
-                    # the new data-property is added to the existing edge with their id and the data-property's name.
-                    # Also the weight of the edge is increased by one and the boolean to indicate the edge already
-                    # exists is set to True
-                    if edge[0] == dp_dom_unique[i].name and edge[1] == dp_type and (
-                            len(dp_dom_unique) == 1 or not i == 0):
-                        edge_in_edgelist = True
-                        identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
-                        edge[2] = edge[2] + ',\n ' + identifier
-                        edge[4] = edge[4] + ',\n ' + dp.name
-                        edge[3] = edge[3] + 1
-            # If there is not already a relation between two corresponding domains and data-types,
-            # and it is not the first domain of the associated data-property (unless there is only one), the new
-            # data-property is written to a list with their domain's name, data-type, id, weight, data-property's name
-            # and dashes-boolean
-            if not edge_in_edgelist:
-                for i, value in enumerate(dp_dom_unique):
-                    if len(dp_dom_unique) == 1 or not i == 0:
-                        identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
-                        edgelist.append([dp_dom_unique[i].name, dp_type, identifier, 1, dp.name, True])
-            # If the data-type of the associated data-property is already in the nodelist, the boolean to indicate
-            # the node already exists is set to True
-            node_in_nodelist = is_already_in_list(dp_type, nodelist)
-            # If node_in_list is False, the data-type of the associated data-property will be added to the nodelist
-            # with their identifier, weight, shape and T-Box label
-            if not node_in_nodelist:
-                nodelist.append([dp_type, 1, 'triangle', 'T', ""])
-            counter_parsed = counter_parsed + 1
-        # If an IndexError is thrown, an warning will be logged, that the one data-property was skipped
         except IndexError:
-            counter_skipped = counter_skipped + 1
+            dp_type = 'NoneType'
+            logging.warning("DP %s has no defined range", dp.name)
+        # Iteration over all relations in edgelist
+        for edge in edgelist:
+            # Iteration over all unique domains of the associated data-property
+            for i, value in enumerate(dp_dom_unique):
+                # If there is already a relation between two corresponding domains and data-types,
+                # and it is not the first domain of the associated data-property (unless there is only one),
+                # the new data-property is added to the existing edge with their id and the data-property's name.
+                # Also the weight of the edge is increased by one and the boolean to indicate the edge already
+                # exists is set to True
+                if edge[0] == dp_dom_unique[i].name and edge[1] == dp_type and (
+                        len(dp_dom_unique) == 1 or not i == 0):
+                    edge_in_edgelist = True
+                    identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
+                    edge[2] = edge[2] + ',\n ' + identifier
+                    edge[4] = edge[4] + ',\n ' + dp.name
+                    edge[3] = edge[3] + 1
+        # If there is not already a relation between two corresponding domains and data-types,
+        # and it is not the first domain of the associated data-property (unless there is only one), the new
+        # data-property is written to a list with their domain's name, data-type, id, weight, data-property's name
+        # and dashes-boolean
+        if not edge_in_edgelist:
+            for i, value in enumerate(dp_dom_unique):
+                if len(dp_dom_unique) == 1 or not i == 0:
+                    identifier = dp_dom_unique[i].name + ' ' + dp.name + ' ' + dp_type
+                    edgelist.append([dp_dom_unique[i].name, dp_type, identifier, 1, dp.name, True])
+        # If the data-type of the associated data-property is already in the nodelist, the boolean to indicate
+        # the node already exists is set to True
+        node_in_nodelist = is_already_in_list(dp_type, nodelist)
+        # If node_in_list is False, the data-type of the associated data-property will be added to the nodelist
+        # with their identifier, weight, shape and T-Box label
+        if not node_in_nodelist:
+            nodelist.append([dp_type, 1, 'triangle', 'T', ""])
+        counter_parsed = counter_parsed + 1
+        # If an IndexError is thrown, an warning will be logged, that the one data-property was skipped
+        #except IndexError:
+        #    counter_skipped = counter_skipped + 1
     logging.info("successfully parsed %i Data-Properties from ontology specified", counter_parsed)
-    logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
+    #logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
