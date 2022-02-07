@@ -18,7 +18,10 @@ import owlready2
 
 # data load and return function
 def load_got():
-    """Load the first book of the Got Dataset
+    """ load the first book of the Got Dataset
+
+    :return: edge_df and node_df including all network information
+     :rtype: tuple[ pd.DataFrame, pd.DataFrame]
     """
     # resolve path
     this_dir, _ = os.path.split(__file__)
@@ -29,8 +32,11 @@ def load_got():
     return edge_df, node_df
 
 def build_example_ontology():
-    """Loads the Pizza-example ontology wih classes, with classes, instances, object- and data-properties"""
+    """ builds up the Pizza-example ontology wih classes, instances, object- and data-properties
 
+    :return: returns the Pizza-example ontology
+     :rtype:OntoEditor
+    """
     this_dir, _ = os.path.split(__file__)
     iri = "http://example.org/onto-got.owl"
     fname = "./onto-got.owl"
@@ -52,15 +58,16 @@ def build_example_ontology():
     ontor1.add_instances(ins)
     return ontor1
 
-def get_tboxes(onto: OntoEditor, nodelist=None):
-    """Extracts T-Boxes from ontology and returns them in a list.
+def get_tboxes(onto: OntoEditor, nodelist: list=None):
+    """ extract T-Boxes from ontology and return them in a list
 
-    Parameters
-    -----------
-    onto: OntoEditor
-        ontology of type OntoEditor from which classes are extracted
-    nodelist: list
-        list of all classes/ instances that were already extracted from the ontology"""
+    :param onto: ontology from which classes are extracted
+     :type onto: OntoEditor
+     :param nodelist: list of all classes/ instances that were already extracted from the ontology
+     :type nodelist: list
+     :return: returns list of T-Boxes
+     :rtype: list
+    """
 
     # Generator of all classes in the ontology is created
     if nodelist is None:
@@ -73,15 +80,16 @@ def get_tboxes(onto: OntoEditor, nodelist=None):
     logging.info("successfully parsed T-Boxes from ontology specified")
     return nodelist
 
-def get_isa_realtions(onto: OntoEditor, edgelist=None):
-    """Extracts all 'is_a'-relations from ontology and returns them in a list.
+def get_isa_realtions(onto: OntoEditor, edgelist: list=None):
+    """ extracts all 'is_a'-relations from ontology and returns them in a list
 
-    Parameters
-    -----------
-    onto: OntoEditor
-        ontology of type OntoEditor from which relations are extracted
-    edgelist: list
-        list of all relations that were already extracted from the ontology"""
+    :param onto: ontology from which relations are extracted
+     :type onto:OntoEditor
+     :param edgelist: list of all relations that were already extracted from the ontology
+     :type edgelist: list
+     :return: return list of relations extracted until this point
+     :rtype: list
+    """
 
     # Generator of all classes in the ontology is created
     if edgelist is None:
@@ -99,15 +107,16 @@ def get_isa_realtions(onto: OntoEditor, edgelist=None):
     logging.info("successfully parsed IS_A-relations from ontology specified")
     return edgelist
 
-def get_OPs(onto: OntoEditor, edgelist=None):
-    """Extracts all object-properties from ontology and returns them in a list that is passed to the function.
+def get_OPs(onto: OntoEditor, edgelist: list=None):
+    """ extracts all object-properties from ontology and returns them in a list that is passed to the function
 
-    Parameters
-    -----------
-    onto: OntoEditor
-        ontology of type OntoEditor from which relations are extracted
-    edgelist: list
-        list of all relations that were already extracted from the ontology"""
+    :param onto: ontology from which relations are extracted
+     :type onto: OntoEditor
+     :param edgelist: list of all relations that were already extracted from the ontology
+     :type edgelist: list
+     :return: return list of relations extracted until this point
+     :rtype: list
+    """
 
     # Generator of all object-properties in the ontology is created
     if edgelist is None:
@@ -125,19 +134,20 @@ def get_OPs(onto: OntoEditor, edgelist=None):
     logging.info("successfully parsed Object-Properties from ontology specified")
     return edgelist
 
-def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
-    """ Extracts all data-properties from ontology and returns them in a list that is passed to the function.
+def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
+    """ extracts all data-properties from ontology and returns them in a list that is passed to the function
 
-    Parameters
-    -----------
-    onto: OntoEditor
-        ontology of type OntoEditor from which relations are extracted
-    nodelist: list
-        list of all classes/ instances that were already extracted from the ontology
-    edgelist: list
-        list of all relations that were already extracted from the ontology"""
+    :param onto: ontology from which relations are extracted
+     :type onto: OntoEditor
+     :param nodelist: list of all classes/ instances that were already extracted from the ontology
+     :type nodelist:list
+     :param edgelist: list of all relations that were already extracted from the ontology
+     :type edgelist: list
+     :return: returns the nodelist and edgelist including the extracted data-properties
+     :rtype: tuple[ list, list]
+    """
 
-    # TODO: Filter DPs that have no valid structure (wenn min/max exclusive gegeben und exakter wert gegeben muss
+    #TODO: Filter DPs that have no valid structure (wenn min/max exclusive gegeben und exakter wert gegeben muss
     #  zu Fehler führen Bsp. faulty dp)
     if edgelist is None:
         edgelist = []
@@ -204,15 +214,16 @@ def get_DPs(onto: OntoEditor, nodelist=None, edgelist=None):
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
-def calculate_node_importance(node_df, edge_df):
-    """Weights the nodes in nodelist acoording to the number of incoming edges
+def calculate_node_importance(node_df: pd.DataFrame, edge_df: pd.DataFrame):
+    """ weights the nodes in nodelist according to the number of incoming edges
 
-    Parameters
-    -----------
-    node_df: pandas.DataFrame
-        DataFrame parsed from nodelist
-    edge_df: pandas.DataFrame
-        DataFrame parsed from edgelist"""
+    :param node_df: DataFrame parsed from nodelist
+     :type node_df: pd.DataFrame
+     :param edge_df: DataFrame parsed from edgelist
+     :type edge_df: pd.DataFrame
+     :returns: node_df with including the calculated weights
+     :rtype: pd.DataFrame
+    """
 
     # Boolean to indicate there is an weight/ importance column in node_df is created
     importance_col = False
@@ -239,17 +250,18 @@ def calculate_node_importance(node_df, edge_df):
     logging.info("successfully calculated weights for A-/T-Boxes")
     return node_df
 
-def get_aboxes(onto: OntoEditor, nodelist, edgelist):
-    """Extracts all instances/ A-Boxes from ontology and returns them in a list that is passed to the function.
+def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
+    """ extracts all instances/ A-Boxes from ontology and returns them in a list that is passed to the function
 
-    Parameters
-    -----------
-    onto: OntoEditor
-        ontology of type OntoEditor from which relations are extracted
-    nodelist: list
-        list of all classes/ instances that were already extracted from the ontology
-    edgelist: list
-        list of all relations that were already extracted from the ontology"""
+    :param onto: ontology from which relations are extracted
+     :type onto: OntoEditor
+     :param nodelist: list of all classes/ instances that were already extracted from the ontology
+     :type nodelist: list
+     :param edgelist: list of all relations that were already extracted from the ontology
+     :type edgelist: list
+     :returns: nodelist and edgelist including the extracted A-boxes
+     :rtype: tuple[ list, list]
+    """
 
     # Generator of all classes in the ontology is created
     node_gen = onto.onto.classes()
@@ -306,8 +318,16 @@ def get_aboxes(onto: OntoEditor, nodelist, edgelist):
     # return list of all extracted instances and list of all extracted edges/ relations
     return nodelist, edgelist
 
-def is_already_in_list(nodename, nodelist):
-    """Checks if a node with a given name, is already in the given list"""
+def is_already_in_list(nodename: str, nodelist: list):
+    """ checks if a node with a given name, is already in the given list
+
+    :param nodename: the name of the node
+     :type nodename: str
+     :param nodelist: list of names to check
+     :type nodelist: list
+     :return: return whether the nodename is already in nodelist
+     :rtype: bool
+     """
     # Iterate over all classes in nodelist
     for cl in nodelist:
         # If there is a class in nodelist that has the name nodename, True is returned
@@ -316,15 +336,16 @@ def is_already_in_list(nodename, nodelist):
     return False
 
 def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
-    """Parses the information given by the ontology into a panda.DataFrame. Parsed data includes:
-    T-Boxes, is-a relations, object-properties, data-properties and A-Boxes (if abox is True).
+    """ parses the information given by the ontology into a panda.DataFrame. Parsed data includes:
+    T-Boxes, is-a relations, object-properties, data-properties and A-Boxes (if abox is True)
 
-    Parameters
-    -----------
-    onto: OntoEditor
-       ontology of type OntoEditor from which the information is extracted
-    abox: bool
-        Boolean to indicate wheter A-Boxes should be included or not"""
+    :param onto: ontology from which the information is extracted
+     :type onto: OntoEditor
+     :param abox: indicates whether A-Boxes should be extracted or not
+     :type abox: bool
+     :return: edge_df and node_df including all parsed information
+     :rtype: tuple[ pd.DataFrame, pd.DataFrame]
+    """
     logging.info("begin parsing data from specified ontology to dataframes...")
     # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)
