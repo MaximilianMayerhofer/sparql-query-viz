@@ -3,8 +3,7 @@ Author: Mohit Mayank
 
 Layout code for the application
 """
-# Import
-#---------
+# import
 import logging
 import os
 import visdcc
@@ -16,8 +15,7 @@ import dash_bootstrap_components as dbc
 from ontor import OntoEditor
 import dash_daq as daq
 
-# Constants
-#--------------
+# constants
 # default node and edge size
 DEFAULT_NODE_SIZE = 7
 DEFAULT_EDGE_SIZE = 1
@@ -55,17 +53,22 @@ DEFAULT_OPTIONS = {
     'height': '600px',
     'width': '100%',
     'interaction':{'hover': True},
-    # 'edges': {'scaling': {'min': 1, 'max': 5}},
     'physics':{'stabilization':{'iterations': 100}}
 }
 
-# Code
-#---------
+def get_options(directed: bool, opts_args: dict= None):
+    """ defines the default options for the visdcc-graph and adds the optional arguments if not None
 
-
-def get_options(directed: bool, opts_args):
+    :param directed: indicates whether the graph has directed edges
+     :type directed: bool
+     :param opts_args: optional arguments for the graph visualization
+     :type opts_args: dict
+     :return: options for the visdcc-graph visualization
+     :rtype: dict
+     """
     opts = DEFAULT_OPTIONS.copy()
     size = 0
+    opts['nodes'] = {}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': size}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
@@ -73,41 +76,59 @@ def get_options(directed: bool, opts_args):
         opts.update(opts_args)
     return opts
 
-def get_distinct_colors(n, for_nodes = True):
-    """Return distict colors, currently atmost 20
+def get_distinct_colors(n: int, for_nodes = True):
+    """ return distinct colors, with two options to get different color schemes (for edges and nodes)
 
-    Parameters
-    -----------
-    n: int
-        number of distinct colors required
-    for_nodes: bool
-        boolean indicates whether nodes or edges will be colored
+    :param n: number of distinct colors required
+     :type n: int
+     :param for_nodes: indicates whether nodes or edges will be colored
+     :type for_nodes: bool
+     :return: list of colors
+     :rtype: list[str]
     """
     if for_nodes:
         return KELLY_COLORS_HEX[:n]
     else:
         return KELLY_COLORS_HEX[2:(n+2)]
 
-def create_card(id, value, description):
-    """Creates card for high level stats
+def create_card(card_id: str, value, description: str):
+    #TODO: not used (may be removed)
+    """ creates card for high level stats
 
-    Parameters
-    ---------------
+    :param card_id: id of the card
+     :type card_id: str
+     :param value: the children of the card
+     :param description: long text detail of the setting
+     :type description: str
+     :return: dbc-element of the card
+     :rtype: dbc.Card
     """
     return dbc.Card(
         dbc.CardBody(
             [
-                html.H4(id=id, children=value, className='card-title'),
+                html.H4(id=card_id, children=value, className='card-title'),
                 html.P(children=description),
             ]))
 
-def create_color_legend(text, color):
-    """Individual row for the color legend
+def create_color_legend(text: str, color: str):
+    """ creates individual row for the color legend
+
+    :param text: text to appear in a row of the legend
+     :type text: str
+     :param color: color-code which will be the background color of the row
+     :type color: str
+     :return: html-element of the rwo of the legend
+     :rtype: html.Div
     """
     return html.Div(text, style={'padding-left': '10px', 'width': '200px', 'background-color': color})
 
-def create_info_text(text):
-    """Individual row for the color legend
+def create_info_text(text: str):
+    """ creates the info text as html-element
+
+    :param text: text to be shown in info popover
+     :type text: str
+     :return: html-element of info text in popover
+     :rtype: html.Div
     """
     return create_row([
         html.Div(text, style={'padding-left': '10px'}),
@@ -123,8 +144,8 @@ def create_row(children, style=None):
                    style=style,
                    className="column flex-display")
 
+# forms for layout
 search_form = dbc.FormGroup([
-    # dbc.Label("Search", html_for="search_graph"),
     dbc.Input(type="search", id="search_graph", placeholder="Search node or edge in graph..."),
     dbc.FormText(
          "Show the node or edge you are looking for",
@@ -239,25 +260,25 @@ sparql_template_form = dbc.FormGroup([
     ),
 ])
 
-def get_select_form_layout(id, options, label, description):
-    """Creates a select (dropdown) form with provides details
+def get_select_form_layout(form_id: str, options: list, label: str, description: str):
+    """ creates a select (dropdown) form with provides details
 
-    Parameters
-    -----------
-    id: str
-        id of the form
-    options: list
-        options to show
-    label: str
-        label of the select dropdown bar
-    description: str
-        long text detail of the setting
+    :param form_id: id of the form
+     :type form_id: str
+     :param options: options to show in dropdown
+     :type options: list
+     :param label: label of the select dropdown bar
+     :type label: list
+     :param description: long text detail of the setting
+     :type description: str
+     :return: dbc-element of the form
+     :rtype: dbc.FormGroup
     """
     if len(options)>1:
         return  dbc.FormGroup([
                     dbc.InputGroup([
                         dbc.InputGroupAddon(label, addon_type="append"),
-                        dbc.RadioItems(id=id,
+                        dbc.RadioItems(id=form_id,
                             options=options, value=options[1].get('value')
                         ),]),
                     dbc.FormText(description, color="secondary",)
@@ -265,15 +286,24 @@ def get_select_form_layout(id, options, label, description):
     return dbc.FormGroup([
                     dbc.InputGroup([
                         dbc.InputGroupAddon(label, addon_type="append"),
-                        dbc.RadioItems(id=id,
+                        dbc.RadioItems(id=form_id,
                             options=options
                         ),]),
                     dbc.FormText(description, color="secondary",)
                 ,])
 
-def get_categorical_features(df_, unique_limit=20, blacklist_features=None):
-    """Identify categorical features for edge or node data and return their names
-    Additional logics: (1) cardinality should be within `unique_limit`, (2) remove blacklist_features
+def get_categorical_features(df_: pd.DataFrame, unique_limit: int=20, blacklist_features: list[str]=None):
+    """ identify categorical features for edge or node data and return their names
+    NOTE: Additional logics: (1) cardinality should be within `unique_limit`, (2) remove blacklist_features
+
+    :param df_: DataFrame from which the features are extracted
+     :type df_: pd.DataFrame
+     :param unique_limit: maximum of unique features
+     :type unique_limit: int
+     :param blacklist_features: list of features that will be excluded
+     :type blacklist_features: list[str]
+     :return: list of categorical features
+     :rtype: list[str]
     """
     # identify the rel cols + None
     if blacklist_features is None:
@@ -288,8 +318,13 @@ def get_categorical_features(df_, unique_limit=20, blacklist_features=None):
     # return
     return cat_features
 
-def get_numerical_features(df_):
-    """Identify numerical features for edge or node data and return their names
+def get_numerical_features(df_: pd.DataFrame):
+    """ identify numerical features for edge or node data and return their names
+
+    :param df_: DataFrame from which the features are extracted
+     :type df_: pd.DataFrame
+     :return: list of numerical features
+     :rtype: list[str]
     """
     # supported numerical cols
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
@@ -307,23 +342,24 @@ def get_numerical_features(df_):
     # return
     return numeric_features
 
-def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: bool=False, vis_opts: dict=None, abox: bool = False):
-    """Create and return the layout of the app
+def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
+                   directed: bool=False, vis_opts: dict=None, abox: bool = False):
+    """ create and return the layout of the app
 
-    Parameters
-    --------------
-    graph_data: dict{nodes, edges}
-        network data in format of visdcc
-    onto: OntoEditor
-        Ontology
-    color_legends: list
-        list of legend elements
-    directed: bool
-        boolean that indicates whether the graph is directed
-    vis_opts: dict
-        additional visualization options to pass to the Network options
-    abox: bool
-        boolean that indicates whether A-Boxes are visualized
+    :param graph_data: network data in format of visdcc
+     :type graph_data: dict{nodes, edges}
+     :param onto: ontology
+     :type onto: OntoEditor
+     :param color_legends: list of legend elements
+     :type color_legends: list
+     :param directed: indicates whether the graph is directed
+     :type directed: bool
+     :param vis_opts: additional visualization options to pass to the vizdcc-Network options
+     :type vis_opts: dict
+     :param abox: indicates whether A-Boxes are visualized
+     :type abox: bool
+     :return: html-element of the layout
+     :rtype: html.Div
     """
     # Step 1-2: find categorical features of nodes and edges
     if color_legends is None:
@@ -477,13 +513,13 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
-                                id='color_nodes',
+                                form_id='color_nodes',
                                 options=[{'label': opt, 'value': opt} for opt in cat_node_features],
                                 label='Color nodes by',
                                 description='Select the categorical node property to color nodes by'
                             ),
                             get_select_form_layout(
-                                id='color_edges',
+                                form_id='color_edges',
                                 options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
                                 label='Color edges by',
                                 description='Select the categorical edge property to color edges by'
@@ -500,13 +536,13 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
-                                id='size_nodes',
+                                form_id='size_nodes',
                                 options=[{'label': opt, 'value': opt} for opt in num_node_features],
                                 label='Size nodes by',
                                 description='Select the numerical node property to size nodes by'
                             ),
                             get_select_form_layout(
-                                id='size_edges',
+                                form_id='size_edges',
                                 options=[{'label': opt, 'value': opt} for opt in num_edge_features],
                                 label='Size edges by',
                                 description='Select the numerical edge property to size edges by'
@@ -530,8 +566,7 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
     logging.info("returning standard app-layout")
     return html.Div([
             create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
-            create_row(html.H3(children=onto.onto.name)),
-            # create_row(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="80px")),
+            create_row(html.H3(children=onto.onto.name)), # Subtitle
             create_row([
                 dbc.Col([
                     # setting panel
@@ -541,10 +576,29 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         html.Hr(className="my-2"),
                         search_form,
 
-                        # ---- selection section ----
-                        html.H6("Selected Edge"),
-                        selected_edge_form,
-                        html.Hr(className="my-2"),
+                        # ---- edge selection section ----
+                        create_row([
+                            html.H6("Selected Edge"),
+                            dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            selected_edge_form,
+                            html.Hr(className="my-2"),
+                        ], id="edge-selection-show-toggle", is_open=False),
+
+                        # ---- SPARQL Template section ----
+                        create_row([
+                            html.H6("SPARQL Templates"),
+                            dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
+                        dbc.Collapse([
+                            sparql_template_form,
+                            html.Hr(className="my-2"),
+                        ], id="template-show-toggle", is_open=False),
 
                         # ---- SPARQL Query section ----
                         create_row([
@@ -554,10 +608,18 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                             dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
+                        dbc.Popover(
+                            html.Div("To write an SPARQL query, type in a valid query in the text "
+                                                      "field and click 'Add'. Or use the provided keywords to build "
+                                                      "up the query. To see the result click 'Evaluate query'. "
+                                                      "To erase the entered text click 'Delete'."),
+                            id="info-sparql-popup", is_open=False,
+                            target="info-sparql-query-button",style={'padding-left': '10px', 'width': '230px'}
+                        ),
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             filter_node_form,
-                        ], id="filter-show-toggle", is_open=True),
+                        ], id="filter-show-toggle", is_open=False),
 
                         # ---- SPARQL Result section ----
                         create_row([
@@ -567,6 +629,20 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Collapse([
+                            dcc.Slider(
+                                id='result-level-slider',
+                                min=0,
+                                max=4,
+                                step=1,
+                                value=1,
+                                marks={
+                                    0: '0',
+                                    1: '1',
+                                    2: '2',
+                                    3: '3',
+                                    4: '4'
+                                },
+                            ),
                             html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
                             html.Hr(className="my-2"),
                         ], id="result-show-toggle", is_open=False),
@@ -619,13 +695,13 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
-                                id='color_nodes',
+                                form_id='color_nodes',
                                 options=[{'label': opt, 'value': opt} for opt in cat_node_features],
                                 label='Color nodes by',
                                 description='Select the categorical node property to color nodes by'
                             ),
                             get_select_form_layout(
-                                id='color_edges',
+                                form_id='color_edges',
                                 options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
                                 label='Color edges by',
                                 description='Select the categorical edge property to color edges by'
@@ -642,13 +718,13 @@ def get_app_layout(graph_data, onto: OntoEditor, color_legends=None, directed: b
                         dbc.Collapse([
                             html.Hr(className="my-2"),
                             get_select_form_layout(
-                                id='size_nodes',
+                                form_id='size_nodes',
                                 options=[{'label': opt, 'value': opt} for opt in num_node_features],
                                 label='Size nodes by',
                                 description='Select the numerical node property to size nodes by'
                             ),
                             get_select_form_layout(
-                                id='size_edges',
+                                form_id='size_edges',
                                 options=[{'label': opt, 'value': opt} for opt in num_edge_features],
                                 label='Size edges by',
                                 description='Select the numerical edge property to size edges by'

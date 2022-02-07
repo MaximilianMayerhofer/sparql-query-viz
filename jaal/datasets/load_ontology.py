@@ -16,7 +16,6 @@ import ontor as ontor
 from ontor import OntoEditor
 import owlready2
 
-# data load and return function
 def load_got():
     """ load the first book of the Got Dataset
 
