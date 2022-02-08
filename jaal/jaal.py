@@ -29,6 +29,14 @@ from .datasets.parse_dataframe import parse_dataframe
 from .datasets.load_ontology import *
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
 
+# constants
+PREFIXES = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' \
+           'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' \
+           'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' \
+           'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ' \
+           'PREFIX owlready: <http://www.lesfleursdunormal.fr/static/_downloads/owlready_ontology.owl#> ' \
+           'PREFIX obo: <http://purl.obolibrary.org/obo/>'
+
 def _callback_search_graph(graph_data: dict, search_text: str):
     """ only show the nodes which match the search text
     
@@ -251,7 +259,9 @@ class Jaal:
         self.filtered_data = self.data.copy()
         selection = {'nodes': [], 'edges': []}
         try:
-            res_list = list(self.onto.onto_world.sparql(self.sparql_query))
+            rdflib_onto = self.onto.onto_world.as_rdflib_graph()
+            res_list = list(rdflib_onto.query_owlready((PREFIXES + self.sparql_query)))
+            #res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             self.sparql_query_result_list = flat_res_list
             result = ""
