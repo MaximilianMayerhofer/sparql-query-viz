@@ -741,20 +741,18 @@ class Jaal:
             return is_open
 
         @app.callback(
-            [Output('node-selection', 'children'),
-             Output('edge-selection', 'children')],
+            Output('node-selection', 'children'),
             [Input('graph', 'selection')])
         def show_dp_from_selected_node(x):
             s_node = ''
-            s_edge = ''
             if len(x['nodes']) > 0:
                 for node in self.data['nodes']:
                     if [node['id']] == x['nodes']:
                         if node['T/A'] == 'T':
-                            return s_node, s_edge
+                            return s_node
                         s_node = [html.Div(x['nodes'] + [': '])]
                         if node['title'] == '':
-                            return s_node + [html.Div(['No Data-Properties for this A-Box'])], s_edge
+                            return s_node + [html.Div(['No Data-Properties for this A-Box'])]
                         separator = ',\n '
                         partition = node['title'].partition(separator)
                         if separator in node['title']:
@@ -765,7 +763,14 @@ class Jaal:
                             s_node = s_node + [html.Div([partition[2]])]
                         else:
                             s_node = s_node + [html.Div([node['title']])]
-            elif len(x['edges']) > 0:
+            return s_node
+
+        @app.callback(
+             Output('edge-selection', 'children'),
+            [Input('graph', 'selection')])
+        def show_label_from_selected_edge(x):
+            s_edge = ''
+            if len(x['edges']) > 0:
                 for edge in self.data['edges']:
                     if [edge['id']] == x['edges']:
                         separator = ',\n '
@@ -784,7 +789,7 @@ class Jaal:
                         else:
                             s_edge = [html.Div([edge['label']] + [': '])]
                             s_edge = s_edge + [html.Div([edge['id']])]
-            return s_node, s_edge
+            return s_edge
 
         # create the main callbacks
         @app.callback(
