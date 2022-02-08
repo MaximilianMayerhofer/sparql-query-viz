@@ -20,7 +20,7 @@ import dash_daq as daq
 DEFAULT_NODE_SIZE = 7
 DEFAULT_EDGE_SIZE = 1
 
-# default node and egde color
+# default node and edge color
 DEFAULT_COLOR = '#97C2FC'
 
 # Taken from https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
@@ -353,7 +353,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
      :type color_legends: list
      :param directed: indicates whether the graph is directed
      :type directed: bool
-     :param vis_opts: additional visualization options to pass to the vizdcc-Network options
+     :param vis_opts: additional visualization options to pass to the visdcc-Network options
      :type vis_opts: dict
      :param abox: indicates whether A-Boxes are visualized
      :type abox: bool
@@ -395,7 +395,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
 
                         # ---- abox data-properties section ----
                         create_row([
-                            html.H6("A-Box Data-Propteries"),
+                            html.H6("A-Box Data-Properties"),
                             dbc.Button("Hide/Show", id="abox-dp-show-toggle-button", outline=True, color="secondary",
                                        size="sm"),
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,

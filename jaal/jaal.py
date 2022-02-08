@@ -161,9 +161,9 @@ class Jaal:
         self.logger = logging.getLogger('jaal-app')
         self.abox = abox
         self.edge_df, self.node_df = get_df_from_ontology(onto, self.abox)
-        self.logger.info("begin parsing data from dataframes to visdcc-dataformat...")
+        self.logger.info("begin parsing data from dataframes to visdcc data format...")
         self.data, self.scaling_vars = parse_dataframe(self.edge_df, self.node_df)
-        self.logger.info("...successfully parsed data from dataframes to visdcc-dataformat")
+        self.logger.info("...successfully parsed data from dataframes to visdcc data format")
         self.filtered_data = self.data.copy()
         self.node_value_color_mapping = {}
         self.edge_value_color_mapping = {}

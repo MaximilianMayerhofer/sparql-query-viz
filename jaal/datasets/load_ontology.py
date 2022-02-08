@@ -79,7 +79,7 @@ def get_tboxes(onto: OntoEditor, nodelist: list=None):
     logging.info("successfully parsed T-Boxes from ontology specified")
     return nodelist
 
-def get_isa_realtions(onto: OntoEditor, edgelist: list=None):
+def get_isa_relations(onto: OntoEditor, edgelist: list=None):
     """ extracts all 'is_a'-relations from ontology and returns them in a list
 
     :param onto: ontology from which relations are extracted
@@ -146,13 +146,12 @@ def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
      :rtype: tuple[ list, list]
     """
 
-    #TODO: Filter DPs that have no valid structure (wenn min/max exclusive gegeben und exakter wert gegeben muss
-    #  zu Fehler führen Bsp. faulty dp)
+    #TODO: Filter DPs that have no valid structure (if min/max exclusive is given and exact value is given, a error must
+    #  be thrown e.g. faulty dp)
     if edgelist is None:
         edgelist = []
     if nodelist is None:
         nodelist = []
-    counter_skipped = 0
     counter_parsed = 0
     # Generator of all data-properties in the ontology is created
     dp_gen = onto.onto.data_properties()
@@ -349,7 +348,7 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     # Get T-Boxes from ontology and write them into nodelist
     nodelist = get_tboxes(onto)
     # Get is-a relations from ontology and write them into edgelist
-    edgelist = get_isa_realtions(onto)
+    edgelist = get_isa_relations(onto)
     # Get object-properties from ontology and write them into edgelist
     edgelist = get_OPs(onto, edgelist)
     # Get data-properties from ontology and write them into edgelist
