@@ -1,15 +1,20 @@
 """
 Author: Mohit Mayank
 
+Editor: Maximilian Mayerhofer
+
 Main class for Jaal network visualization dashboard
 """
-# import
+# import for logging
 import logging
 import datetime
 import os
-dir = os.path.dirname(__file__)
-logfile = dir.replace('/jaal/jaal', '/jaal/docs/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+# basic configuration fpr logging
+dir_file = os.path.dirname(__file__)
+logfile = dir_file.replace('/jaal/jaal', '/jaal/docs/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
+
+# import
 import owlready2.rply
 from ontor import OntoEditor
 import dash
@@ -24,13 +29,20 @@ from .datasets.parse_dataframe import parse_dataframe
 from .datasets.load_ontology import *
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
 
-def _callback_search_graph(graph_data, search_text):
-    """Only show the nodes which match the search text
+def _callback_search_graph(graph_data: dict, search_text: str):
+    """ only show the nodes which match the search text
+    
+    :param graph_data: network data in format of visdcc
+     :type graph_data: dict
+     :param search_text: the text the graph will be searched for
+     :type search_text: str
+     :return: network data with only the matching results in format of visdcc
+     :rtype: dict
     """
     nodes = graph_data['nodes']
     edges = graph_data['edges']
     for node in nodes:
-        if search_text not in node['label'].lower():
+        if (search_text not in node['label'].lower()) and (search_text not in node['label']):
             node['hidden'] = True
         else:
             node['hidden'] = False
@@ -45,8 +57,15 @@ def _callback_search_graph(graph_data, search_text):
     graph_data['edges'] = edges
     return graph_data
 
-def get_color_popover_legend_children(node_value_color_mapping=None, edge_value_color_mapping=None):
-    """Get the popover legends for node and edge based on the color setting
+def get_color_popover_legend_children(node_value_color_mapping: dict=None, edge_value_color_mapping: dict=None):
+    """ get the popover legends for node and edge based on the color setting
+
+    :param node_value_color_mapping: maps a node value to a specific color
+     :type node_value_color_mapping: dict
+     :param edge_value_color_mapping: maps an edge value to a specific color
+     :type edge_value_color_mapping: dict
+     :return: returns a list of dbc.PopoverHeader, html.Div and dbc.PopoverBody - elements
+     :rtype: list
     """
     # var
     if edge_value_color_mapping is None:
@@ -91,10 +110,24 @@ def get_color_popover_legend_children(node_value_color_mapping=None, edge_value_
     #
     return popover_legend_children
 
-def get_nodes_to_be_shown(data: dict, res_list: list=[], number_of_edges_to_be_shown_around_result: int = 1):
+def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edges_to_be_shown_around_result: int = 1):
+    """ gets the nodes in graph_data that are listed in res_list and therefore will be shown in the graph
+    NOTE: with number_of_edges_to_be_shown_around_result how many layers of the surrounding neighbourhood will be displayed
+
+    :param graph_data: network data in format of visdcc
+     :type graph_data: dict
+     :param res_list: list of nodes that will be shown in the graph
+     :type res_list: list
+     :param number_of_edges_to_be_shown_around_result: how many layers of the surrounding neighbourhood will be displayed
+     :type number_of_edges_to_be_shown_around_result: int
+     :return: filtered node graph_data and the result nodes that will be selected
+     :rtype: tuple[list, list]
+     """
+    if res_list is None:
+        res_list = []
     filtered_node_data = []
     n = 1
-    for node in data['nodes']:
+    for node in graph_data['nodes']:
         for result in res_list:
             if node['id'] == result.name:
                 filtered_node_data.append(node)
@@ -103,9 +136,9 @@ def get_nodes_to_be_shown(data: dict, res_list: list=[], number_of_edges_to_be_s
     next_level_res_list = []
     while n <= number_of_edges_to_be_shown_around_result:
         for result in current_level_res_list:
-            for edge in data['edges']:
+            for edge in graph_data['edges']:
                 if edge['from'] == result['id']:
-                    for node in data['nodes']:
+                    for node in graph_data['nodes']:
                         if node['id'] == edge['to']:
                             filtered_node_data.append(node)
                             next_level_res_list.append(node)
@@ -118,14 +151,12 @@ class Jaal:
     """The main visualization class
     """
     def __init__(self, onto: OntoEditor = ontor.OntoEditor("http://example.org/onto-ex.owl", "./onto-ex.owl"), abox: bool = True):
-        """
-        Parameters
-        -------------
-        edge_df: pandas dataframe
-            The network edge data stored in format of pandas dataframe
+        """ initialize Jaal class
 
-        node_df: pandas dataframe (optional)
-            The network node data stored in format of pandas dataframe
+        :param onto: ontology
+         :type onto: OntoEditor
+         :param abox: indicates whether A-Boxes are visualized
+         :type abox: bool
         """
         self.logger = logging.getLogger('jaal-app')
         self.abox = abox
@@ -148,7 +179,12 @@ class Jaal:
         self.selected_edge_for_template = ''
         self.onto = onto
 
-    def edit_edge_appearance(self, directed = True):
+    def edit_edge_appearance(self, directed: bool=True):
+        """ edits the arrow heads of is_a relations
+
+        :param directed: indicates whether arrow heads are displayed
+         :type directed: bool
+         """
         for edge in self.data['edges']:
             if edge['label'] == 'is_a':
                 arrow_type = {'arrows': {'to': {'enabled': directed, 'type': 'circle'}}}
@@ -157,12 +193,19 @@ class Jaal:
             edge.update(arrow_type)
 
     def clear_selection_for_template_query(self):
+        """ deletes/ clears the selection made by the user for query templates
+        """
         self.nodes_selected_for_template = 0
         self.selected_node_for_template = ''
         self.edges_selected_for_template = 0
         self.selected_edge_for_template = ''
 
     def complete_sparql_query_with_selection(self, selection: dict):
+        """ inserts the selection made by the user into the chosen template
+
+        :param selection: selected node/ edge
+         :type selection: dict
+         """
         if len(selection['nodes']) > 0:
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
@@ -189,12 +232,21 @@ class Jaal:
                     self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
 
     def add_to_query_history(self):
+        """ adds the evaluated query to the query history
+        """
         self.counter_query_history = self.counter_query_history + 1
         self.sparql_query_history = self.sparql_query_history + str(
             self.counter_query_history) + ": " + self.sparql_query + '\n'
 
-    def _callback_filter_nodes(self, graph_data, shown_result_level: int):
-        """Filter the nodes based on the Python query syntax
+    def _callback_filter_nodes(self, graph_data: dict, shown_result_level: int=1):
+        """ filters the nodes based on the Python query syntax
+
+        :param graph_data: network data in format of visdcc
+         :type graph_data: dict
+         :param shown_result_level: how many layers of the surrounding neighbourhood will be displayed
+         :type shown_result_level: int
+         :return: the filtered graph_data, the result nodes as string, and the nodes  that will be selected
+         :rtype: tuple[dict, str, dict]
         """
         self.filtered_data = self.data.copy()
         selection = {'nodes': [], 'edges': []}
@@ -242,7 +294,14 @@ class Jaal:
             self.logger.warning("sparql query passed from user is not valid")
         return graph_data, result, selection
 
-    def _callback_sparql_query_history(self, number_of_shown_queries):
+    def _callback_sparql_query_history(self, number_of_shown_queries: int):
+        """ gets the sparql queries to be shown in the sparql query history
+
+        :param number_of_shown_queries: how many queries will be included in the history
+        :type number_of_shown_queries: int
+        :return: the history of sparql queries to be shown
+        :rtype: str
+        """
         sparql_query_history = self.sparql_query_history
         if self.counter_query_history > number_of_shown_queries:
             separator = str(self.counter_query_history - (number_of_shown_queries - 1)) + ": "
@@ -252,7 +311,14 @@ class Jaal:
             shown_sparql_query_history = sparql_query_history
         return shown_sparql_query_history
 
-    def _callback_color_nodes(self, color_nodes_value):
+    def _callback_color_nodes(self, color_nodes_value: str):
+        """ colors the nodes according to the color_nodes_value
+
+        :param color_nodes_value: the feature that is used to color the nodes
+         :type color_nodes_value: str
+         :return: the graph_data with the adjusted node-color values and the color-value mapping
+         :rtype: tuple[dict, dict]
+        """
         value_color_mapping = {}
         # color option is None, revert back all changes
         if color_nodes_value == 'None':
@@ -271,8 +337,14 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data, value_color_mapping
     
-    def _callback_size_nodes(self, size_nodes_value):
+    def _callback_size_nodes(self, size_nodes_value: str):
+        """ sizes the nodes according to the size_nodes_value
 
+                :param size_nodes_value: the feature that is used to size the nodes
+                 :type size_nodes_value: str
+                 :return: the graph_data with the adjusted edge-size values
+                 :rtype: dict
+                """
         # color option is None, revert back all changes
         if size_nodes_value == 'None':
             # revert to default size
@@ -293,7 +365,14 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data
 
-    def _callback_color_edges(self, color_edges_value):
+    def _callback_color_edges(self, color_edges_value: str):
+        """ colors the edges according to the color_edges_value
+
+                :param color_edges_value: the feature that is used to color the edges
+                 :type color_edges_value: str
+                 :return: the graph_data with the adjusted edge-color values and the color-value mapping
+                 :rtype: tuple[dict, dict]
+                """
         value_color_mapping = {}
         # color option is None, revert back all changes
         if color_edges_value == 'None':
@@ -312,7 +391,14 @@ class Jaal:
         graph_data = self.filtered_data
         return graph_data, value_color_mapping
 
-    def _callback_size_edges(self, size_edges_value):
+    def _callback_size_edges(self, size_edges_value: str):
+        """ sizes the edges according to the size_edges_value
+
+        :param size_edges_value: the feature that is used to size the edges
+         :type size_edges_value: str
+         :return: the graph_data with the adjusted edge-size values
+         :rtype: dict
+        """
         minn = 0
         maxx = 100
         # fetch the scaling value
@@ -341,8 +427,11 @@ class Jaal:
         return graph_data
 
     def forced_callback_execution_at_beginning(self, directed=True):
-        """This function executes the callback functions for node and edge Coloring and Sizing at start of the app,
-        without andy userinput. This is to ensure a default coloring and sizing of nodes and edges."""
+        """ executes the callback functions for node and edge Coloring and Sizing at start of the app
+
+        :param directed: indicates whether graph is directed
+         :type directed: bool
+         """
 
         # Give all is_a edges a circle as arrowhead
         self.edit_edge_appearance(directed=directed)
@@ -384,21 +473,15 @@ class Jaal:
             self.data = self._callback_size_edges(options[1].get('value'))
             self.logger.info("Edges were initially sized")
 
-    def create(self, directed=False, vis_opts=None):
-        """Create the Jaal app and return it
+    def create(self, directed=False, vis_opts: dict=None):
+        """ creates the Jaal app and returns it
 
-        Parameter
-        ----------
-            directed: boolean
-                process the graph as directed graph?
-
-            vis_opts: dict
-                the visual options to be passed to the dash server (default: None)
-
-        Returns
-        -------
-            app: dash.Dash
-                the Jaal app
+        :param directed: indicates whether the graph is directed
+         :type directed: bool
+         :param vis_opts: additional visualization options for the visdcc-graph
+         :type vis_opts: dict
+         :return: the Jaal app
+         :rtype dash.Dash
         """
         # create the app
         #app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')

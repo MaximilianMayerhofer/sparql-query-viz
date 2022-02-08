@@ -68,7 +68,6 @@ def get_options(directed: bool, opts_args: dict= None):
      """
     opts = DEFAULT_OPTIONS.copy()
     size = 0
-    opts['nodes'] = {}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': size}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
@@ -347,7 +346,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
     """ create and return the layout of the app
 
     :param graph_data: network data in format of visdcc
-     :type graph_data: dict{nodes, edges}
+     :type graph_data: dict
      :param onto: ontology
      :type onto: OntoEditor
      :param color_legends: list of legend elements
