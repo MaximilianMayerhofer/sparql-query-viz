@@ -146,7 +146,7 @@ def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
      :rtype: tuple[ list, list]
     """
 
-    #TODO: Filter DPs that have no valid structure (if min/max exclusive is given and exact value is given, a error must
+    # todo Filter DPs that have no valid structure (if min/max exclusive is given and exact value is given, a error must
     #  be thrown e.g. faulty dp)
     if edgelist is None:
         edgelist = []

@@ -91,7 +91,7 @@ def get_distinct_colors(n: int, for_nodes = True):
         return KELLY_COLORS_HEX[2:(n+2)]
 
 def create_card(card_id: str, value, description: str):
-    #TODO: not used (may be removed)
+    # todo not used (may be removed)
     """ creates card for high level stats
 
     :param card_id: id of the card
