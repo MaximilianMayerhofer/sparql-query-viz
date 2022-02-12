@@ -1,1 +1,1 @@
-from .load_ontology import load_got
+from .parse_ontology import *

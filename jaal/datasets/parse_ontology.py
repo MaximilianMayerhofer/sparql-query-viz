@@ -16,20 +16,6 @@ import ontor as ontor
 from ontor import OntoEditor
 import owlready2
 
-def load_got():
-    """ load the first book of the Got Dataset
-
-    :return: edge_df and node_df including all network information
-     :rtype: tuple[ pd.DataFrame, pd.DataFrame]
-    """
-    # resolve path
-    this_dir, _ = os.path.split(__file__)
-    # load the edge and node data
-    edge_df = pd.read_csv(os.path.join(this_dir, "got", "got_edge_df.csv"))
-    node_df = pd.read_csv(os.path.join(this_dir, "got", "got_node_df.csv"))
-    #return
-    return edge_df, node_df
-
 def build_example_ontology():
     """ builds up the Pizza-example ontology wih classes, instances, object- and data-properties
 
