@@ -11,7 +11,7 @@ import datetime
 import os
 # basic configuration fpr logging
 dir_file = os.path.dirname(__file__)
-logfile = dir_file.replace('/jaal/jaal', '/jaal/docs/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_jaal.log"
+logfile = dir_file.replace('/jaal/jaal', '/jaal/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 # import
@@ -158,7 +158,7 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
 class Jaal:
     """The main visualization class
     """
-    def __init__(self, onto: OntoEditor = ontor.OntoEditor("http://example.org/onto-ex.owl", "./onto-ex.owl"), abox: bool = True):
+    def __init__(self, iri: str="http://example.org/onto-ex.owl", path: str="./onto-ex.owl", abox: bool = True):
         """ initialize Jaal class
 
         :param onto: ontology
@@ -168,7 +168,8 @@ class Jaal:
         """
         self.logger = logging.getLogger('jaal-app')
         self.abox = abox
-        self.edge_df, self.node_df = get_df_from_ontology(onto, self.abox)
+        self.onto = ontor.OntoEditor(iri,path)
+        self.edge_df, self.node_df = get_df_from_ontology(self.onto, self.abox)
         self.logger.info("begin parsing data from dataframes to visdcc data format...")
         self.data, self.scaling_vars = parse_dataframe(self.edge_df, self.node_df)
         self.logger.info("...successfully parsed data from dataframes to visdcc data format")
@@ -185,7 +186,6 @@ class Jaal:
         self.selected_node_for_template = ''
         self.edges_selected_for_template = 0
         self.selected_edge_for_template = ''
-        self.onto = onto
 
     def edit_edge_appearance(self, directed: bool=True):
         """ edits the arrow heads of is_a relations
