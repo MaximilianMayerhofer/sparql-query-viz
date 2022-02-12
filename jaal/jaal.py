@@ -260,7 +260,7 @@ class Jaal:
         selection = {'nodes': [], 'edges': []}
         try:
             rdflib_onto = self.onto.onto_world.as_rdflib_graph()
-            res_list = list(rdflib_onto.query_owlready((PREFIXES + self.sparql_query)))
+            res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
             #res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             self.sparql_query_result_list = flat_res_list
@@ -355,15 +355,19 @@ class Jaal:
                  :return: the graph_data with the adjusted edge-size values
                  :rtype: dict
                 """
+        minn = 0
+        maxx = 100
+        # fetch the scaling value
+        if size_nodes_value != 'None':
+            # fetch the scaling value
+            minn = self.scaling_vars['node'][size_nodes_value]['min']
+            maxx = self.scaling_vars['node'][size_nodes_value]['max']
         # color option is None, revert back all changes
-        if size_nodes_value == 'None':
+        if size_nodes_value == 'None' or minn == maxx:
             # revert to default size
             for node in self.data['nodes']:
                 node['size'] = DEFAULT_NODE_SIZE
         else:
-            # fetch the scaling value
-            minn = self.scaling_vars['node'][size_nodes_value]['min']
-            maxx = self.scaling_vars['node'][size_nodes_value]['max']
             # define the scaling function
             scale_val = lambda x: 20*(x-minn)/(maxx-minn)
             # set size after scaling
