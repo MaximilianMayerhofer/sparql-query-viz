@@ -1,0 +1,34 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://example.org/onto-example.owl#>
+
+# Stimmt die Summe aller Rollen pro Zone ("levels"; ohne Zone 2) [H2O] mit der Anzahl der Rollen aus Abschnitt [MA1] überein?
+
+SELECT DISTINCT ?anzahl_rollen_ma1 ?anzahl_rollen_h2o
+WHERE {
+    ?gz a :gieszanlage ;
+        :has_param ?rollenzahl .
+    ?rollenzahl a :rollenzahl ;
+        :int_value ?anzahl_rollen .
+
+    {
+        SELECT ?gz (SUM(?levelnr) as ?anzahl_rollen_h2o)
+        WHERE {
+            ?gz :part ?zone .
+            ?zone a :zone ;
+                :has_parameter ?levelnumber ;
+                :has_parameter ?zonenumber .
+            ?zonenumber a :zonenummer ;
+                :int_value ?zonenr .
+            FILTER ( ?zonenr != 2 )
+            ?levelnumber a :levelnumber ;
+                :int_value ?levelnr .
+        }
+        GROUP BY ?gz
+    }
+
+    FILTER ( ?anzahl_rollen != ?anzahl_rollen_h2o )
+}
+

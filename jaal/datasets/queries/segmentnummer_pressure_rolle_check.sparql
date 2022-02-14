@@ -1,0 +1,44 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://example.org/onto-example.owl#>
+
+# description: Ist die Segmentnummer im Abschnitt [MA1] eine Rolle davor oder dahinter ungleich der aktuellen Segmentnummer (z.B. aktuell=4, davor=3, dahinter=5), dann ist der Eintrag in Ordnung.
+
+# NOTE: uses segmentnummer directly associated with rolle; alternative way is commented out
+# NOTE: performance issue might be due to number of "has_parameter" relations
+
+SELECT DISTINCT ?rolle ?rollennr_val ?segnr_val ?rolle_before ?rolle_after
+WHERE {
+    ?rolle a :rolle ;
+        :has_parameter ?rollennummer ;
+        :has_parameter ?segmentnummer ;
+        :has_parameter ?pressuresystem .
+    ?rollennummer a :rollennummer ;
+        :int_value ?rollennr_val .
+    ?segmentnummer a :segmentnummer ;
+        :int_value ?segnr_val .
+    ?pressuresystem a :pressure_system1 ;
+        :str_value "P"^^xsd:string .
+
+    ?rolle_before a :rolle ;
+        :has_parameter ?rollennr_before ;
+        :has_parameter ?segnr_before .
+    ?rollennr_before a :rollennummer ;
+        :int_value ?rollennr_bf_val .
+    ?segnr_before a :segmentnummer ;
+        :int_value ?segnr_bf_val .
+    FILTER ( ?rollennr_bf_val = ?rollennr_val - 1 )
+
+    ?rolle_after a :rolle ;
+        :has_parameter ?rollennr_after ;
+        :has_parameter ?segnr_after .
+    ?rollennr_after a :rollennummer ;
+        :int_value ?rollennr_af_val .
+    ?segnr_after a :segmentnummer ;
+        :int_value ?segnr_af_val .
+    FILTER ( ?rollennr_af_val = ?rollennr_val + 1 )
+
+    FILTER( ?segnr_bf_val != ?segnr_val-1 && ?segnr_af_val != ?segnr_val+1 )
+}

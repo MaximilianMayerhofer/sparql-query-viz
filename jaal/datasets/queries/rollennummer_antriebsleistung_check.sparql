@@ -1,0 +1,26 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://example.org/onto-example.owl#>
+
+# Rollen in [MA4] (erkennbar an Parameter Antriebsleistung) stimmen nicht mit Rollen in [MA1] (definiert als angetriebene Rolle) überein:
+
+SELECT ?rolle_ma1 ?rolle_ma4
+WHERE {
+    {
+        # rolls listed in MA1, but not in MA4
+        ?rolle_ma1 a :angetriebene_rolle .
+        FILTER NOT EXISTS {
+            ?rolle_ma1 :has_parameter/a :antriebsleistung .
+        }
+    } UNION {
+        # rolls listed in MA4, but not in MA1
+        ?rolle_ma4 a :rolle ;
+            :has_parameter/a :antriebsleistung .
+        FILTER NOT EXISTS {
+            ?rolle_ma4 a :angetriebene_rolle . 
+        }
+    }
+}
+ORDER BY ?rolle_ma1 ?rolle_ma4

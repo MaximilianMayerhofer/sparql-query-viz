@@ -1,0 +1,33 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://example.org/onto-example.owl#>
+
+# Anzahl der Rollen in [MA] (gekennzeichnet durch Rollennummer) ist ungleich Anzahl der Rollen in [MA6] (gekennzeichnet durch Parameter für pressure system)
+
+# RFE: adapt this using info from information model
+
+SELECT ?rolle_ma1 ?rolle_ma6
+WHERE {
+    {
+        # rolle in MA1, aber nicht in MA6
+        ?rolle_ma1 a :rolle ;
+            :has_parameter ?rollennummer .
+        ?rollennummer a :rollennummer ;
+        FILTER NOT EXISTS {
+            ?rolle :has_parameter ?pressuresystem .
+            ?pressuresystem a :pressure_system1 .
+        }
+    } UNION {
+        # rolle in MA6, aber nicht in MA1
+        ?rolle_ma6 a :rolle ;
+            :has_parameter ?pressuresystem .
+        ?pressuresystem a :pressure_system1 ;
+        FILTER NOT EXISTS {
+            ?rolle :has_parameter ?rollennummer .
+            ?rollennummer a :rollennummer .
+        }
+    }
+}
+ORDER BY ?rolle_ma1 ?rolle_ma6

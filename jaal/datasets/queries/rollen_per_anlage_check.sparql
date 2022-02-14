@@ -1,0 +1,24 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX : <http://example.org/onto-example.owl#>
+
+SELECT DISTINCT ?giessanlage ?rollenzahlspec ?rollencount
+WHERE {
+    ?giessanlage a/rdfs:subClassOf* :gieszanlage ;
+        :has_param ?rollenzahlparam .
+    ?rollenzahlparam a :rollenzahl ;
+        :int_value ?rollenzahlspec . 
+    {
+        SELECT ?giessanlage (COUNT(distinct ?rolle) as ?rollencount)
+        WHERE {
+            ?giessanlage :part ?segment . 
+            ?segment a :segment ; 
+                :part ?rolle . 
+            ?rolle a :rolle . 
+        }
+        GROUP BY ?giessanlage
+    }
+    FILTER(?rollenzahlspec != ?rollencount)
+}

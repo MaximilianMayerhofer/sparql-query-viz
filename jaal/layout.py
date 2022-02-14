@@ -50,7 +50,7 @@ KELLY_COLORS_HEX = [
     ]
 
 DEFAULT_OPTIONS = {
-    'height': '600px',
+    'height': '800px',
     'width': '100%',
     'interaction':{'hover': True},
 }
@@ -73,7 +73,7 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     else:
         opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
                            'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
-                                         'springLength': 150, 'springConstant': 0.01, 'damping': 0.09,
+                                         'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
                                          'avoidOverlap': 0.0 }}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
@@ -259,6 +259,8 @@ sparql_template_form = dbc.FormGroup([
         create_row([
             dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary", size="sm"),
             dbc.Button("Find selected Node with selected OP", id="sparql_template_2", outline=True, color="secondary",
+                       size="sm"),
+            dbc.Button("Check Consistency 1", id="sparql_template_3", outline=True, color="secondary",
                        size="sm"),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
@@ -584,7 +586,13 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                     # setting panel
                     dbc.Form([
                         # ---- search section ----
-                        html.H6("Search"),
+                        create_row([
+                            html.H6("Search"),
+                            dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
+                                       color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
                         html.Hr(className="my-2"),
                         search_form,
 
