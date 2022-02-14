@@ -15,6 +15,7 @@ import pandas as pd
 import ontor as ontor
 from ontor import OntoEditor
 import owlready2
+import time
 
 def build_example_ontology():
     """ builds up the Pizza-example ontology wih classes, instances, object- and data-properties
@@ -198,6 +199,28 @@ def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 
+def get_node_importance(nodelist: list, edgelist: list):
+    """ weights the nodes in nodelist according to the number of incoming edges
+
+        :param nodelist: list of all classes/ instances that were already extracted from the ontology
+         :type nodelist: list
+         :param edgelist: list of all relations that were already extracted from the ontology
+         :type edgelist: list
+         :returns: nodelist including the calculated weights
+         :rtype: list
+        """
+    for node in nodelist:
+        counter = 0
+        for edge in edgelist:
+            if node[0] == edge[1] and edge[4] == 'is_a':
+                    counter = counter + 1
+            # If the counter of a node is higher than zero, the new importance value is assigned
+        if counter != 0:
+            node[1] = counter
+    logging.info("successfully calculated weights for A-/T-Boxes")
+    return nodelist
+
+
 def calculate_node_importance(node_df: pd.DataFrame, edge_df: pd.DataFrame):
     """ weights the nodes in nodelist according to the number of incoming edges
 
@@ -208,7 +231,6 @@ def calculate_node_importance(node_df: pd.DataFrame, edge_df: pd.DataFrame):
      :returns: node_df with including the calculated weights
      :rtype: pd.DataFrame
     """
-
     # Boolean to indicate there is an weight/ importance column in node_df is created
     importance_col = False
     # If there is a column in node_df called importance, importance_col will be set to True
@@ -246,7 +268,6 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
      :returns: nodelist and edgelist including the extracted A-boxes
      :rtype: tuple[ list, list]
     """
-
     # Generator of all classes in the ontology is created
     node_gen = onto.onto.classes()
     # Iteration over all classes/ nodes in the generator
@@ -268,11 +289,14 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
                             prop_value = prop_value + ',\n ' + prop.name + ' = ' + str(value)
                     else:
                         identifier = ins.name + ' ' + prop.name + ' ' + value.name
-                        for rel in edgelist:
-                            if rel[2] == identifier:
-                                edge_in_edgelist = True
-                        if not edge_in_edgelist:
-                            edgelist.append([ins.name, value.name, identifier, 1, prop.name, False])
+                        new_edge = [ins.name, value.name, identifier, 1, prop.name, False]
+                        if not new_edge in edgelist:
+                            edgelist.append(new_edge)
+                        #for rel in edgelist:
+                        #    if rel[2] == identifier:
+                        #        edge_in_edgelist = True
+                        #if not edge_in_edgelist:
+                        #    edgelist.append([ins.name, value.name, identifier, 1, prop.name, False])
                         edge_in_edgelist = False
             # If there is a class in nodelist that has the same name as the instance node_in_list is set to True
             node_in_nodelist = is_already_in_list(ins.name, nodelist)
@@ -342,7 +366,8 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     # If abox is True, get A-Boxes from ontology and write them into nodelist
     if abox:
         nodelist, edgelist = get_aboxes(onto, nodelist, edgelist)
-
+    # Calculate the importance of nodes in nodelist
+    nodelist = get_node_importance(nodelist, edgelist)
     # Parse nodelist into panda.DataFrame, with column-names id, importance, shape and T/A
     node_df = pd.DataFrame(nodelist)
     node_df.columns = ['id', 'importance', 'shape', 'T/A', 'title']
@@ -350,6 +375,6 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     edge_df = pd.DataFrame(edgelist)
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
     # Calculate the importance of nodes in nodelist and write the new importance value into node_df
-    node_df = calculate_node_importance(node_df, edge_df)
+    #node_df = calculate_node_importance(node_df, edge_df)
     logging.info("...successfully parsed data from ontology specified to dataframes")
     return edge_df, node_df
