@@ -53,22 +53,29 @@ DEFAULT_OPTIONS = {
     'height': '600px',
     'width': '100%',
     'interaction':{'hover': True},
-    'physics':{'stabilization':{'iterations': 100}}
 }
 
-def get_options(directed: bool, opts_args: dict= None):
+def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     """ defines the default options for the visdcc-graph and adds the optional arguments if not None
 
     :param directed: indicates whether the graph has directed edges
      :type directed: bool
      :param opts_args: optional arguments for the graph visualization
      :type opts_args: dict
+     :param physics: indicates whether simulation physics are on or off
+     :type physics: bool
      :return: options for the visdcc-graph visualization
      :rtype: dict
      """
     opts = DEFAULT_OPTIONS.copy()
-    size = 0
-    opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': size}}
+    if not physics:
+        opts['physics'] = {'enabled': False}
+    else:
+        opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
+                           'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
+                                         'springLength': 150, 'springConstant': 0.01, 'damping': 0.09,
+                                         'avoidOverlap': 0.0 }}
+    opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
     if opts_args is not None:
@@ -377,7 +384,13 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                     # setting panel
                     dbc.Form([
                         # ---- search section ----
-                        html.H6("Search"),
+                        create_row([
+                            html.H6("Search"),
+                            dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
+                                       color="secondary",
+                                       size="sm"),
+                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                            'justify-content': 'space-between'}),
                         html.Hr(className="my-2"),
                         search_form,
 

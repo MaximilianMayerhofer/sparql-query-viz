@@ -27,7 +27,8 @@ from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
 from .datasets.parse_ontology import *
-from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE
+from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, \
+    get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE, get_options
 
 # constants
 PREFIXES = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' \
@@ -506,6 +507,18 @@ class Jaal:
 
         # define layout
         app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
+
+        @app.callback(
+            Output("graph", "options"),
+            Input("freeze-physics", "n_clicks"),
+            [State("graph", "options")],
+        )
+        def toggle_filter_collapse(n_show, options):
+            if n_show and options['physics'] == {'enabled': False}:
+                options = get_options(directed=directed, opts_args=vis_opts)
+            elif n_show:
+                options = get_options(directed=directed, opts_args=vis_opts, physics=False)
+            return options
 
         # create callbacks to toggle legend popover
         @app.callback(
