@@ -138,7 +138,11 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
     n = 1
     for node in graph_data['nodes']:
         for result in res_list:
-            if node['id'] == result.name:
+            try:
+                resname = result.name
+            except:
+                resname = ''
+            if node['id'] == resname:
                 filtered_node_data.append(node)
     node_selection = filtered_node_data.copy()
     current_level_res_list = node_selection.copy()
@@ -274,16 +278,16 @@ class Jaal:
                 self.logger.info("valid sparql query successfully evaluated")
                 self.logger.info("result for passed sparql query is empty")
                 return graph_data, result, selection
-            res_is_no_data_object = False
+            res_is_no_data_object = True
             for flat_res in flat_res_list:
                 try:
                     result = result + str(flat_res.name) + "\n"
                     self.logger.info("result is a valid node/edge of graph")
+                    res_is_no_data_object = False
                 except AttributeError:
                     graph_data = self.data
                     result = result + str(flat_res) + "\n"
                     self.logger.info("result is not an object (A-/ T-Box) in graph (different data-type)")
-                    res_is_no_data_object = True
             self.sparql_query_result = result
             if not res_is_no_data_object:
                 self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data, flat_res_list, shown_result_level)
