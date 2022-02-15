@@ -270,6 +270,8 @@ class Jaal:
                 graph_data = self.data
                 result = "No results for this SPARQL query."
                 self.sparql_query_result = result
+                self.add_to_query_history()
+                self.logger.info("valid sparql query successfully evaluated")
                 self.logger.info("result for passed sparql query is empty")
                 return graph_data, result, selection
             res_is_no_data_object = False
@@ -555,10 +557,10 @@ class Jaal:
             [Input("filter-show-toggle-button", "n_clicks"),
              Input('sparql_template_1', 'n_clicks'),
              Input('sparql_template_2', 'n_clicks'),
-             Input('sparql_template_3', 'n_clicks'),],
+             Input('sparql_template_dropdown', 'value'),],
             [State("filter-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n_show, n_template1, n_template2, n_template3, is_open):
+        def toggle_filter_collapse(n_show, n_template1, n_template2, template_value, is_open):
             ctx = dash.callback_context
             if not ctx.triggered:
                 return is_open
@@ -572,8 +574,8 @@ class Jaal:
                     return not is_open
                 if (input_id == "sparql_template_1" and n_template1)\
                         or (input_id == "sparql_template_2" and n_template2)\
-                        or (input_id == "sparql_template_3" and n_template3):
-                    self.logger.info("sparql query section was shown, because template button was triggered")
+                        or (input_id == "sparql_template_dropdown" and template_value):
+                    self.logger.info("sparql query section was shown, because template input was triggered")
                     return True
             return is_open
 
@@ -626,11 +628,11 @@ class Jaal:
              Input('graph', 'selection'),
              Input('sparql_template_1','n_clicks'),
              Input('sparql_template_2','n_clicks'),
-             Input('sparql_template_3','n_clicks')],
+             Input('sparql_template_dropdown','value')],
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
-                              n_clear, n_delete, on_select, selection, n_template1, n_template2, n_template3, value):
+                              n_clear, n_delete, on_select, selection, n_template1, n_template2, template_value, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -691,8 +693,8 @@ class Jaal:
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
-                elif input_id == "sparql_template_3" and n_template3:
-                    query = open("jaal/datasets/queries/rollen_angetrieben_check.sparql", 'r')
+                elif input_id == "sparql_template_dropdown" and template_value:
+                    query = open("jaal/datasets/queries/"+template_value, 'r')
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()

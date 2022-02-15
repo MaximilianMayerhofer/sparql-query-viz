@@ -260,8 +260,25 @@ sparql_template_form = dbc.FormGroup([
             dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary", size="sm"),
             dbc.Button("Find selected Node with selected OP", id="sparql_template_2", outline=True, color="secondary",
                        size="sm"),
-            dbc.Button("Check Consistency 1", id="sparql_template_3", outline=True, color="secondary",
-                       size="sm"),
+            dcc.Dropdown(
+            id='sparql_template_dropdown',
+            options=[
+                {'label': 'Anzahl angetriebene Rolle Check', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
+                {'label': 'Projektinfo Check', 'value': 'projektinfo_check.sparql'},
+                {'label': 'Rollen angetrieben Check', 'value': 'rollen_angetrieben_check.sparql'},
+                {'label': 'Rollen antriebskenner Check', 'value': 'rollen_antriebskenner_check.sparql'},
+                {'label': 'Rollen per Anlage Check', 'value': 'rollen_per_anlage_check.sparql'},
+                {'label': 'Rollen per Segment Check', 'value': 'rollen_per_segment_check.sparql'},
+                {'label': 'Rollen Winkel Check', 'value': 'rollen_winkel_check.sparql'},
+                {'label': 'Rollenanzahl Pressuresystem Check', 'value': 'rollenanzahl_pressuresystem_check.sparql'},
+                {'label': 'Rollenanzahl Zone Check', 'value': 'rollenanzahl_zone_check.sparql'},
+                {'label': 'Rollennummer antriebsleistung check', 'value': 'rollennummer_antriebsleistung_check.sparql'},
+                {'label': 'Segmentnummer Pressure Rolle Check', 'value': 'segmentnummer_pressure_rolle_check.sparql'},
+                {'label': 'Segmentzahl Check', 'value': 'segmentzahl_check.sparql'},
+                {'label': 'Summer Distribution Check', 'value': 'summe_distribution_check.sparql'},
+            ],
+            placeholder="Consistency Checks",
+            style={'width': '100%'}),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
         color="secondary",
@@ -564,7 +581,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         ], id="size-show-toggle", is_open=False),
 
                     ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
-                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
                 # graph
                 dbc.Col(
                     visdcc.Network(
@@ -572,7 +589,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         data=graph_data,
                         selection={'nodes': [], 'edges': []},
                         options=get_options(directed, vis_opts)),
-                    width=9)])
+                    width=9, align="start")])
         ])
     if abox:
         logging.info("returning app-layout with section for A-Box Data-Properties")
@@ -752,7 +769,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         ], id="size-show-toggle", is_open=False),
 
                     ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
-                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
                 # graph
                 dbc.Col(
                     visdcc.Network(
@@ -760,5 +777,5 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         data=graph_data,
                         selection={'nodes': [], 'edges': []},
                         options=get_options(directed, vis_opts)),
-                    width=9)])
+                    width=9, align="start")])
         ])
