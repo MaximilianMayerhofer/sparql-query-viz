@@ -139,10 +139,10 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
     for node in graph_data['nodes']:
         for result in res_list:
             try:
-                resname = result.name
-            except:
-                resname = ''
-            if node['id'] == resname:
+                res_name = result.name
+            except AttributeError:
+                res_name = ''
+            if node['id'] == res_name:
                 filtered_node_data.append(node)
     node_selection = filtered_node_data.copy()
     current_level_res_list = node_selection.copy()
@@ -457,7 +457,8 @@ class Jaal:
         # Give all is_a edges a circle as arrowhead
         self.edit_edge_appearance(directed=directed)
         # Get list of categorical features from nodes
-        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']), 20, ['shape', 'label', 'id', 'title', 'color'])
+        cat_node_features = get_categorical_features(pd.DataFrame(self.data['nodes']),
+                                                     20, ['shape', 'label', 'id', 'title', 'color'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_node_features]
         # If options has more then one categorical feature, the callback function for nodes-coloring is executed once,
