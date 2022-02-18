@@ -223,7 +223,7 @@ class Jaal:
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
                     self.sparql_query_last_input.append(' :' + node['id'])
-                    if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
+                    if (" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.nodes_selected_for_template == 0:
                         self.sparql_query = self.sparql_query.replace(':[node]', self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
@@ -235,7 +235,7 @@ class Jaal:
             for edge in self.data['edges']:
                 if [edge['id']] == selection['edges']:
                     self.sparql_query_last_input.append(' :' + edge['label'])
-                    if (" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x" in self.sparql_query) \
+                    if (" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x" in self.sparql_query) \
                             and self.edges_selected_for_template == 0:
                         self.sparql_query = self.sparql_query.replace(':[edge]', self.sparql_query_last_input[-1])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
@@ -694,7 +694,7 @@ class Jaal:
                     self.clear_selection_for_template_query()
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_template_2" and n_template2:
-                    self.sparql_query_last_input.append(" PREFIX : <" + self.onto.iri + "#>" + "SELECT ?x WHERE { ?x :[edge] :[node] .}")
+                    self.sparql_query_last_input.append(" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x :[edge] :[node] .}")
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
