@@ -110,10 +110,26 @@ def get_OPs(onto: OntoEditor, edgelist: list=None):
     op_gen = onto.onto.object_properties()
     # Iteration over all object-properties from the generator
     for op in op_gen:
-        # All range-elements (targets) are written into a list except the first element, with their
+        # All range-elements (targets) are written into a list, with their
         # domain's name, name, identifier, weight, associated object-property's name and dashes-boolean
         for i, value in enumerate(op.range):
-            if i != 0:
+            #if i != 0:
+            domain = op.domain
+            if not domain:
+                print("op-domain empty")
+                #node_gen = onto.onto.classes()
+                #for cl in node_gen:
+                #    edge_already_exists = False
+                #    identifier = cl.name + ' ' + op.name + ' ' + op.range[i].name
+                #    for edge in edgelist:
+                #        if cl != value and (cl.name == edge[0] and op.range[i].name == edge[1]):
+                #            edge_already_exists = True
+                #            edge[2] = edge[2] + ',\n ' + identifier
+                #            edge[4] = edge[4] + ',\n ' + op.name
+                #            edge[3] = edge[3] + 1
+                #    if not edge_already_exists and cl != value:
+                #        edgelist.append([cl.name, op.range[i].name, identifier, 1, op.name, True])
+            else:
                 identifier = op.domain[0].name + ' ' + op.name + ' ' + op.range[i].name
                 edgelist.append([op.domain[0].name, op.range[i].name, identifier, 1, op.name, True])
     # return list of all extracted edges/ relations
