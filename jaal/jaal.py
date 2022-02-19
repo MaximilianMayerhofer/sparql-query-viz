@@ -185,6 +185,7 @@ class Jaal:
         self.edge_value_color_mapping = {}
         self.sparql_query = ''
         self.sparql_query_last_input = ['']
+        self.sparql_query_last_input_type = ['']
         self.sparql_query_history = ''
         self.counter_query_history = 0
         self.sparql_query_result = ''
@@ -231,8 +232,10 @@ class Jaal:
                         self.sparql_query = self.sparql_query.replace(':[node]', self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('select_node')
                     else:
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
         elif len(selection['edges']) > 0:
             for edge in self.data['edges']:
@@ -242,9 +245,28 @@ class Jaal:
                         self.sparql_query = self.sparql_query.replace(':[edge]', self.sparql_query_last_input[-1])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
                         self.selected_edge_for_template = self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('select_edge')
                     else:
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
+
+    def delete_last_user_input(self):
+        if not self.sparql_query_last_input_type:
+            pass
+        elif self.sparql_query_last_input_type[-1] == 'user_input':
+            self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], '')
+        elif self.sparql_query_last_input_type[-1] == 'select_node':
+            self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], ':[node]', 1)
+            self.selected_node_for_template = ''
+            self.nodes_selected_for_template = self.nodes_selected_for_template - 1
+        elif self.sparql_query_last_input_type[-1] == 'select_edge':
+            self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], ':[edge]', 1)
+            self.selected_edge_for_template = ''
+            self.edges_selected_for_template = self.edges_selected_for_template - 1
+        self.sparql_query_last_input.pop(-1)
+        self.sparql_query_last_input_type.pop(-1)
+        self.logger.info('last input from user deleted from sparql query, triggered by user')
 
     def add_to_query_history(self):
         """ adds the evaluated query to the query history
@@ -652,6 +674,7 @@ class Jaal:
                         else:
                             self.sparql_query_last_input.append(" " + kw_value)
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                         self.logger.info("%s - keyword added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql-variables-dropdown":
                     if var_value is not None:
@@ -660,39 +683,43 @@ class Jaal:
                             self.sparql_query = self.sparql_query.replace(' ?[...]', self.sparql_query_last_input[-1])
                         else:
                             self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                         self.logger.info("%s - variable added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql-syntax-dropdown":
                     if syn_value is not None:
                         self.sparql_query_last_input.append(" " + syn_value)
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                         self.logger.info("%s - syntax added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "add_to_query_button":
                     if n_add and value is not None:
                         self.sparql_query_last_input.append(' ' + value)
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
+                        self.sparql_query_last_input_type.append('user_input')
                         self.logger.info("user-text-input %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "clear_query_button":
                     if n_clear:
                         self.sparql_query_last_input = ['']
                         self.sparql_query = ''
+                        self.sparql_query_last_input_type = ['']
                         self.logger.info("sparql query cleared by user")
                         self.clear_selection_for_template_query()
                 elif input_id == "delete_query_button":
                     if n_delete:
-                        self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], '')
-                        self.sparql_query_last_input.remove(self.sparql_query_last_input[-1])
-                        self.logger.info('last input from user deleted from sparql query, triggered by user')
+                        self.delete_last_user_input()
                 elif input_id == "sparql_template_dropdown" and template_value:
                     query = open("jaal/datasets/templates/"+template_value, "r")
                     self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n"+ query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
+                    self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_library_dropdown" and library_value:
                     query = open("jaal/datasets/queries/"+library_value, "r")
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
+                    self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("Inconsistency Check: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
                     self.complete_sparql_query_with_selection(selection, template_value)
