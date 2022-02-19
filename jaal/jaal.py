@@ -10,6 +10,8 @@ import logging
 import datetime
 import os
 # basic configuration fpr logging
+import pyparsing
+
 dir_file = os.path.dirname(__file__)
 logfile = dir_file.replace('/jaal/jaal', '/jaal/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -213,18 +215,19 @@ class Jaal:
         self.edges_selected_for_template = 0
         self.selected_edge_for_template = ''
 
-    def complete_sparql_query_with_selection(self, selection: dict):
+    def complete_sparql_query_with_selection(self, selection: dict, template: str):
         """ inserts the selection made by the user into the chosen template
 
         :param selection: selected node/ edge
          :type selection: dict
+         :param template: file name of the template that was chosen
+         :type template: str
          """
         if len(selection['nodes']) > 0:
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
                     self.sparql_query_last_input.append(' :' + node['id'])
-                    if (" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x" in self.sparql_query) \
-                            and self.nodes_selected_for_template == 0:
+                    if self.nodes_selected_for_template == 0 and template and (':[node]' in self.sparql_query):
                         self.sparql_query = self.sparql_query.replace(':[node]', self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = self.sparql_query_last_input[-1]
@@ -235,8 +238,7 @@ class Jaal:
             for edge in self.data['edges']:
                 if [edge['id']] == selection['edges']:
                     self.sparql_query_last_input.append(' :' + edge['label'])
-                    if (" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x" in self.sparql_query) \
-                            and self.edges_selected_for_template == 0:
+                    if self.edges_selected_for_template == 0 and template and (':[edge]' in self.sparql_query):
                         self.sparql_query = self.sparql_query.replace(':[edge]', self.sparql_query_last_input[-1])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
                         self.selected_edge_for_template = self.sparql_query_last_input[-1]
@@ -294,12 +296,7 @@ class Jaal:
                 graph_data = self.filtered_data
             self.add_to_query_history()
             self.logger.info("valid sparql query successfully evaluated")
-        except owlready2.rply.ParsingError:
-            graph_data = self.data
-            result = "No SPARQL query entered"
-            self.sparql_query_result = result
-            self.logger.warning("sparql query passed from user is empty")
-        except owlready2.rply.LexingError:
+        except pyparsing.ParseException:
             graph_data = self.data
             result = "Not a valid SPARQL query."
             self.sparql_query_result = result
@@ -698,7 +695,7 @@ class Jaal:
                     self.clear_selection_for_template_query()
                     self.logger.info("Inconsistency Check: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
-                    self.complete_sparql_query_with_selection(selection)
+                    self.complete_sparql_query_with_selection(selection, template_value)
             return self.sparql_query
         
         # create callbacks to toggle hide/show sections - COLOR section
