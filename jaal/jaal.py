@@ -699,7 +699,7 @@ class Jaal:
                     self.clear_selection_for_template_query()
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_template_dropdown" and template_value:
-                    query = open("jaal/datasets/queries/"+template_value, 'r')
+                    query = open("jaal/datasets/queries/"+template_value, "r")
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
@@ -750,6 +750,20 @@ class Jaal:
                     self.logger.info("template section was hidden, triggered by user")
                 else:
                     self.logger.info("template section was shown, triggered by user")
+                return not is_open
+            return is_open
+
+        @app.callback(
+            Output("library-show-toggle", "is_open"),
+            [Input("library-show-toggle-button", "n_clicks")],
+            [State("library-show-toggle", "is_open")],
+        )
+        def toggle_library_collapse(n, is_open):
+            if n:
+                if is_open:
+                    self.logger.info("library section was hidden, triggered by user")
+                else:
+                    self.logger.info("library section was shown, triggered by user")
                 return not is_open
             return is_open
 
