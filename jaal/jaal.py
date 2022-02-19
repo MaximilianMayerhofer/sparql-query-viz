@@ -560,12 +560,11 @@ class Jaal:
         @app.callback(
             Output("filter-show-toggle", "is_open"),
             [Input("filter-show-toggle-button", "n_clicks"),
-             Input('sparql_template_1', 'n_clicks'),
-             Input('sparql_template_2', 'n_clicks'),
-             Input('sparql_template_dropdown', 'value'),],
+             Input('sparql_template_dropdown', 'value'),
+             Input('sparql_library_dropdown', 'value'),],
             [State("filter-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n_show, n_template1, n_template2, template_value, is_open):
+        def toggle_filter_collapse(n_show, template_value, library_value, is_open):
             ctx = dash.callback_context
             if not ctx.triggered:
                 return is_open
@@ -577,10 +576,9 @@ class Jaal:
                     else:
                         self.logger.info("sparql query section was shown, triggered by user")
                     return not is_open
-                if (input_id == "sparql_template_1" and n_template1)\
-                        or (input_id == "sparql_template_2" and n_template2)\
-                        or (input_id == "sparql_template_dropdown" and template_value):
-                    self.logger.info("sparql query section was shown, because template input was triggered")
+                if (input_id == "sparql_template_dropdown" and template_value)\
+                        or (input_id == "sparql_library_dropdown" and library_value):
+                    self.logger.info("sparql query section was shown, because template/library input was triggered")
                     return True
             return is_open
 
@@ -631,13 +629,12 @@ class Jaal:
              Input("delete_query_button", "n_clicks"),
              Input("add_node_edge_to_query_button", "on"),
              Input('graph', 'selection'),
-             Input('sparql_template_1','n_clicks'),
-             Input('sparql_template_2','n_clicks'),
-             Input('sparql_template_dropdown','value')],
+             Input('sparql_template_dropdown','value'),
+             Input('sparql_library_dropdown','value')],
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
-                              n_clear, n_delete, on_select, selection, n_template1, n_template2, template_value, value):
+                              n_clear, n_delete, on_select, selection, template_value, library_value, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -688,22 +685,18 @@ class Jaal:
                         self.sparql_query = self.sparql_query.replace(self.sparql_query_last_input[-1], '')
                         self.sparql_query_last_input.remove(self.sparql_query_last_input[-1])
                         self.logger.info('last input from user deleted from sparql query, triggered by user')
-                elif input_id == "sparql_template_1" and n_template1:
-                    self.sparql_query_last_input.append("SELECT (COUNT(?x) AS ?nb) \n{ ?x a owl:Class . }")
-                    self.sparql_query = self.sparql_query_last_input[-1]
-                    self.clear_selection_for_template_query()
-                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
-                elif input_id == "sparql_template_2" and n_template2:
-                    self.sparql_query_last_input.append(" PREFIX : <" + self.onto.iri + "#>" + " SELECT ?x WHERE { ?x :[edge] :[node] .}")
-                    self.sparql_query = self.sparql_query_last_input[-1]
-                    self.clear_selection_for_template_query()
-                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_template_dropdown" and template_value:
-                    query = open("jaal/datasets/queries/"+template_value, "r")
+                    query = open("jaal/datasets/templates/"+template_value, "r")
+                    self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n"+ query.read())
+                    self.sparql_query = self.sparql_query_last_input[-1]
+                    self.clear_selection_for_template_query()
+                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
+                elif input_id == "sparql_library_dropdown" and library_value:
+                    query = open("jaal/datasets/queries/"+library_value, "r")
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
-                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
+                    self.logger.info("Inconsistency Check: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
                     self.complete_sparql_query_with_selection(selection)
             return self.sparql_query

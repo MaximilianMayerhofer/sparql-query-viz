@@ -257,9 +257,14 @@ filter_node_form = dbc.FormGroup([
 sparql_template_form = dbc.FormGroup([
     dbc.FormText(
         create_row([
-            dbc.Button("Get number of classes", id="sparql_template_1", outline=True, color="secondary", size="sm"),
-            dbc.Button("Find selected Node with selected OP", id="sparql_template_2", outline=True, color="secondary",
-                       size="sm"),
+            dcc.Dropdown(
+                id='sparql_template_dropdown',
+                options=[
+                    {'label': 'Get Number of owl-Classes', 'value': 'template_1.sparql'},
+                    {'label': 'Find Instance with selected OP', 'value': 'template_2.sparql'},
+                ],
+                placeholder="Templates",
+                style={'width': '100%'}),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
         color="secondary",
@@ -270,7 +275,7 @@ sparql_library_form = dbc.FormGroup([
     dbc.FormText(
         create_row([
             dcc.Dropdown(
-            id='sparql_template_dropdown',
+            id='sparql_library_dropdown',
             options=[
                 {'label': 'Anzahl angetriebene Rolle Check', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
                 {'label': 'Projektinfo Check', 'value': 'projektinfo_check.sparql'},
