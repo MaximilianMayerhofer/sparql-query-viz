@@ -262,6 +262,7 @@ sparql_template_form = dbc.FormGroup([
                 options=[
                     {'label': 'Get Number of owl-Classes', 'value': 'template_1.sparql'},
                     {'label': 'Find Instance with selected OP', 'value': 'template_2.sparql'},
+                    {'label': 'Find Instance with selected OP', 'value': 'template_3.sparql'},
                 ],
                 placeholder="Templates",
                 style={'width': '100%'}),

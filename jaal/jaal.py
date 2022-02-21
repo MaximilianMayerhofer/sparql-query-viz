@@ -225,11 +225,25 @@ class Jaal:
          :type template: str
          """
         if len(selection['nodes']) > 0:
+            max_number_of_selected_nodes = 0
+            placeholder = ''
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
                     self.sparql_query_last_input.append(' :' + node['id'])
-                    if self.nodes_selected_for_template == 0 and template and (':[node]' in self.sparql_query):
-                        self.sparql_query = self.sparql_query.replace(':[node]', self.sparql_query_last_input[-1])
+                    if template == "template_2.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_3.sparql":
+                        max_number_of_selected_nodes = 3
+                    if '[:node]' in self.sparql_query:
+                        placeholder = "[:node]"
+                    elif '[:node1]' in self.sparql_query:
+                        placeholder = "[:node1]"
+                    elif '[:node2]' in self.sparql_query:
+                        placeholder = "[:node2]"
+                    elif '[:node3]' in self.sparql_query:
+                        placeholder = "[:node3]"
+                    if self.nodes_selected_for_template < max_number_of_selected_nodes and template and (placeholder != ''):
+                        self.sparql_query = self.sparql_query.replace(placeholder, self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('select_node')
@@ -238,11 +252,25 @@ class Jaal:
                         self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
         elif len(selection['edges']) > 0:
+            max_number_of_selected_edges = 0
+            placeholder = ''
             for edge in self.data['edges']:
                 if [edge['id']] == selection['edges']:
                     self.sparql_query_last_input.append(' :' + edge['label'])
-                    if self.edges_selected_for_template == 0 and template and (':[edge]' in self.sparql_query):
-                        self.sparql_query = self.sparql_query.replace(':[edge]', self.sparql_query_last_input[-1])
+                    if template == "template_2.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_3.sparql":
+                        max_number_of_selected_edges = 2
+                    if '[:edge]' in self.sparql_query:
+                        placeholder = "[:edge]"
+                    elif '[:edge1]' in self.sparql_query:
+                        placeholder = "[:edge1]"
+                    elif '[:edge2]' in self.sparql_query:
+                        placeholder = "[:edge2]"
+                    elif '[:edge3]' in self.sparql_query:
+                        placeholder = "[:edge3]"
+                    if self.edges_selected_for_template < max_number_of_selected_edges and (placeholder != ''):
+                        self.sparql_query = self.sparql_query.replace(placeholder, self.sparql_query_last_input[-1])
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
                         self.selected_edge_for_template = self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('select_edge')
