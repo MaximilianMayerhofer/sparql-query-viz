@@ -53,7 +53,7 @@ def _callback_search_graph(graph_data: dict, search_text: str):
     nodes = graph_data['nodes']
     edges = graph_data['edges']
     for node in nodes:
-        if (search_text not in node['label'].lower()) and (search_text not in node['label']):
+        if (search_text.lower() not in node['label'].lower()) and (search_text not in node['label']):
             node['hidden'] = True
         else:
             node['hidden'] = False
@@ -225,7 +225,7 @@ class Jaal:
          :type template: str
          """
         if len(selection['nodes']) > 0:
-            max_number_of_selected_nodes = 0
+            max_number_of_selected_nodes = -1
             placeholder = ''
             for node in self.data['nodes']:
                 if [node['id']] == selection['nodes']:
@@ -247,12 +247,14 @@ class Jaal:
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('select_node')
+                    elif self.nodes_selected_for_template == max_number_of_selected_nodes:
+                        pass
                     else:
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("%s added to sparql query", self.sparql_query_last_input[-1])
         elif len(selection['edges']) > 0:
-            max_number_of_selected_edges = 0
+            max_number_of_selected_edges = -1
             placeholder = ''
             for edge in self.data['edges']:
                 if [edge['id']] == selection['edges']:
@@ -274,6 +276,8 @@ class Jaal:
                         self.edges_selected_for_template = self.edges_selected_for_template + 1
                         self.selected_edge_for_template = self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('select_edge')
+                    elif self.edges_selected_for_template == max_number_of_selected_edges:
+                        pass
                     else:
                         self.sparql_query = self.sparql_query + self.sparql_query_last_input[-1]
                         self.sparql_query_last_input_type.append('user_input')

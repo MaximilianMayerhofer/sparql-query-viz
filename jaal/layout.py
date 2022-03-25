@@ -71,10 +71,11 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     if not physics:
         opts['physics'] = {'enabled': False}
     else:
-        opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
-                           'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
-                                         'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
-                                         'avoidOverlap': 0.0 }}
+        pass
+    #    opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
+    #                       'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
+    #                                     'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
+    #                                     'avoidOverlap': 0.0 }}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
     #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
@@ -411,7 +412,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
     # Step 5: create and return the layout
     layout_with_abox = html.Div([
-            create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
+            create_row(html.H2(children="SPARQL Query Viz")),  # Title
             create_row(html.H3(children=onto.onto.name)), # Subtitle
             create_row([
                 dbc.Col([
@@ -623,7 +624,7 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
         return layout_with_abox
     logging.info("returning standard app-layout")
     return html.Div([
-            create_row(html.H2(children="SPARQL Visualization Tool")),  # Title
+            create_row(html.H2(children="SPARQL Query Viz")),  # Title
             create_row(html.H3(children=onto.onto.name)), # Subtitle
             create_row([
                 dbc.Col([
