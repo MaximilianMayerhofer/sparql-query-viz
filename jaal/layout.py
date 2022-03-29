@@ -359,7 +359,6 @@ def get_categorical_features(df_: pd.DataFrame, unique_limit: int=20, blacklist_
             cat_features.remove(col)
     except ValueError:
         pass
-    # return
     return cat_features
 
 def get_numerical_features(df_: pd.DataFrame):
