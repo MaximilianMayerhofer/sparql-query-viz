@@ -165,7 +165,7 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
 class Jaal:
     """The main visualization class
     """
-    def __init__(self, iri: str="http://example.org/pizza-onto.owl", path: str="./pizza-onto.owl", abox: bool = True):
+    def __init__(self, iri: str="http://example.org/onto-ex.owl", path: str="./pizza-onto.owl", abox: bool = True):
         """ initialize Jaal class
 
         :param onto: ontology
