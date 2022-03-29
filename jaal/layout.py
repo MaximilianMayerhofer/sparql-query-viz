@@ -71,7 +71,10 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     if not physics:
         opts['physics'] = {'enabled': False}
     else:
-        pass
+        opts['physics'] = {'stabilization':{'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,'maxVelocity': 250,
+                           'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
+                                                                              'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
+                                                                              'avoidOverlap': 0 }}
     #    opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
     #                       'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
     #                                     'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
@@ -263,7 +266,7 @@ sparql_template_form = dbc.FormGroup([
                 options=[
                     {'label': 'Get Number of owl-Classes', 'value': 'template_1.sparql'},
                     {'label': 'Find Instance with selected OP', 'value': 'template_2.sparql'},
-                    {'label': 'Find Instance with selected OP', 'value': 'template_3.sparql'},
+                    {'label': 'Inconsistency Query Template 1', 'value': 'template_3.sparql'},
                 ],
                 placeholder="Templates",
                 style={'width': '100%'}),
@@ -279,19 +282,19 @@ sparql_library_form = dbc.FormGroup([
             dcc.Dropdown(
             id='sparql_library_dropdown',
             options=[
-                {'label': 'Anzahl angetriebene Rolle Check', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
-                {'label': 'Projektinfo Check', 'value': 'projektinfo_check.sparql'},
-                {'label': 'Rollen angetrieben Check', 'value': 'rollen_angetrieben_check.sparql'},
-                {'label': 'Rollen antriebskenner Check', 'value': 'rollen_antriebskenner_check.sparql'},
-                {'label': 'Rollen per Anlage Check', 'value': 'rollen_per_anlage_check.sparql'},
-                {'label': 'Rollen per Segment Check', 'value': 'rollen_per_segment_check.sparql'},
-                {'label': 'Rollen Winkel Check', 'value': 'rollen_winkel_check.sparql'},
-                {'label': 'Rollenanzahl Pressuresystem Check', 'value': 'rollenanzahl_pressuresystem_check.sparql'},
-                {'label': 'Rollenanzahl Zone Check', 'value': 'rollenanzahl_zone_check.sparql'},
-                {'label': 'Rollennummer antriebsleistung check', 'value': 'rollennummer_antriebsleistung_check.sparql'},
-                {'label': 'Segmentnummer Pressure Rolle Check', 'value': 'segmentnummer_pressure_rolle_check.sparql'},
-                {'label': 'Segmentzahl Check', 'value': 'segmentzahl_check.sparql'},
-                {'label': 'Summer Distribution Check', 'value': 'summe_distribution_check.sparql'},
+                {'label': 'Check Number of Active Rolls ', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
+                {'label': 'Check Information on Project', 'value': 'projektinfo_check.sparql'},
+                {'label': 'Check Active Rolls', 'value': 'rollen_angetrieben_check.sparql'},
+                {'label': 'Check Id of Active Rolls', 'value': 'rollen_antriebskenner_check.sparql'},
+                {'label': 'Check Rolls per Plant', 'value': 'rollen_per_anlage_check.sparql'},
+                {'label': 'Check Rolls per Segment', 'value': 'rollen_per_segment_check.sparql'},
+                {'label': 'Check Angel of Rolls', 'value': 'rollen_winkel_check.sparql'},
+                {'label': 'Check Number of Rolls in Pressure-System', 'value': 'rollenanzahl_pressuresystem_check.sparql'},
+                {'label': 'Check Number of Rolls in Zone', 'value': 'rollenanzahl_zone_check.sparql'},
+                {'label': 'Check Roll-Number and Drive Power', 'value': 'rollennummer_antriebsleistung_check.sparql'},
+                {'label': 'Check Segment-Number and Pressure', 'value': 'segmentnummer_pressure_rolle_check.sparql'},
+                {'label': 'Check Segment-Number', 'value': 'segmentzahl_check.sparql'},
+                {'label': 'Check Sum of Distribution', 'value': 'summe_distribution_check.sparql'},
             ],
             placeholder="Consistency Checks",
             style={'width': '100%'}),
@@ -405,7 +408,9 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
     # Step 1-2: find categorical features of nodes and edges
     if color_legends is None:
         color_legends = []
-    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20, ['shape', 'label', 'id', 'title', 'color'])
+    #cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20, ['shape', 'label', 'id', 'title', 'color'])
+    cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20,
+                                                 ['shape', 'title', 'color'])
     cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id','arrows']), 20, ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
@@ -486,10 +491,11 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Popover(
-                            html.Div("To write an SPARQL query, type in a valid query in the text "
-                                                      "field and click 'Add'. Or use the provided keywords to build "
-                                                      "up the query. To see the result click 'Evaluate query'. "
-                                                      "To erase the entered text click 'Delete'."),
+                            html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
+                                     "write your own queries into the input text field and click the Add-button. "
+                                     "To insert graph elements into the query, toggle the Select Edge/Node-button"
+                                     " and click on the element you like to add. To evaluate the query click the "
+                                     "evaluate-button."),
                             id="info-sparql-popup", is_open=False,
                             target="info-sparql-query-button",style={'padding-left': '10px', 'width': '230px'}
                         ),
@@ -674,12 +680,13 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
                         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
                             'justify-content': 'space-between'}),
                         dbc.Popover(
-                            html.Div("To write an SPARQL query, type in a valid query in the text "
-                                                      "field and click 'Add'. Or use the provided keywords to build "
-                                                      "up the query. To see the result click 'Evaluate query'. "
-                                                      "To erase the entered text click 'Delete'."),
+                            html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
+                                     "write your own queries into the input text field and click the Add-button. "
+                                     "To insert graph elements into the query, toggle the Select Edge/Node-button"
+                                     " and click on the element you like to add. To evaluate the query click the "
+                                     "evaluate-button."),
                             id="info-sparql-popup", is_open=False,
-                            target="info-sparql-query-button",style={'padding-left': '10px', 'width': '230px'}
+                            target="info-sparql-query-button", style={'padding-left': '10px', 'width': '230px'}
                         ),
                         dbc.Collapse([
                             html.Hr(className="my-2"),

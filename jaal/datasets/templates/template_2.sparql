@@ -6,4 +6,4 @@ PREFIX owlready: <http://www.lesfleursdunormal.fr/static/_downloads/owlready_ont
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 
 SELECT ?x WHERE {
-    ?x :[edge] :[node] .}
+    ?x [:edge] [:node] .}
