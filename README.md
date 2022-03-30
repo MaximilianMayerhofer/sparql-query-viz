@@ -1,12 +1,12 @@
-<img src="jaal/assest/logo_sqv.pdf" alt="sqv logo"/>
+<img src="jaal/assest/logo_sqv.png" alt="sqv logo"/>
 
-![PyPI](https://img.shields.io/pypi/v/jaal) [![PyPI dm](https://img.shields.io/pypi/dm/jaal.svg)](https://img.shields.io/pypi/jaal) [![Join the chat at https://gitter.im/imm-jaal/community](https://badges.gitter.im/imm-jaal/community.svg)](https://gitter.im/imm-jaal/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![GitHub](https://img.shields.io/github/license/imohitmayank/jaal) ![GitHub Repo stars](https://img.shields.io/github/stars/imohitmayank/jaal?style=social)
+![PyPI](https://img.shields.io/pypi/v/jaal) [![PyPI dm](https://img.shields.io/pypi/dm/jaal.svg)](https://img.shields.io/pypi/jaal) [![Join the chat at https://gitter.im/imm-jaal/community](https://badges.gitter.im/imm-jaal/community.svg)](https://gitter.im/imm-jaal/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![GitHub](https://img.shields.io/github/license/MaximilianMayerhofer/SPARQL-Query-Viz) ![GitHub Repo stars](https://img.shields.io/github/stars/MaximilianMayerhofer/SPARQL-Query-Viz?style=social)
 
-*Your interactive network visualizing dashboard*
+*Your interactive ontology visualizing and SPARQL query formulation tool*
 
 Documentation: [Here](http://mohitmayank.com/jaal/)
 
-## 👉 What is Jaal
+## 👉 What is *SPARQL Query Viz*
 
 Jaal is a python based interactive network visualizing tool built using Dash and Visdcc. Along with the basic features, Jaal also provides multiple option to play with the network data such as searching graph, filtering and even coloring nodes and edges in the graph. And all of this within 2 lines of codes :)
 
