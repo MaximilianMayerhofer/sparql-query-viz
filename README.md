@@ -8,7 +8,11 @@ Documentation: [Here](http://mohitmayank.com/jaal/)
 
 ## 👉 What is *SPARQL Query Viz*
 
-Jaal is a python based interactive network visualizing tool built using Dash and Visdcc. Along with the basic features, Jaal also provides multiple option to play with the network data such as searching graph, filtering and even coloring nodes and edges in the graph. And all of this within 2 lines of codes :)
+*SPARQL Query Viz* is a python based interactive ontology visualizing tool, that supports you to compose SPARQL queries interactively. 
+
+The straightforward visualization can be adjusted to your needs by coloring and sizing of the graph elements. You can also turn of the visualization of *ABoxes* if the visualized ontology is cluttering the display. 
+
+*SPARQL Query Viz* provides an interactive query formulation and composition panel, that enables you to write queries, by making use of templates and other useful features. You can evaluate the queries and see the visualized result in the context of the ontology.
 
 ## 👉 Requirements
 
