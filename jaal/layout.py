@@ -5,15 +5,12 @@ Layout code for the application
 """
 # import
 import logging
-import os
-import visdcc
-import base64
-import random
-import pandas as pd
-from dash import dcc, html
 import dash_bootstrap_components as dbc
-from ontor import OntoEditor
 import dash_daq as daq
+import pandas as pd
+import visdcc
+from dash import dcc, html
+from ontor import OntoEditor
 
 # constants
 # default node and edge size
@@ -25,37 +22,38 @@ DEFAULT_COLOR = '#97C2FC'
 
 # Taken from https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors
 KELLY_COLORS_HEX = [
-    "#FFB300", # Vivid Yellow
-    "#A6BDD7", # Very Light Blue
-    "#803E75", # Strong Purple
-    "#FF6800", # Vivid Orange
-    "#C10020", # Vivid Red
-    "#CEA262", # Grayish Yellow
-    "#817066", # Medium Gray
+    "#FFB300",  # Vivid Yellow
+    "#A6BDD7",  # Very Light Blue
+    "#803E75",  # Strong Purple
+    "#FF6800",  # Vivid Orange
+    "#C10020",  # Vivid Red
+    "#CEA262",  # Grayish Yellow
+    "#817066",  # Medium Gray
 
     # The following don't work well for people with defective color vision
-    "#007D34", # Vivid Green
-    "#F6768E", # Strong Purplish Pink
-    "#00538A", # Strong Blue
-    "#FF7A5C", # Strong Yellowish Pink
-    "#53377A", # Strong Violet
-    "#FF8E00", # Vivid Orange Yellow
-    "#B32851", # Strong Purplish Red
-    "#F4C800", # Vivid Greenish Yellow
-    "#7F180D", # Strong Reddish Brown
-    "#93AA00", # Vivid Yellowish Green
-    "#593315", # Deep Yellowish Brown
-    "#F13A13", # Vivid Reddish Orange
-    "#232C16", # Dark Olive Green
-    ]
+    "#007D34",  # Vivid Green
+    "#F6768E",  # Strong Purplish Pink
+    "#00538A",  # Strong Blue
+    "#FF7A5C",  # Strong Yellowish Pink
+    "#53377A",  # Strong Violet
+    "#FF8E00",  # Vivid Orange Yellow
+    "#B32851",  # Strong Purplish Red
+    "#F4C800",  # Vivid Greenish Yellow
+    "#7F180D",  # Strong Reddish Brown
+    "#93AA00",  # Vivid Yellowish Green
+    "#593315",  # Deep Yellowish Brown
+    "#F13A13",  # Vivid Reddish Orange
+    "#232C16",  # Dark Olive Green
+]
 
 DEFAULT_OPTIONS = {
     'height': '800px',
     'width': '100%',
-    'interaction':{'hover': True},
+    'interaction': {'hover': True},
 }
 
-def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
+
+def get_options(directed: bool, opts_args: dict = None, physics: bool = True):
     """ defines the default options for the visdcc-graph and adds the optional arguments if not None
 
     :param directed: indicates whether the graph has directed edges
@@ -74,17 +72,19 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
         if opts_args == "small":
             opts['physics'] = {'enabled': True}
         else:
-            opts['physics'] = {'stabilization':{'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,'maxVelocity': 250,
+            opts['physics'] = {'stabilization': {'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,
+                               'maxVelocity': 250,
                                'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
-                                                                                  'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
-                                                                                  'avoidOverlap': 0 }}
+                                             'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
+                                             'avoidOverlap': 0}}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
-    #if opts_args is not None:
+    # if opts_args is not None:
     #    opts.update(opts_args)
 
     return opts
 
-def get_distinct_colors(n: int, for_nodes = True):
+
+def get_distinct_colors(n: int, for_nodes=True):
     """ return distinct colors, with two options to get different color schemes (for edges and nodes)
 
     :param n: number of distinct colors required
@@ -97,7 +97,8 @@ def get_distinct_colors(n: int, for_nodes = True):
     if for_nodes:
         return KELLY_COLORS_HEX[:n]
     else:
-        return KELLY_COLORS_HEX[2:(n+2)]
+        return KELLY_COLORS_HEX[2:(n + 2)]
+
 
 def create_card(card_id: str, value, description: str):
     # todo not used (may be removed)
@@ -118,6 +119,7 @@ def create_card(card_id: str, value, description: str):
                 html.P(children=description),
             ]))
 
+
 def create_color_legend(text: str, color: str):
     """ creates individual row for the color legend
 
@@ -129,6 +131,7 @@ def create_color_legend(text: str, color: str):
      :rtype: html.Div
     """
     return html.Div(text, style={'padding-left': '10px', 'width': '200px', 'background-color': color})
+
 
 def create_info_text(text: str):
     """ creates the info text as html-element
@@ -142,8 +145,10 @@ def create_info_text(text: str):
         html.Div(text, style={'padding-left': '10px'}),
     ])
 
+
 def fetch_flex_row_style():
     return {'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center', 'align-items': 'center'}
+
 
 def create_row(children, style=None):
     if style is None:
@@ -152,25 +157,26 @@ def create_row(children, style=None):
                    style=style,
                    className="column flex-display")
 
+
 # forms for layout
 search_form = dbc.FormGroup([
     dbc.Input(type="search", id="search_graph", placeholder="Search node or edge in graph..."),
     dbc.FormText(
-         "Show the node or edge you are looking for",
-         color="secondary",
+        "Show the node or edge you are looking for",
+        color="secondary",
     )
 ])
 
 selected_edge_form = dbc.FormGroup([
     dbc.FormText(
-        id = 'edge-selection',
+        id='edge-selection',
         color="secondary",
     ),
 ])
 
 a_box_dp_form = dbc.FormGroup([
     dbc.FormText(
-        id = 'node-selection',
+        id='node-selection',
         color="secondary",
     ),
 ])
@@ -178,7 +184,7 @@ a_box_dp_form = dbc.FormGroup([
 filter_node_form = dbc.FormGroup([
     # dbc.Label("Filter nodes", html_for="filter_nodes"),
     create_row([
-        dbc.Button("Add", id="add_to_query_button", outline=True, color="secondary",size="sm"),
+        dbc.Button("Add", id="add_to_query_button", outline=True, color="secondary", size="sm"),
         daq.BooleanSwitch(id='add_node_edge_to_query_button', on=False, color="#FFB300",
                           label="Select Edge/Node", labelPosition="top"),
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
@@ -241,16 +247,16 @@ filter_node_form = dbc.FormGroup([
     html.Div(id='select-sparql', style={'whiteSpace': 'pre-line'}),
     html.Hr(className="my-2"),
     create_row([
-        dbc.Button("Delete", id="delete_query_button", outline=True, color="secondary",size="sm"),
-        dbc.Button("Clear", id="clear_query_button", outline=True, color="secondary",size="sm"),
-        dbc.Button("Evaluate Query", id="evaluate_query_button", outline=True, color="secondary",size="sm"),
+        dbc.Button("Delete", id="delete_query_button", outline=True, color="secondary", size="sm"),
+        dbc.Button("Clear", id="clear_query_button", outline=True, color="secondary", size="sm"),
+        dbc.Button("Evaluate Query", id="evaluate_query_button", outline=True, color="secondary", size="sm"),
     ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
         'justify-content': 'space-between'}),
     dbc.FormText(
         html.P([
             "Filter graph data by using ",
             html.A("SPARQL Query syntax",
-            href="https://www.w3.org/TR/sparql11-query/#grammar"),
+                   href="https://www.w3.org/TR/sparql11-query/#grammar"),
         ]),
         color="secondary",
     ),
@@ -269,7 +275,7 @@ sparql_template_form = dbc.FormGroup([
                 placeholder="Templates",
                 style={'width': '100%'}),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-        'justify-content': 'space-between'}),
+            'justify-content': 'space-between'}),
         color="secondary",
     ),
 ])
@@ -278,29 +284,33 @@ sparql_library_form = dbc.FormGroup([
     dbc.FormText(
         create_row([
             dcc.Dropdown(
-            id='sparql_library_dropdown',
-            options=[
-                {'label': 'Check Number of Active Rolls ', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
-                {'label': 'Check Information on Project', 'value': 'projektinfo_check.sparql'},
-                {'label': 'Check Active Rolls', 'value': 'rollen_angetrieben_check.sparql'},
-                {'label': 'Check Id of Active Rolls', 'value': 'rollen_antriebskenner_check.sparql'},
-                {'label': 'Check Rolls per Plant', 'value': 'rollen_per_anlage_check.sparql'},
-                {'label': 'Check Rolls per Segment', 'value': 'rollen_per_segment_check.sparql'},
-                {'label': 'Check Angel of Rolls', 'value': 'rollen_winkel_check.sparql'},
-                {'label': 'Check Number of Rolls in Pressure-System', 'value': 'rollenanzahl_pressuresystem_check.sparql'},
-                {'label': 'Check Number of Rolls in Zone', 'value': 'rollenanzahl_zone_check.sparql'},
-                {'label': 'Check Roll-Number and Drive Power', 'value': 'rollennummer_antriebsleistung_check.sparql'},
-                {'label': 'Check Segment-Number and Pressure', 'value': 'segmentnummer_pressure_rolle_check.sparql'},
-                {'label': 'Check Segment-Number', 'value': 'segmentzahl_check.sparql'},
-                {'label': 'Check Sum of Distribution', 'value': 'summe_distribution_check.sparql'},
-            ],
-            placeholder="Consistency Checks",
-            style={'width': '100%'}),
+                id='sparql_library_dropdown',
+                options=[
+                    {'label': 'Check Number of Active Rolls ', 'value': 'anzahl_angetriebene_rolle_check.sparql'},
+                    {'label': 'Check Information on Project', 'value': 'projektinfo_check.sparql'},
+                    {'label': 'Check Active Rolls', 'value': 'rollen_angetrieben_check.sparql'},
+                    {'label': 'Check Id of Active Rolls', 'value': 'rollen_antriebskenner_check.sparql'},
+                    {'label': 'Check Rolls per Plant', 'value': 'rollen_per_anlage_check.sparql'},
+                    {'label': 'Check Rolls per Segment', 'value': 'rollen_per_segment_check.sparql'},
+                    {'label': 'Check Angel of Rolls', 'value': 'rollen_winkel_check.sparql'},
+                    {'label': 'Check Number of Rolls in Pressure-System',
+                     'value': 'rollenanzahl_pressuresystem_check.sparql'},
+                    {'label': 'Check Number of Rolls in Zone', 'value': 'rollenanzahl_zone_check.sparql'},
+                    {'label': 'Check Roll-Number and Drive Power',
+                     'value': 'rollennummer_antriebsleistung_check.sparql'},
+                    {'label': 'Check Segment-Number and Pressure',
+                     'value': 'segmentnummer_pressure_rolle_check.sparql'},
+                    {'label': 'Check Segment-Number', 'value': 'segmentzahl_check.sparql'},
+                    {'label': 'Check Sum of Distribution', 'value': 'summe_distribution_check.sparql'},
+                ],
+                placeholder="Consistency Checks",
+                style={'width': '100%'}),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-        'justify-content': 'space-between'}),
+            'justify-content': 'space-between'}),
         color="secondary",
     ),
 ])
+
 
 def get_select_form_layout(form_id: str, options: list, label: str, description: str):
     """ creates a select (dropdown) form with provides details
@@ -316,25 +326,26 @@ def get_select_form_layout(form_id: str, options: list, label: str, description:
      :return: dbc-element of the form
      :rtype: dbc.FormGroup
     """
-    if len(options)>1:
-        return  dbc.FormGroup([
-                    dbc.InputGroup([
-                        dbc.InputGroupAddon(label, addon_type="append"),
-                        dbc.RadioItems(id=form_id,
-                            options=options, value=options[1].get('value')
-                        ),]),
-                    dbc.FormText(description, color="secondary",)
-                ,])
+    if len(options) > 1:
+        return dbc.FormGroup([
+            dbc.InputGroup([
+                dbc.InputGroupAddon(label, addon_type="append"),
+                dbc.RadioItems(id=form_id,
+                               options=options, value=options[1].get('value')
+                               ), ]),
+            dbc.FormText(description, color="secondary", )
+            , ])
     return dbc.FormGroup([
-                    dbc.InputGroup([
-                        dbc.InputGroupAddon(label, addon_type="append"),
-                        dbc.RadioItems(id=form_id,
-                            options=options
-                        ),]),
-                    dbc.FormText(description, color="secondary",)
-                ,])
+        dbc.InputGroup([
+            dbc.InputGroupAddon(label, addon_type="append"),
+            dbc.RadioItems(id=form_id,
+                           options=options
+                           ), ]),
+        dbc.FormText(description, color="secondary", )
+        , ])
 
-def get_categorical_features(df_: pd.DataFrame, unique_limit: int=20, blacklist_features: list[str]=None):
+
+def get_categorical_features(df_: pd.DataFrame, unique_limit: int = 20, blacklist_features: list[str] = None):
     """ identify categorical features for edge or node data and return their names
     NOTE: Additional logics: (1) cardinality should be within `unique_limit`, (2) remove blacklist_features
 
@@ -350,7 +361,8 @@ def get_categorical_features(df_: pd.DataFrame, unique_limit: int=20, blacklist_
     # identify the rel cols + None
     if blacklist_features is None:
         blacklist_features = ['shape', 'label', 'id']
-    cat_features = ['None'] + df_.columns[(df_.dtypes == 'object') & (df_.apply(pd.Series.nunique) <= unique_limit)].tolist()
+    cat_features = ['None'] + df_.columns[
+        (df_.dtypes == 'object') & (df_.apply(pd.Series.nunique) <= unique_limit)].tolist()
     # remove irrelevant cols
     try:
         for col in blacklist_features:
@@ -358,6 +370,7 @@ def get_categorical_features(df_: pd.DataFrame, unique_limit: int=20, blacklist_
     except ValueError:
         pass
     return cat_features
+
 
 def get_numerical_features(df_: pd.DataFrame):
     """ identify numerical features for edge or node data and return their names
@@ -383,8 +396,9 @@ def get_numerical_features(df_: pd.DataFrame):
     # return
     return numeric_features
 
-def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
-                   directed: bool=False, vis_opts: dict=None, abox: bool = False):
+
+def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list = None,
+                   directed: bool = False, vis_opts: dict = None, abox: bool = False):
     """ create and return the layout of the app
 
     :param graph_data: network data in format of visdcc
@@ -405,409 +419,411 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list=None,
     # Step 1-2: find categorical features of nodes and edges
     if color_legends is None:
         color_legends = []
-    #cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20, ['shape', 'label', 'id', 'title', 'color'])
+    # cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20, ['shape', 'label', 'id', 'title', 'color'])
     cat_node_features = get_categorical_features(pd.DataFrame(graph_data['nodes']).drop(columns=['color']), 20,
                                                  ['shape', 'title', 'color'])
-    cat_edge_features = get_categorical_features(pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id','arrows']), 20, ['color', 'from', 'to', 'id'])
+    cat_edge_features = get_categorical_features(
+        pd.DataFrame(graph_data['edges']).drop(columns=['color', 'from', 'to', 'id', 'arrows']), 20,
+        ['color', 'from', 'to', 'id'])
     # Step 3-4: Get numerical features of nodes and edges
     num_node_features = get_numerical_features(pd.DataFrame(graph_data['nodes']))
     num_edge_features = get_numerical_features(pd.DataFrame(graph_data['edges']))
     # Step 5: create and return the layout
     layout_with_abox = html.Div([
-            create_row(html.H2(children="SPARQL Query Viz")),  # Title
-            create_row(html.H3(children=onto.onto.name)), # Subtitle
-            create_row([
-                dbc.Col([
-                    # setting panel
-                    dbc.Form([
-                        # ---- search section ----
-                        create_row([
-                            html.H6("Search"),
-                            dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
-                                       color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
+        create_row(html.H2(children="SPARQL Query Viz")),  # Title
+        create_row(html.H3(children=onto.onto.name)),  # Subtitle
+        create_row([
+            dbc.Col([
+                # setting panel
+                dbc.Form([
+                    # ---- search section ----
+                    create_row([
+                        html.H6("Search"),
+                        dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
+                                   color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    html.Hr(className="my-2"),
+                    search_form,
+
+                    # ---- edge selection section ----
+                    create_row([
+                        html.H6("Selected Edge"),
+                        dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        selected_edge_form,
                         html.Hr(className="my-2"),
-                        search_form,
+                    ], id="edge-selection-show-toggle", is_open=False),
 
-                        # ---- edge selection section ----
-                        create_row([
-                            html.H6("Selected Edge"),
-                            dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            selected_edge_form,
-                            html.Hr(className="my-2"),
-                        ], id="edge-selection-show-toggle", is_open=False),
+                    # ---- abox data-properties section ----
+                    create_row([
+                        html.H6("A-Box Data-Properties"),
+                        dbc.Button("Hide/Show", id="abox-dp-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        a_box_dp_form,
+                        html.Hr(className="my-2"),
+                    ], id="abox-dp-show-toggle", is_open=False),
 
-                        # ---- abox data-properties section ----
-                        create_row([
-                            html.H6("A-Box Data-Properties"),
-                            dbc.Button("Hide/Show", id="abox-dp-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            a_box_dp_form,
-                            html.Hr(className="my-2"),
-                        ], id="abox-dp-show-toggle", is_open=False),
+                    # ---- SPARQL Template section ----
+                    create_row([
+                        html.H6("SPARQL Templates"),
+                        dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        sparql_template_form,
+                        html.Hr(className="my-2"),
+                    ], id="template-show-toggle", is_open=False),
 
-                        # ---- SPARQL Template section ----
-                        create_row([
-                            html.H6("SPARQL Templates"),
-                            dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            sparql_template_form,
-                            html.Hr(className="my-2"),
-                        ], id="template-show-toggle", is_open=False),
-                        
-                        # ---- SPARQL Library section ----
-                        create_row([
-                            html.H6("SPARQL Library"),
-                            dbc.Button("Hide/Show", id="library-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            sparql_library_form,
-                            html.Hr(className="my-2"),
-                        ], id="library-show-toggle", is_open=False),
+                    # ---- SPARQL Library section ----
+                    create_row([
+                        html.H6("SPARQL Library"),
+                        dbc.Button("Hide/Show", id="library-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        sparql_library_form,
+                        html.Hr(className="my-2"),
+                    ], id="library-show-toggle", is_open=False),
 
-                        # ---- SPARQL Query section ----
-                        create_row([
-                            html.H6("SPARQL Query"),
-                            dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                            dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Popover(
-                            html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
-                                     "write your own queries into the input text field and click the Add-button. "
-                                     "To insert graph elements into the query, toggle the Select Edge/Node-button"
-                                     " and click on the element you like to add. To evaluate the query click the "
-                                     "evaluate-button."),
-                            id="info-sparql-popup", is_open=False,
-                            target="info-sparql-query-button",style={'padding-left': '10px', 'width': '230px'}
+                    # ---- SPARQL Query section ----
+                    create_row([
+                        html.H6("SPARQL Query"),
+                        dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                        dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Popover(
+                        html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
+                                 "write your own queries into the input text field and click the Add-button. "
+                                 "To insert graph elements into the query, toggle the Select Edge/Node-button"
+                                 " and click on the element you like to add. To evaluate the query click the "
+                                 "evaluate-button."),
+                        id="info-sparql-popup", is_open=False,
+                        target="info-sparql-query-button", style={'padding-left': '10px', 'width': '230px'}
+                    ),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        filter_node_form,
+                    ], id="filter-show-toggle", is_open=False),
+
+                    # ---- SPARQL Result section ----
+                    create_row([
+                        html.H6("SPARQL Result"),
+                        dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        dcc.Slider(
+                            id='result-level-slider',
+                            min=0,
+                            max=4,
+                            step=1,
+                            value=1,
+                            marks={
+                                0: '0',
+                                1: '1',
+                                2: '2',
+                                3: '3',
+                                4: '4'
+                            },
                         ),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            filter_node_form,
-                        ], id="filter-show-toggle", is_open=False),
+                        html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+                        html.Hr(className="my-2"),
+                    ], id="result-show-toggle", is_open=False),
 
-                        # ---- SPARQL Result section ----
-                        create_row([
-                            html.H6("SPARQL Result"),
-                            dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            dcc.Slider(
-                                id='result-level-slider',
-                                min=0,
-                                max=4,
-                                step=1,
-                                value=1,
-                                marks={
-                                    0: '0',
-                                    1: '1',
-                                    2: '2',
-                                    3: '3',
-                                    4: '4'
-                                },
-                            ),
-                            html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
-                            html.Hr(className="my-2"),
-                        ], id="result-show-toggle", is_open=False),
+                    # ---- SPARQL History section ----
+                    create_row([
+                        html.H6("SPARQL History"),
+                        dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        dcc.Slider(
+                            id='query-history-length-slider',
+                            min=1,
+                            max=5,
+                            step=1,
+                            value=3,
+                            marks={
+                                1: '1',
+                                2: '2',
+                                3: '3',
+                                4: '4',
+                                5: '5'
+                            },
+                        ),
+                        html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
+                        html.Hr(className="my-2"),
+                        dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], id="history-show-toggle", is_open=False),
 
-                        # ---- SPARQL History section ----
-                        create_row([
-                            html.H6("SPARQL History"),
-                            dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            dcc.Slider(
-                                id='query-history-length-slider',
-                                min=1,
-                                max=5,
-                                step=1,
-                                value=3,
-                                marks={
-                                    1: '1',
-                                    2: '2',
-                                    3: '3',
-                                    4: '4',
-                                    5: '5'
-                                },
-                            ),
-                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
-                            html.Hr(className="my-2"),
-                            dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], id="history-show-toggle", is_open=False),
+                    # ---- color section ----
+                    create_row([
+                        html.H6("Color"),  # heading
+                        html.Div([
+                            dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),  # legend
+                            dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
+                            # legend
+                        ]),
+                        # add the legends popup
+                        dbc.Popover(
+                            children=color_legends,
+                            id="color-legend-popup", is_open=False,
+                            target="color-legend-toggle"
+                        ),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        get_select_form_layout(
+                            form_id='color_nodes',
+                            options=[{'label': opt, 'value': opt} for opt in cat_node_features],
+                            label='Color nodes by',
+                            description='Select the categorical node property to color nodes by'
+                        ),
+                        get_select_form_layout(
+                            form_id='color_edges',
+                            options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
+                            label='Color edges by',
+                            description='Select the categorical edge property to color edges by'
+                        ),
+                    ], id="color-show-toggle", is_open=False),
 
-                        # ---- color section ----
-                        create_row([
-                            html.H6("Color"),  # heading
-                            html.Div([
-                                dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
-                                           size="sm"),  # legend
-                                dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
-                                # legend
-                            ]),
-                            # add the legends popup
-                            dbc.Popover(
-                                children=color_legends,
-                                id="color-legend-popup", is_open=False,
-                                target="color-legend-toggle"
-                            ),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            get_select_form_layout(
-                                form_id='color_nodes',
-                                options=[{'label': opt, 'value': opt} for opt in cat_node_features],
-                                label='Color nodes by',
-                                description='Select the categorical node property to color nodes by'
-                            ),
-                            get_select_form_layout(
-                                form_id='color_edges',
-                                options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
-                                label='Color edges by',
-                                description='Select the categorical edge property to color edges by'
-                            ),
-                        ], id="color-show-toggle", is_open=False),
+                    # ---- size section ----
+                    create_row([
+                        html.H6("Size"),  # heading
+                        dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        get_select_form_layout(
+                            form_id='size_nodes',
+                            options=[{'label': opt, 'value': opt} for opt in num_node_features],
+                            label='Size nodes by',
+                            description='Select the numerical node property to size nodes by'
+                        ),
+                        get_select_form_layout(
+                            form_id='size_edges',
+                            options=[{'label': opt, 'value': opt} for opt in num_edge_features],
+                            label='Size edges by',
+                            description='Select the numerical edge property to size edges by'
+                        ),
+                    ], id="size-show-toggle", is_open=False),
 
-                        # ---- size section ----
-                        create_row([
-                            html.H6("Size"),  # heading
-                            dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            get_select_form_layout(
-                                form_id='size_nodes',
-                                options=[{'label': opt, 'value': opt} for opt in num_node_features],
-                                label='Size nodes by',
-                                description='Select the numerical node property to size nodes by'
-                            ),
-                            get_select_form_layout(
-                                form_id='size_edges',
-                                options=[{'label': opt, 'value': opt} for opt in num_edge_features],
-                                label='Size edges by',
-                                description='Select the numerical edge property to size edges by'
-                            ),
-                        ], id="size-show-toggle", is_open=False),
-
-                    ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
-                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
-                # graph
-                dbc.Col(
-                    visdcc.Network(
-                        id='graph',
-                        data=graph_data,
-                        selection={'nodes': [], 'edges': []},
-                        options=get_options(directed, vis_opts)),
-                    width=9, align="start")])
-        ])
+                ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
+            ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
+            # graph
+            dbc.Col(
+                visdcc.Network(
+                    id='graph',
+                    data=graph_data,
+                    selection={'nodes': [], 'edges': []},
+                    options=get_options(directed, vis_opts)),
+                width=9, align="start")])
+    ])
     if abox:
         logging.info("returning app-layout with section for A-Box Data-Properties")
         return layout_with_abox
     logging.info("returning standard app-layout")
     return html.Div([
-            create_row(html.H2(children="SPARQL Query Viz")),  # Title
-            create_row(html.H3(children=onto.onto.name)), # Subtitle
-            create_row([
-                dbc.Col([
-                    # setting panel
-                    dbc.Form([
-                        # ---- search section ----
-                        create_row([
-                            html.H6("Search"),
-                            dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
-                                       color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
+        create_row(html.H2(children="SPARQL Query Viz")),  # Title
+        create_row(html.H3(children=onto.onto.name)),  # Subtitle
+        create_row([
+            dbc.Col([
+                # setting panel
+                dbc.Form([
+                    # ---- search section ----
+                    create_row([
+                        html.H6("Search"),
+                        dbc.Button("Un-/Freeze", id="freeze-physics", outline=True,
+                                   color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    html.Hr(className="my-2"),
+                    search_form,
+
+                    # ---- edge selection section ----
+                    create_row([
+                        html.H6("Selected Edge"),
+                        dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        selected_edge_form,
                         html.Hr(className="my-2"),
-                        search_form,
+                    ], id="edge-selection-show-toggle", is_open=False),
 
-                        # ---- edge selection section ----
-                        create_row([
-                            html.H6("Selected Edge"),
-                            dbc.Button("Hide/Show", id="edge-selection-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            selected_edge_form,
-                            html.Hr(className="my-2"),
-                        ], id="edge-selection-show-toggle", is_open=False),
+                    # ---- SPARQL Template section ----
+                    create_row([
+                        html.H6("SPARQL Templates"),
+                        dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        sparql_template_form,
+                        html.Hr(className="my-2"),
+                    ], id="template-show-toggle", is_open=False),
 
-                        # ---- SPARQL Template section ----
-                        create_row([
-                            html.H6("SPARQL Templates"),
-                            dbc.Button("Hide/Show", id="template-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            sparql_template_form,
-                            html.Hr(className="my-2"),
-                        ], id="template-show-toggle", is_open=False),
+                    # ---- SPARQL Query section ----
+                    create_row([
+                        html.H6("SPARQL Query"),
+                        dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                        dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Popover(
+                        html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
+                                 "write your own queries into the input text field and click the Add-button. "
+                                 "To insert graph elements into the query, toggle the Select Edge/Node-button"
+                                 " and click on the element you like to add. To evaluate the query click the "
+                                 "evaluate-button."),
+                        id="info-sparql-popup", is_open=False,
+                        target="info-sparql-query-button", style={'padding-left': '10px', 'width': '230px'}
+                    ),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        filter_node_form,
+                    ], id="filter-show-toggle", is_open=False),
 
-                        # ---- SPARQL Query section ----
-                        create_row([
-                            html.H6("SPARQL Query"),
-                            dbc.Button("Hide/Show", id="filter-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                            dbc.Button("Info", id="info-sparql-query-button", outline=True, color="info", size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Popover(
-                            html.Div("To compose a SPARQL query, use the syntax provided in the dropdown-menus or "
-                                     "write your own queries into the input text field and click the Add-button. "
-                                     "To insert graph elements into the query, toggle the Select Edge/Node-button"
-                                     " and click on the element you like to add. To evaluate the query click the "
-                                     "evaluate-button."),
-                            id="info-sparql-popup", is_open=False,
-                            target="info-sparql-query-button", style={'padding-left': '10px', 'width': '230px'}
+                    # ---- SPARQL Result section ----
+                    create_row([
+                        html.H6("SPARQL Result"),
+                        dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        dcc.Slider(
+                            id='result-level-slider',
+                            min=0,
+                            max=4,
+                            step=1,
+                            value=1,
+                            marks={
+                                0: '0',
+                                1: '1',
+                                2: '2',
+                                3: '3',
+                                4: '4'
+                            },
                         ),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            filter_node_form,
-                        ], id="filter-show-toggle", is_open=False),
+                        html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
+                        html.Hr(className="my-2"),
+                    ], id="result-show-toggle", is_open=False),
 
-                        # ---- SPARQL Result section ----
-                        create_row([
-                            html.H6("SPARQL Result"),
-                            dbc.Button("Hide/Show", id="result-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            dcc.Slider(
-                                id='result-level-slider',
-                                min=0,
-                                max=4,
-                                step=1,
-                                value=1,
-                                marks={
-                                    0: '0',
-                                    1: '1',
-                                    2: '2',
-                                    3: '3',
-                                    4: '4'
-                                },
-                            ),
-                            html.Div(id='textarea-result-output', style={'whiteSpace': 'pre-line'}),
-                            html.Hr(className="my-2"),
-                        ], id="result-show-toggle", is_open=False),
+                    # ---- SPARQL History section ----
+                    create_row([
+                        html.H6("SPARQL History"),
+                        dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        dcc.Slider(
+                            id='query-history-length-slider',
+                            min=1,
+                            max=5,
+                            step=1,
+                            value=3,
+                            marks={
+                                1: '1',
+                                2: '2',
+                                3: '3',
+                                4: '4',
+                                5: '5'
+                            },
+                        ),
+                        html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
+                        html.Hr(className="my-2"),
+                        dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], id="history-show-toggle", is_open=False),
 
-                        # ---- SPARQL History section ----
-                        create_row([
-                            html.H6("SPARQL History"),
-                            dbc.Button("Hide/Show", id="history-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            dcc.Slider(
-                                id='query-history-length-slider',
-                                min=1,
-                                max=5,
-                                step=1,
-                                value=3,
-                                marks={
-                                    1: '1',
-                                    2: '2',
-                                    3: '3',
-                                    4: '4',
-                                    5: '5'
-                                },
-                            ),
-                            html.Div(id='sparql_query_history', style={'whiteSpace': 'pre-line'}),
-                            html.Hr(className="my-2"),
-                            dbc.Button("Clear", id="clear-query-history-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], id="history-show-toggle", is_open=False),
+                    # ---- color section ----
+                    create_row([
+                        html.H6("Color"),  # heading
+                        html.Div([
+                            dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
+                                       size="sm"),  # legend
+                            dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
+                            # legend
+                        ]),
+                        # add the legends popup
+                        dbc.Popover(
+                            children=color_legends,
+                            id="color-legend-popup", is_open=False,
+                            target="color-legend-toggle"
+                        ),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        get_select_form_layout(
+                            form_id='color_nodes',
+                            options=[{'label': opt, 'value': opt} for opt in cat_node_features],
+                            label='Color nodes by',
+                            description='Select the categorical node property to color nodes by'
+                        ),
+                        get_select_form_layout(
+                            form_id='color_edges',
+                            options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
+                            label='Color edges by',
+                            description='Select the categorical edge property to color edges by'
+                        ),
+                    ], id="color-show-toggle", is_open=False),
 
-                        # ---- color section ----
-                        create_row([
-                            html.H6("Color"),  # heading
-                            html.Div([
-                                dbc.Button("Hide/Show", id="color-show-toggle-button", outline=True, color="secondary",
-                                           size="sm"),  # legend
-                                dbc.Button("Legends", id="color-legend-toggle", outline=True, color="secondary", size="sm"),
-                                # legend
-                            ]),
-                            # add the legends popup
-                            dbc.Popover(
-                                children=color_legends,
-                                id="color-legend-popup", is_open=False,
-                                target="color-legend-toggle"
-                            ),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            get_select_form_layout(
-                                form_id='color_nodes',
-                                options=[{'label': opt, 'value': opt} for opt in cat_node_features],
-                                label='Color nodes by',
-                                description='Select the categorical node property to color nodes by'
-                            ),
-                            get_select_form_layout(
-                                form_id='color_edges',
-                                options=[{'label': opt, 'value': opt} for opt in cat_edge_features],
-                                label='Color edges by',
-                                description='Select the categorical edge property to color edges by'
-                            ),
-                        ], id="color-show-toggle", is_open=False),
+                    # ---- size section ----
+                    create_row([
+                        html.H6("Size"),  # heading
+                        dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        html.Hr(className="my-2"),
+                        get_select_form_layout(
+                            form_id='size_nodes',
+                            options=[{'label': opt, 'value': opt} for opt in num_node_features],
+                            label='Size nodes by',
+                            description='Select the numerical node property to size nodes by'
+                        ),
+                        get_select_form_layout(
+                            form_id='size_edges',
+                            options=[{'label': opt, 'value': opt} for opt in num_edge_features],
+                            label='Size edges by',
+                            description='Select the numerical edge property to size edges by'
+                        ),
+                    ], id="size-show-toggle", is_open=False),
 
-                        # ---- size section ----
-                        create_row([
-                            html.H6("Size"),  # heading
-                            dbc.Button("Hide/Show", id="size-show-toggle-button", outline=True, color="secondary",
-                                       size="sm"),
-                        ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
-                            'justify-content': 'space-between'}),
-                        dbc.Collapse([
-                            html.Hr(className="my-2"),
-                            get_select_form_layout(
-                                form_id='size_nodes',
-                                options=[{'label': opt, 'value': opt} for opt in num_node_features],
-                                label='Size nodes by',
-                                description='Select the numerical node property to size nodes by'
-                            ),
-                            get_select_form_layout(
-                                form_id='size_edges',
-                                options=[{'label': opt, 'value': opt} for opt in num_edge_features],
-                                label='Size edges by',
-                                description='Select the numerical edge property to size edges by'
-                            ),
-                        ], id="size-show-toggle", is_open=False),
-
-                    ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
-                ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
-                # graph
-                dbc.Col(
-                    visdcc.Network(
-                        id='graph',
-                        data=graph_data,
-                        selection={'nodes': [], 'edges': []},
-                        options=get_options(directed, vis_opts)),
-                    width=9, align="start")])
-        ])
+                ], className="card", style={'padding': '5px', 'background': '#e5e5e5'}),
+            ], width=3, style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}, align="start"),
+            # graph
+            dbc.Col(
+                visdcc.Network(
+                    id='graph',
+                    data=graph_data,
+                    selection={'nodes': [], 'edges': []},
+                    options=get_options(directed, vis_opts)),
+                width=9, align="start")])
+    ])

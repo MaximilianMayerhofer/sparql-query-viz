@@ -4,7 +4,6 @@ Author: Mohit Mayank
 Parse network data from dataframe format into visdcc format 
 """
 
-from dash import dcc, html
 
 def compute_scaling_vars_for_numerical_cols(df):
     """Identify and scale numerical cols"""
@@ -16,9 +15,10 @@ def compute_scaling_vars_for_numerical_cols(df):
     # scale numerical cols
     for col in numeric_cols:
         minn, maxx = df[col].min(), df[col].max()
-        scaling_vars[col] = {'min': minn, 'max': maxx} 
-    # return
+        scaling_vars[col] = {'min': minn, 'max': maxx}
+        # return
     return scaling_vars
+
 
 def parse_dataframe(edge_df, node_df=None):
     """Parse the network dataframe into visdcc format
@@ -48,7 +48,7 @@ def parse_dataframe(edge_df, node_df=None):
     if node_df is not None:
         scaling_vars['node'] = compute_scaling_vars_for_numerical_cols(node_df)
     scaling_vars['edge'] = compute_scaling_vars_for_numerical_cols(edge_df)
-    
+
     # create node list w.r.t. the presence of absence of node_df
     nodes = []
     if node_df is None:
@@ -65,6 +65,6 @@ def parse_dataframe(edge_df, node_df=None):
     # create edges from df
     edges = []
     for row in edge_df.to_dict(orient='records'):
-        edges.append({**row, **{'id': row['id'],  'color': {'color': '#97C2FC'}}})
+        edges.append({**row, **{'id': row['id'], 'color': {'color': '#97C2FC'}}})
     # return
     return {'nodes': nodes, 'edges': edges}, scaling_vars

@@ -5,11 +5,17 @@ Editor: Maximilian Mayerhofer
 
 Main class for Jaal network visualization dashboard
 """
-# import for logging
-import logging
+
+# import
 import datetime
+import logging
 import os
 import pyparsing
+import dash
+from dash import html
+import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output, State
+
 
 # basic configuration fpr logging
 dir_file = os.path.dirname(__file__)
@@ -18,17 +24,8 @@ logfile = dir_file.replace('/SPARQL-Query-Viz/jaal',
     "%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
-# import
-import owlready2.rply
+# imports after logging was set up
 from ontor import OntoEditor
-import dash
-import visdcc
-import pandas as pd
-from dash import dcc
-from dash import html
-import dash_bootstrap_components as dbc
-from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output, State
 from .datasets.parse_dataframe import parse_dataframe
 from .datasets.parse_ontology import *
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, \

@@ -9,13 +9,11 @@ Data details:
 
 # imports
 import logging
-import datetime
 import os
-import pandas as pd
 import ontor as ontor
+import pandas as pd
 from ontor import OntoEditor
-import owlready2
-import time
+
 
 def build_example_ontology():
     """ builds up the Pizza-example ontology wih classes, instances, object- and data-properties
@@ -44,7 +42,8 @@ def build_example_ontology():
     ontor1.add_instances(ins)
     return ontor1
 
-def get_tboxes(onto: OntoEditor, nodelist: list=None):
+
+def get_tboxes(onto: OntoEditor, nodelist: list = None):
     """ extract T-Boxes from ontology and return them in a list
 
     :param onto: ontology from which classes are extracted
@@ -62,11 +61,12 @@ def get_tboxes(onto: OntoEditor, nodelist: list=None):
     # All classes from the generator are written into a list with their name, importance, shape and T-Box label
     for cl in node_gen:
         nodelist.append([cl.name, 1, 'dot', 'T', ""])
-    #return list of all extracted classes
+    # return list of all extracted classes
     logging.info("successfully parsed T-Boxes from ontology specified")
     return nodelist
 
-def get_isa_relations(onto: OntoEditor, edgelist: list=None):
+
+def get_isa_relations(onto: OntoEditor, edgelist: list = None):
     """ extracts all 'is_a'-relations from ontology and returns them in a list
 
     :param onto: ontology from which relations are extracted
@@ -93,7 +93,8 @@ def get_isa_relations(onto: OntoEditor, edgelist: list=None):
     logging.info("successfully parsed IS_A-relations from ontology specified")
     return edgelist
 
-def get_OPs(onto: OntoEditor, edgelist: list=None):
+
+def get_OPs(onto: OntoEditor, edgelist: list = None):
     """ extracts all object-properties from ontology and returns them in a list that is passed to the function
 
     :param onto: ontology from which relations are extracted
@@ -113,12 +114,12 @@ def get_OPs(onto: OntoEditor, edgelist: list=None):
         # All range-elements (targets) are written into a list, with their
         # domain's name, name, identifier, weight, associated object-property's name and dashes-boolean
         for i, value in enumerate(op.range):
-            #if i != 0:
+            # if i != 0:
             domain = op.domain
             if not domain:
                 print("op-domain empty")
-                #node_gen = onto.onto.classes()
-                #for cl in node_gen:
+                # node_gen = onto.onto.classes()
+                # for cl in node_gen:
                 #    edge_already_exists = False
                 #    identifier = cl.name + ' ' + op.name + ' ' + op.range[i].name
                 #    for edge in edgelist:
@@ -136,7 +137,8 @@ def get_OPs(onto: OntoEditor, edgelist: list=None):
     logging.info("successfully parsed Object-Properties from ontology specified")
     return edgelist
 
-def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
+
+def get_DPs(onto: OntoEditor, nodelist: list = None, edgelist: list = None):
     """ extracts all data-properties from ontology and returns them in a list that is passed to the function
 
     :param onto: ontology from which relations are extracted
@@ -165,7 +167,7 @@ def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
         for dom in dp.domain:
             if not dom in dp_dom_unique:
                 dp_dom_unique.append(dom)
-        #try:
+        # try:
         # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
         edge_in_edgelist = False
         # The datatype of the associated data-property is written into a string-variable
@@ -208,12 +210,13 @@ def get_DPs(onto: OntoEditor, nodelist: list=None, edgelist: list=None):
             nodelist.append([dp_type, 1, 'triangle', 'T', ""])
         counter_parsed = counter_parsed + 1
         # If an IndexError is thrown, an warning will be logged, that the one data-property was skipped
-        #except IndexError:
+        # except IndexError:
         #    counter_skipped = counter_skipped + 1
     logging.info("successfully parsed %i Data-Properties from ontology specified", counter_parsed)
-    #logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
+    # logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
+
 
 def get_node_importance(nodelist: list, edgelist: list):
     """ weights the nodes in nodelist according to the number of incoming edges
@@ -229,7 +232,7 @@ def get_node_importance(nodelist: list, edgelist: list):
         counter = 0
         for edge in edgelist:
             if node[0] == edge[1] and edge[4] == 'is_a':
-                    counter = counter + 1
+                counter = counter + 1
             # If the counter of a node is higher than zero, the new importance value is assigned
         if counter != 0:
             node[1] = counter
@@ -267,10 +270,11 @@ def calculate_node_importance(node_df: pd.DataFrame, edge_df: pd.DataFrame):
                     counter = counter + 1
             # If the counter of a node is higher than zero, the new importance value is assigned
             if counter != 0:
-                node_df.loc[node_index,'importance'] = counter
+                node_df.loc[node_index, 'importance'] = counter
     # return node_df with new importance values
     logging.info("successfully calculated weights for A-/T-Boxes")
     return node_df
+
 
 def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
     """ extracts all instances/ A-Boxes from ontology and returns them in a list that is passed to the function
@@ -289,7 +293,7 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
     # Iteration over all classes/ nodes in the generator
     for node in node_gen:
         # Iteration over all instances of of the associated class
-        for ins in onto.onto.search(type = node):
+        for ins in onto.onto.search(type=node):
             # Boolean to indicate, whether edge is already in edgelist is instantiated
             edge_in_edgelist = False
             # Get superclass of instance
@@ -308,10 +312,10 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
                         new_edge = [ins.name, value.name, identifier, 1, prop.name, False]
                         if not new_edge in edgelist:
                             edgelist.append(new_edge)
-                        #for rel in edgelist:
+                        # for rel in edgelist:
                         #    if rel[2] == identifier:
                         #        edge_in_edgelist = True
-                        #if not edge_in_edgelist:
+                        # if not edge_in_edgelist:
                         #    edgelist.append([ins.name, value.name, identifier, 1, prop.name, False])
                         edge_in_edgelist = False
             # If there is a class in nodelist that has the same name as the instance node_in_list is set to True
@@ -342,6 +346,7 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
     # return list of all extracted instances and list of all extracted edges/ relations
     return nodelist, edgelist
 
+
 def is_already_in_list(nodename: str, nodelist: list):
     """ checks if a node with a given name, is already in the given list
 
@@ -358,6 +363,7 @@ def is_already_in_list(nodename: str, nodelist: list):
         if cl[0] == nodename:
             return True
     return False
+
 
 def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     """ parses the information given by the ontology into a panda.DataFrame. Parsed data includes:
@@ -391,6 +397,6 @@ def get_df_from_ontology(onto: OntoEditor, abox: bool = False):
     edge_df = pd.DataFrame(edgelist)
     edge_df.columns = ['from', 'to', 'id', 'weight', 'label', 'dashes']
     # Calculate the importance of nodes in nodelist and write the new importance value into node_df
-    #node_df = calculate_node_importance(node_df, edge_df)
+    # node_df = calculate_node_importance(node_df, edge_df)
     logging.info("...successfully parsed data from ontology specified to dataframes")
     return edge_df, node_df
