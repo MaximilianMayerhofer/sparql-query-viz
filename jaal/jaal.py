@@ -13,7 +13,9 @@ import pyparsing
 
 # basic configuration fpr logging
 dir_file = os.path.dirname(__file__)
-logfile = dir_file.replace('/SPARQL-Query-Viz/jaal', '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
+logfile = dir_file.replace('/SPARQL-Query-Viz/jaal',
+                           '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime(
+    "%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 # import
@@ -39,6 +41,7 @@ PREFIXES = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' \
            'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ' \
            'PREFIX owlready: <http://www.lesfleursdunormal.fr/static/_downloads/owlready_ontology.owl#> ' \
            'PREFIX obo: <http://purl.obolibrary.org/obo/>'
+
 
 def _callback_search_graph(graph_data: dict, search_text: str):
     """ only show the nodes which match the search text
@@ -68,7 +71,8 @@ def _callback_search_graph(graph_data: dict, search_text: str):
     graph_data['edges'] = edges
     return graph_data
 
-def get_color_popover_legend_children(node_value_color_mapping: dict=None, edge_value_color_mapping: dict=None):
+
+def get_color_popover_legend_children(node_value_color_mapping: dict = None, edge_value_color_mapping: dict = None):
     """ get the popover legends for node and edge based on the color setting
 
     :param node_value_color_mapping: maps a node value to a specific color
@@ -99,7 +103,7 @@ def get_color_popover_legend_children(node_value_color_mapping: dict=None, edge_
                     _popover_legend_children.append(
                         # dbc.PopoverBody(f"Key: {key}, Value: {value}")
                         create_color_legend(key, value)
-                        )
+                    )
                 else:
                     _popover_legend_children.append(
                         # dbc.PopoverBody(f"Key: {key}, Value: {value}")
@@ -109,7 +113,7 @@ def get_color_popover_legend_children(node_value_color_mapping: dict=None, edge_
                         # dbc.PopoverBody(f"Key: {key}, Value: {value}")
                         create_color_legend(partition[2], value)
                     )
-        else: # otherwise add filler
+        else:  # otherwise add filler
             _popover_legend_children.append(dbc.PopoverBody(f"no {title.lower()} colored!"))
         #
         return _popover_legend_children
@@ -120,6 +124,7 @@ def get_color_popover_legend_children(node_value_color_mapping: dict=None, edge_
     popover_legend_children.extend(create_legends_for("Edge", edge_value_color_mapping))
     #
     return popover_legend_children
+
 
 def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edges_to_be_shown_around_result: int = 1):
     """ gets the nodes in graph_data that are listed in res_list and therefore will be shown in the graph
@@ -159,13 +164,15 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
                             next_level_res_list.append(node)
         current_level_res_list = next_level_res_list.copy()
         next_level_res_list = []
-        n = n+1
+        n = n + 1
     return filtered_node_data, node_selection
+
 
 class Jaal:
     """The main visualization class
     """
-    def __init__(self, iri: str="http://example.org/onto-ex.owl", path: str="./pizza-onto.owl", abox: bool = True):
+
+    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./pizza-onto.owl", abox: bool = True):
         """ initialize Jaal class
 
         :param onto: ontology
@@ -175,7 +182,7 @@ class Jaal:
         """
         self.logger = logging.getLogger('jaal-app')
         self.abox = abox
-        self.onto = ontor.OntoEditor(iri,path)
+        self.onto = ontor.OntoEditor(iri, path)
         self.edge_df, self.node_df = get_df_from_ontology(self.onto, self.abox)
         self.logger.info("begin parsing data from dataframes to visdcc data format...")
         self.data, self.scaling_vars = parse_dataframe(self.edge_df, self.node_df)
@@ -195,7 +202,7 @@ class Jaal:
         self.edges_selected_for_template = 0
         self.selected_edge_for_template = ''
 
-    def edit_edge_appearance(self, directed: bool=True):
+    def edit_edge_appearance(self, directed: bool = True):
         """ edits the arrow heads of is_a relations
 
         :param directed: indicates whether arrow heads are displayed
@@ -242,7 +249,8 @@ class Jaal:
                         placeholder = "[:node2]"
                     elif '[:node3]' in self.sparql_query:
                         placeholder = "[:node3]"
-                    if self.nodes_selected_for_template < max_number_of_selected_nodes and template and (placeholder != ''):
+                    if self.nodes_selected_for_template < max_number_of_selected_nodes and template and (
+                            placeholder != ''):
                         self.sparql_query = self.sparql_query.replace(placeholder, self.sparql_query_last_input[-1])
                         self.nodes_selected_for_template = self.nodes_selected_for_template + 1
                         self.selected_node_for_template = self.sparql_query_last_input[-1]
@@ -307,7 +315,7 @@ class Jaal:
         self.sparql_query_history = self.sparql_query_history + str(
             self.counter_query_history) + ": " + self.sparql_query + '\n'
 
-    def _callback_filter_nodes(self, graph_data: dict, shown_result_level: int=1):
+    def _callback_filter_nodes(self, graph_data: dict, shown_result_level: int = 1):
         """ filters the nodes based on the Python query syntax
 
         :param graph_data: network data in format of visdcc
@@ -322,7 +330,7 @@ class Jaal:
         try:
             rdflib_onto = self.onto.onto_world.as_rdflib_graph()
             res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
-            #res_list = list(self.onto.onto_world.sparql(self.sparql_query))
+            # res_list = list(self.onto.onto_world.sparql(self.sparql_query))
             flat_res_list = [x for l in res_list for x in l]
             self.sparql_query_result_list = flat_res_list
             result = ""
@@ -346,7 +354,9 @@ class Jaal:
                     self.logger.info("result is not an object (A-/ T-Box) in graph (different data-type)")
             self.sparql_query_result = result
             if not res_is_no_data_object:
-                self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data, flat_res_list, shown_result_level)
+                self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data,
+                                                                                        flat_res_list,
+                                                                                        shown_result_level)
                 graph_data = self.filtered_data
             self.add_to_query_history()
             self.logger.info("valid sparql query successfully evaluated")
@@ -396,7 +406,7 @@ class Jaal:
         else:
             unique_values = pd.DataFrame(self.data['nodes'])[color_nodes_value].unique()
             colors = get_distinct_colors(len(unique_values), for_nodes=True)
-            value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
+            value_color_mapping = {x: y for x, y in zip(unique_values, colors)}
             for node in self.data['nodes']:
                 node['color'] = value_color_mapping[node[color_nodes_value]]
         # filter the data currently shown
@@ -404,7 +414,7 @@ class Jaal:
         self.filtered_data['nodes'] = [x for x in self.data['nodes'] if x['id'] in filtered_nodes]
         graph_data = self.filtered_data
         return graph_data, value_color_mapping
-    
+
     def _callback_size_nodes(self, size_nodes_value: str):
         """ sizes the nodes according to the size_nodes_value
 
@@ -427,7 +437,7 @@ class Jaal:
                 node['size'] = DEFAULT_NODE_SIZE
         else:
             # define the scaling function
-            scale_val = lambda x: 20*(x-minn)/(maxx-minn)
+            scale_val = lambda x: 20 * (x - minn) / (maxx - minn)
             # set size after scaling
             for node in self.data['nodes']:
                 node['size'] = node['size'] + scale_val(node[size_nodes_value])
@@ -454,7 +464,7 @@ class Jaal:
         else:
             unique_values = pd.DataFrame(self.data['edges'])[color_edges_value].unique()
             colors = get_distinct_colors(len(unique_values), for_nodes=False)
-            value_color_mapping = {x:y for x, y in zip(unique_values, colors)}
+            value_color_mapping = {x: y for x, y in zip(unique_values, colors)}
             for edge in self.data['edges']:
                 edge['color']['color'] = value_color_mapping[edge[color_edges_value]]
         # filter the data currently shown
@@ -484,7 +494,7 @@ class Jaal:
                 edge['width'] = DEFAULT_EDGE_SIZE
         else:
             # define the scaling function
-            scale_val = lambda x: 5*(x-minn)/(maxx-minn)
+            scale_val = lambda x: 5 * (x - minn) / (maxx - minn)
             # set the size after scaling
             for edge in self.data['edges']:
                 if edge[size_edges_value] == minn:
@@ -519,7 +529,7 @@ class Jaal:
             self.logger.info("Nodes were initially colored")
         # Get list of categorical features from edges
         cat_edge_features = get_categorical_features(pd.DataFrame(self.data['edges']).drop(
-            columns=['color', 'from', 'to', 'id','arrows']), 20,['color', 'from', 'to', 'id'])
+            columns=['color', 'from', 'to', 'id', 'arrows']), 20, ['color', 'from', 'to', 'id'])
         # Define label and value for each categorical feature
         options = [{'label': opt, 'value': opt} for opt in cat_edge_features]
         # If options has mor then one categorical feature, the callback function for edge-coloring is executed once,
@@ -546,7 +556,7 @@ class Jaal:
             self.data = self._callback_size_edges(options[1].get('value'))
             self.logger.info("Edges were initially sized")
 
-    def create(self, directed=False, vis_opts: dict=None):
+    def create(self, directed=False, vis_opts: dict = None):
         """ creates the Jaal app and returns it
 
         :param directed: indicates whether the graph is directed
@@ -557,14 +567,15 @@ class Jaal:
          :rtype dash.Dash
         """
         # create the app
-        #app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
-        app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
+        # app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
+        app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title='SPARQL Query Viz')
 
         # get color_mapping and size_mapping once at the start
         self.forced_callback_execution_at_beginning(directed=directed)
 
         # define layout
-        app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(), directed=directed, vis_opts=vis_opts, abox = self.abox)
+        app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(),
+                                    directed=directed, vis_opts=vis_opts, abox=self.abox)
 
         @app.callback(
             Output("graph", "options"),
@@ -612,7 +623,7 @@ class Jaal:
             Output("filter-show-toggle", "is_open"),
             [Input("filter-show-toggle-button", "n_clicks"),
              Input('sparql_template_dropdown', 'value'),
-             Input('sparql_library_dropdown', 'value'),],
+             Input('sparql_library_dropdown', 'value'), ],
             [State("filter-show-toggle", "is_open")],
         )
         def toggle_filter_collapse(n_show, template_value, library_value, is_open):
@@ -627,7 +638,7 @@ class Jaal:
                     else:
                         self.logger.info("sparql query section was shown, triggered by user")
                     return not is_open
-                if (input_id == "sparql_template_dropdown" and template_value)\
+                if (input_id == "sparql_template_dropdown" and template_value) \
                         or (input_id == "sparql_library_dropdown" and library_value):
                     self.logger.info("sparql query section was shown, because template/library input was triggered")
                     return True
@@ -669,10 +680,10 @@ class Jaal:
                     self.logger.info("sparql history section was shown, triggered by user")
                 return not is_open
             return is_open
-        
+
         @app.callback(
             Output("select-sparql", "children"),
-            [Input("sparql-keywords-dropdown","value"),
+            [Input("sparql-keywords-dropdown", "value"),
              Input("sparql-variables-dropdown", "value"),
              Input("sparql-syntax-dropdown", "value"),
              Input("add_to_query_button", "n_clicks"),
@@ -680,8 +691,8 @@ class Jaal:
              Input("delete_query_button", "n_clicks"),
              Input("add_node_edge_to_query_button", "on"),
              Input('graph', 'selection'),
-             Input('sparql_template_dropdown','value'),
-             Input('sparql_library_dropdown','value')],
+             Input('sparql_template_dropdown', 'value'),
+             Input('sparql_library_dropdown', 'value')],
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
@@ -740,14 +751,14 @@ class Jaal:
                     if n_delete:
                         self.delete_last_user_input()
                 elif input_id == "sparql_template_dropdown" and template_value:
-                    query = open("jaal/datasets/templates/"+template_value, "r")
-                    self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n"+ query.read())
+                    query = open("jaal/datasets/templates/" + template_value, "r")
+                    self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n" + query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_library_dropdown" and library_value:
-                    query = open("jaal/datasets/queries/"+library_value, "r")
+                    query = open("jaal/datasets/queries/" + library_value, "r")
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
@@ -756,7 +767,7 @@ class Jaal:
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
                     self.complete_sparql_query_with_selection(selection, template_value)
             return self.sparql_query
-        
+
         # create callbacks to toggle hide/show sections - COLOR section
         @app.callback(
             Output("color-show-toggle", "is_open"),
@@ -872,7 +883,7 @@ class Jaal:
             return s_node
 
         @app.callback(
-             Output('edge-selection', 'children'),
+            Output('edge-selection', 'children'),
             [Input('graph', 'selection')])
         def show_label_from_selected_edge(x):
             s_edge = ''
@@ -901,7 +912,7 @@ class Jaal:
         @app.callback(
             [Output('graph', 'data'),
              Output('color-legend-popup', 'children'),
-             Output('textarea-result-output', 'children'), 
+             Output('textarea-result-output', 'children'),
              Output('sparql_query_history', 'children'),
              Output('graph', 'selection')],
             [Input('search_graph', 'value'),
@@ -911,14 +922,14 @@ class Jaal:
              Input('size_edges', 'value'),
              Input('evaluate_query_button', 'n_clicks'),
              Input('clear-query-history-button', 'n_clicks'),
-             Input('query-history-length-slider','value'),
+             Input('query-history-length-slider', 'value'),
              Input("color-legend-toggle", "n_clicks"),
-             Input('result-level-slider','value'),],
+             Input('result-level-slider', 'value'), ],
             [State('graph', 'data')]
         )
         def setting_pane_callback(search_text, color_nodes_value, color_edges_value,
                                   size_nodes_value, size_edges_value, n_evaluate, n_clear, query_history_length,
-                                  n_legend,shown_result_level, graph_data):
+                                  n_legend, shown_result_level, graph_data):
             # fetch the id of option which triggered
             ctx = dash.callback_context
             flat_res_list_children = self.sparql_query_result
@@ -938,11 +949,14 @@ class Jaal:
                     self.logger.info("shown graph data filtered, triggered by user")
                 # In case filter nodes was triggered
                 elif input_id == 'evaluate_query_button' and n_evaluate:
-                    graph_data, flat_res_list_children, selection = self._callback_filter_nodes(graph_data, shown_result_level)
+                    graph_data, flat_res_list_children, selection = self._callback_filter_nodes(graph_data,
+                                                                                                shown_result_level)
                 elif input_id == 'result-level-slider':
-                    graph_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.data, self.sparql_query_result_list, shown_result_level)
+                    graph_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.data,
+                                                                                    self.sparql_query_result_list,
+                                                                                    shown_result_level)
                 if input_id == "clear-query-history-button" and n_clear:
-                    self.counter_query_history= 0
+                    self.counter_query_history = 0
                     self.sparql_query_history = ""
                     self.logger.info("query history was cleared, triggered by user")
                 # If color node text is provided
@@ -971,6 +985,7 @@ class Jaal:
             # finally return the modified data
             return [graph_data, color_popover_legend_children, flat_res_list_children,
                     sparql_query_history_children, selection]
+
         # return server
         return app
 
