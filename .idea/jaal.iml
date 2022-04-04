@@ -5,7 +5,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
-    <option name="requirementsPath" value="$MODULE_DIR$/requirements.txt" />
+    <option name="requirementsPath" value="$USER_HOME$/jaal/requirements.txt" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

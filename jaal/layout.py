@@ -71,20 +71,17 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     if not physics:
         opts['physics'] = {'enabled': False}
     else:
-        #opts['physics'] = {'enabled': True}
-        opts['physics'] = {'stabilization':{'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,'maxVelocity': 250,
-                           'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
-                                                                              'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
-                                                                              'avoidOverlap': 0 }}
-    #    opts['physics'] = {'stabilization':{'enabled': False}, 'timestep': 1, 'maxVelocity': 25, 'minVelocity': 0.1,
-    #                       'barnesHut': {'theta': 1,'gravitationalConstant': -100000, 'centralGravity': 0.1,
-    #                                     'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
-    #                                     'avoidOverlap': 0.0 }}
+        if opts_args == "small":
+            opts['physics'] = {'enabled': True}
+        else:
+            opts['physics'] = {'stabilization':{'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,'maxVelocity': 250,
+                               'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
+                                                                                  'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
+                                                                                  'avoidOverlap': 0 }}
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
-    #opts['edges'] = { 'arrows': { 'to': directed }, 'chosen': {'edge': False, 'label': True}}
-    #opts['edges'] = { 'arrows': { 'to': directed }, 'font': {'size': 0},'chosen': {'edge': False, 'label': 'function(values, id, selected, hovering) {values.size = 14;}'}}
-    if opts_args is not None:
-        opts.update(opts_args)
+    #if opts_args is not None:
+    #    opts.update(opts_args)
+
     return opts
 
 def get_distinct_colors(n: int, for_nodes = True):

@@ -13,7 +13,7 @@ import os
 import pyparsing
 
 dir_file = os.path.dirname(__file__)
-logfile = dir_file.replace('/jaal/jaal', '/jaal/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
+logfile = dir_file.replace('/SPARQL-Query-Viz/jaal', '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 # import
@@ -974,7 +974,7 @@ class Jaal:
         # return server
         return app
 
-    def plot(self, debug=False, host="127.0.0.1", port=8050, directed=False, vis_opts=None):
+    def plot(self, debug=False, host="127.0.0.1", port=8050, directed=True, vis_opts=None):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
         Parameter
