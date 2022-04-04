@@ -324,49 +324,49 @@ class Jaal:
         """
         self.filtered_data = self.data.copy()
         selection = {'nodes': [], 'edges': []}
-        try:
-            rdflib_onto = self.onto.onto_world.as_rdflib_graph()
-            res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
-            # res_list = list(self.onto.onto_world.sparql(self.sparql_query))
-            flat_res_list = [x for l in res_list for x in l]
-            self.sparql_query_result_list = flat_res_list
-            result = ""
-            if not flat_res_list:
-                graph_data = self.data
-                result = "No results for this SPARQL query."
+        if self.sparql_query:
+            try:
+                rdflib_onto = self.onto.onto_world.as_rdflib_graph()
+                res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
+                flat_res_list = [x for l in res_list for x in l]
+                self.sparql_query_result_list = flat_res_list
+                result = ""
+                if not flat_res_list:
+                    graph_data = self.data
+                    result = "No results for this SPARQL query."
+                    self.sparql_query_result = result
+                    self.add_to_query_history()
+                    self.logger.info("valid sparql query successfully evaluated")
+                    self.logger.info("result for passed sparql query is empty")
+                    return graph_data, result, selection
+                res_is_no_data_object = True
+                for flat_res in flat_res_list:
+                    try:
+                        result = result + str(flat_res.name) + "\n"
+                        self.logger.info("result is a valid node/edge of graph")
+                        res_is_no_data_object = False
+                    except AttributeError:
+                        graph_data = self.data
+                        result = result + str(flat_res) + "\n"
+                        self.logger.info("result is not an object (A-/ T-Box) in graph (different data-type)")
                 self.sparql_query_result = result
+                if not res_is_no_data_object:
+                    self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data,
+                                                                                            flat_res_list,
+                                                                                            shown_result_level)
+                    graph_data = self.filtered_data
                 self.add_to_query_history()
                 self.logger.info("valid sparql query successfully evaluated")
-                self.logger.info("result for passed sparql query is empty")
-                return graph_data, result, selection
-            res_is_no_data_object = True
-            for flat_res in flat_res_list:
-                try:
-                    result = result + str(flat_res.name) + "\n"
-                    self.logger.info("result is a valid node/edge of graph")
-                    res_is_no_data_object = False
-                except AttributeError:
-                    graph_data = self.data
-                    result = result + str(flat_res) + "\n"
-                    self.logger.info("result is not an object (A-/ T-Box) in graph (different data-type)")
-            self.sparql_query_result = result
-            if not res_is_no_data_object:
-                self.filtered_data['nodes'], selection['nodes'] = get_nodes_to_be_shown(self.filtered_data,
-                                                                                        flat_res_list,
-                                                                                        shown_result_level)
-                graph_data = self.filtered_data
-            self.add_to_query_history()
-            self.logger.info("valid sparql query successfully evaluated")
-        except pyparsing.ParseException:
+            except pyparsing.ParseException:
+                graph_data = self.data
+                result = "Syntax Error in SPARQL Query."
+                self.sparql_query_result = result
+                self.logger.warning("sparql query passed from user included a syntax error")
+        else:
             graph_data = self.data
-            result = "Not a valid SPARQL query."
+            result = "There is nothing to evaluate."
             self.sparql_query_result = result
-            self.logger.warning("sparql query passed from user is not valid")
-        except ValueError:
-            graph_data = self.data
-            result = "Not a valid SPARQL query."
-            self.sparql_query_result = result
-            self.logger.warning("sparql query passed from user is not valid")
+            self.logger.warning("sparql query passed from user is empty")
         return graph_data, result, selection
 
     def _callback_sparql_query_history(self, number_of_shown_queries: int):
