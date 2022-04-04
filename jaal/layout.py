@@ -71,6 +71,7 @@ def get_options(directed: bool, opts_args: dict= None, physics: bool = True):
     if not physics:
         opts['physics'] = {'enabled': False}
     else:
+        #opts['physics'] = {'enabled': True}
         opts['physics'] = {'stabilization':{'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,'maxVelocity': 250,
                            'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
                                                                               'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
