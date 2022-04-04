@@ -9,9 +9,9 @@ Main class for Jaal network visualization dashboard
 import logging
 import datetime
 import os
-# basic configuration fpr logging
 import pyparsing
 
+# basic configuration fpr logging
 dir_file = os.path.dirname(__file__)
 logfile = dir_file.replace('/SPARQL-Query-Viz/jaal', '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
