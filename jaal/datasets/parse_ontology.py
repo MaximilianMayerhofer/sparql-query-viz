@@ -15,34 +15,6 @@ import pandas as pd
 from ontor import OntoEditor
 
 
-def build_example_ontology():
-    """ builds up the Pizza-example ontology wih classes, instances, object- and data-properties
-
-    :return: returns the Pizza-example ontology
-     :rtype:OntoEditor
-    """
-    this_dir, _ = os.path.split(__file__)
-    iri = "http://example.org/onto-got.owl"
-    fname = "./onto-got.owl"
-    ontor1 = OntoEditor(iri, fname)
-    classes = [["company", None, None, None, None, None, None],
-               ["pizza_company", "company", None, None, None, None, False],
-               ["margherita_company", "pizza_company", None, None, None, None, False],
-               ["quattro_stagioni", "pizza", None, None, None, None, False]]
-    ins = [["Her_pizza", "quattro_stagioni", None, None, None],
-           ["Jane", "human", "likes", "Her_pizza", None],
-           ["Faulty_pizza", None, None, None, None],
-           ["Her_pizza", "quattro_stagioni", "weight_in_grams", "430.0", "float"],
-           ["Her_pizza", "quattro_stagioni", "diameter_in_cm", "32", "integer"],
-           ["Her_pizza", "quattro_stagioni", "description", "jane's pizza", "string"]]
-    ontor1.add_axioms(classes)
-    ontor1.add_ops(ontor.load_json(os.path.join(this_dir, "example_ontology", "props.json"))["op"])
-    ontor1.add_dps(ontor.load_json(os.path.join(this_dir, "example_ontology", "props.json"))["dp"])
-    ontor1.add_axioms(ontor.load_csv(os.path.join(this_dir, "example_ontology", "class_axioms.csv")))
-    ontor1.add_instances(ins)
-    return ontor1
-
-
 def get_tboxes(onto: OntoEditor, nodelist: list = None):
     """ extract T-Boxes from ontology and return them in a list
 

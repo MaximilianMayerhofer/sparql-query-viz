@@ -142,4 +142,4 @@ dmypy.json
 
 # use-case-data
 jaal/datasets/queries/
-use-case-onto.owl
+jaal/datasets/ontologies/use-case-onto.owl

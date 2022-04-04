@@ -1,3 +1,3 @@
 # import
 from jaal import Jaal
-Jaal(iri="http://example.org/onto-example.owl", path="./use-case-onto.owl").plot()
+Jaal(iri="http://example.org/onto-example.owl", path="jaal/datasets/ontologies/use-case-onto.owl").plot()

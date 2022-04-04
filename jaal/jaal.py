@@ -169,7 +169,8 @@ class Jaal:
     """The main visualization class
     """
 
-    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./pizza-onto.owl", abox: bool = True):
+    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./jaal/datasets/ontologies/pizza"
+                                                                                "-onto.owl", abox: bool = True):
         """ initialize Jaal class
 
         :param onto: ontology
