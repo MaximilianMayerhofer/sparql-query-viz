@@ -9,9 +9,9 @@
 
 *SPARQL Query Viz* is a python based interactive ontology visualizing tool, that supports you to compose SPARQL queries interactively. 
 
-The straightforward visualization can be adjusted to your needs by coloring and sizing of the graph elements. You can also turn of the visualization of *ABoxes* if the visualized ontology is cluttering the display. 
+The interactive graph gives an overview over the structure of the ontology at hand. The visualization can be adjusted to your needs by tweaking the visualization option, by coloring and sizing of the graph elements and by turning on/ off the *ABox* visualization.
 
-*SPARQL Query Viz* provides an interactive query formulation and composition panel, that enables you to write queries, by making use of templates and other useful features. You can evaluate the queries and see the visualized result in the context of the ontology.
+*SPARQL Query Viz* provides an interactive query formulation panel, that enables you to compose and evaluate queries. Templates and interactive composition techniques support particularly lay users in query formulation.
 
 ## Requirements
 
