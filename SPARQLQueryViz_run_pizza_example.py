@@ -1,4 +1,9 @@
 # import
-from jaal import SQV
+from sparql_query_viz import SQV
 
-SQV().plot(vis_opts="small")
+port = 8050
+while True:
+    try:
+        SQV().plot(port=port, vis_opts="small")
+    except:
+        port += 1

@@ -1,4 +1,4 @@
-<img src="jaal/assest/logo_sqv.png" alt="sqv logo"/>
+<img src="sparql_query_viz/assest/logo_sqv.png" alt="sqv logo"/>
 
 
 *Your interactive ontology visualizing and SPARQL query formulation tool*
@@ -37,9 +37,9 @@ To visualize the included *Pizza-ontology*, the file `SPARQLQueryViz_run_pizza_e
 Alternatively the following two lines of code also do the job:
 
 ```python
-from jaal import SQV
+from sparql_query_viz import SQV
 
-sqv = SQV(iri="http://example.org/onto-ex.owl", path="./jaal/datasets/ontologies/pizza", abox=True)
+sqv = SQV(iri="http://example.org/onto-ex.owl", path="sparql_query_viz/datasets/ontologies/pizza", abox=True)
 sqv.plot(host="127.0.0.1", port=8050, directed=True, vis_opts="small")
 ```
 
@@ -58,7 +58,7 @@ Note, that all the arguments are optional. The default values for these argument
 
 After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where *SPARQL-Query-Viz* is running. Access it to see the following dashboard:
 
-<img src="jaal/assest/dashboard.png" alt="dashboard"/>
+<img src="sparql_query_viz/assest/dashboard.png" alt="dashboard"/>
 
 ## Features
 
@@ -85,8 +85,8 @@ By default, the *ABoxes* of an ontology are displayed in the graph. To disable t
 
 ```python
 # turn of abox visu
-from jaal import SQV
-jl = SQV(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = False)
+from sparql_query_viz import SQV
+jl = SQV(iri = "http://example.org/onto-ex.owl", path = "sparql_query_viz/datasets/ontologies/pizza", abox = False)
 ```
 
 ### Plot undirected graph
@@ -94,7 +94,7 @@ jl = SQV(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontolog
 By default, `SQV` plots directed edges for the ontology visualization. This setting can be changed by,
 
 ```python
-from jaal import SQV
+from sparql_query_viz import SQV
 SQV().plot(directed = False)
 ```
 
@@ -107,13 +107,13 @@ The default is `vis_opts = None`. Thereby *SPARQL-Query-Viz* takes the predefine
 For small ontologies it is useful to use the predefined visualization options for small ontologies, by passing `vis_opts = "small"`:
 
 ```python
-from jaal import SQV
+from sparql_query_viz import SQV
 SQV().plot(vis_opts="small")
 ```
 To adjust the visualization settings further, additional options can be passed like shown in the example below:
 
 ```python
-from jaal import SQV
+from sparql_query_viz import SQV
 SQV().plot(vis_opts={'height': '600px', # change height
                                       'interaction':{'hover': False}, # turn off the hover 
                                       'physics':{'stabilization':{'iterations': 100}}}) # define the convergence iteration of network
@@ -127,7 +127,7 @@ For a complete list of settings, visit [vis.js website](https://visjs.github.io/
 If you are facing port related issues, try the following way to run *SPARQL-Query-Viz*:
 
 ```python
-from jaal import SQV
+from sparql_query_viz import SQV
 port=8050
 while True:
     try:

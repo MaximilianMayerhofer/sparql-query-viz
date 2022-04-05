@@ -19,7 +19,7 @@ master_doc="index"
 
 # -- Project information -----------------------------------------------------
 
-project = 'jaal'
+project = 'sparql_query_viz'
 copyright = '2021, Mohit Mayank'
 author = 'Mohit Mayank'
 
@@ -58,7 +58,7 @@ html_sidebars = {
 html_theme_options = {
         'github_banner': True,
         'github_user': 'imohitmayank',
-        'github_repo': 'jaal',
+        'github_repo': 'sparql_query_viz',
         'nosidebar': False,
 }
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -19,7 +19,7 @@ from dash.dependencies import Input, Output, State
 
 # basic configuration fpr logging
 dir_file = os.path.dirname(__file__)
-logfile = dir_file.replace('/SPARQL-Query-Viz/jaal',
+logfile = dir_file.replace('/SPARQL-Query-Viz/sparql_query_viz',
                            '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime(
     "%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
@@ -169,7 +169,7 @@ class SQV:
     """The main visualization class
     """
 
-    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./jaal/datasets/ontologies/pizza"
+    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./sparql_query_viz/datasets/ontologies/pizza"
                                                                                 "-onto.owl", abox: bool = True):
         """ initialize Jaal class
 
@@ -178,7 +178,7 @@ class SQV:
          :param abox: indicates whether A-Boxes are visualized
          :type abox: bool
         """
-        self.logger = logging.getLogger('jaal-app')
+        self.logger = logging.getLogger('sparql_query_viz-app')
         self.abox = abox
         self.onto = ontor.OntoEditor(iri, path)
         self.edge_df, self.node_df = get_df_from_ontology(self.onto, self.abox)
@@ -749,14 +749,14 @@ class SQV:
                     if n_delete:
                         self.delete_last_user_input()
                 elif input_id == "sparql_template_dropdown" and template_value:
-                    query = open("jaal/datasets/templates/" + template_value, "r")
+                    query = open("sparql_query_viz/datasets/templates/" + template_value, "r")
                     self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n" + query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "sparql_library_dropdown" and library_value:
-                    query = open("jaal/datasets/queries/" + library_value, "r")
+                    query = open("sparql_query_viz/datasets/queries/" + library_value, "r")
                     self.sparql_query_last_input.append(query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()

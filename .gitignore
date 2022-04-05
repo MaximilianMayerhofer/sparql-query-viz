@@ -141,5 +141,5 @@ dmypy.json
 .pyre/
 
 # use-case-data
-jaal/datasets/queries/
-jaal/datasets/ontologies/use-case-onto.owl
+sparql_query_viz/datasets/queries/
+sparql_query_viz/datasets/ontologies/use-case-onto.owl
