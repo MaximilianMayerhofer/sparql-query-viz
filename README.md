@@ -1,12 +1,11 @@
 <img src="jaal/assest/logo_sqv.png" alt="sqv logo"/>
 
-![PyPI](https://img.shields.io/pypi/v/jaal) [![PyPI dm](https://img.shields.io/pypi/dm/jaal.svg)](https://img.shields.io/pypi/jaal) [![Join the chat at https://gitter.im/imm-jaal/community](https://badges.gitter.im/imm-jaal/community.svg)](https://gitter.im/imm-jaal/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![GitHub](https://img.shields.io/github/license/MaximilianMayerhofer/SPARQL-Query-Viz) ![GitHub Repo stars](https://img.shields.io/github/stars/MaximilianMayerhofer/SPARQL-Query-Viz?style=social)
 
 *Your interactive ontology visualizing and SPARQL query formulation tool*
 
-Documentation: [Here](http://mohitmayank.com/jaal/)
+[[_TOC_]]
 
-## 👉 What is *SPARQL Query Viz*
+## What is *SPARQL Query Viz*
 
 *SPARQL Query Viz* is a python based interactive ontology visualizing tool, that supports you to compose SPARQL queries interactively. 
 
@@ -14,51 +13,49 @@ The straightforward visualization can be adjusted to your needs by coloring and 
 
 *SPARQL Query Viz* provides an interactive query formulation and composition panel, that enables you to write queries, by making use of templates and other useful features. You can evaluate the queries and see the visualized result in the context of the ontology.
 
-## 👉 Requirements
+## Requirements
 
-Jaal requires following python packages, 
+*SPARQL Query Viz* requires the following python packages, 
 1. Dash
     - dash_core_components
     - dash_html_components 
 2. dash_bootstrap_components
 3. visdcc
-4. pandas
+4. ontor
+5. owlready2
 
-## 👉 Install
+## Installation
 
-Installing Jaal is super easy, just do the following,
+1. Clone the repo from [GitLab](https://gitlab.lrz.de/maximilianmayerhofer/SPARQL-Query-Viz)
+2. Set up a virtual enivornment, by using `python -m venv myenv` and activate the env:
+    - (Windows) `.\\myvenv\\Scripts\\activate.bat`
+    - (Linux & MacOS) `source myvenv/bin/activate`
 
-```bash
-pip install jaal
-```
+## Getting started
 
-And you are done :)
-
-Note, it's recommended to create a virtual enivornment before installing. This can be easily done using `python -m venv myenv` and then to activate the env we need,
-1. (Windows) `.\\myvenv\\Scripts\\activate.bat`
-2. (Linux) `source myvenv/bin/activate`
-
-## 👉 Getting started
-
-After installing Jaal, we need to fetch the data and call `plot` function in Jaal. This can be shown by playing with an included Game of Thrones dataset, as follows,
+To visualize the included *Pizza-ontology*, the file `SPARQLQueryViz_run_pizza_example.py` has to be excecuted.
+Alternativly the following two lines of code also do the job:
 
 ```python
-# import
 from jaal import Jaal
-from jaal.datasets import load_got
-# load the data
-edge_df, node_df = load_got()
-# init Jaal and run server
-Jaal(edge_df, node_df).plot()
+jl = Jaal(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = True)
+jl.plot(host = "127.0.0.1", port = 8050, directed = True, vis_opts = "small")
 ```
 
-Here first we import `Jaal` main class and the dataset loading function `load_got`. Later we load the GoT dataset from the datasets included in the package. This gives us two files,
-1. **edge_df:** its a pandas dataframe with atleast `from` and `to` column, which represents the edge relationship between the entities
-2. **node_df:** its an optional parameter, but should contains a `id` column with unique node names. 
+1. The main visualization class `Jaal` is imported. 
+2. `Jaal` is initialised by passing the following optional arguments to the constructor:
+    - `iri`: The *Internationalized Resource Identifier* of the ontology
+    - `path`: The path to the ontology file
+    - `abox`: The option to turn on or off the visualization of the *ABoxes* in the ontology
+3. The `plot` method of `Jaal` is called with the following optional arguments_
+    - `host`: The host of the `Dash`-app
+    - `port`: The port of the `Dash`-app
+    - `directed`: The option to visualize the edges with arrowheads
+    - `vis_opts`: The option to pass additional visualization options to the `visdcc`-graph
 
-Note, edge_df is mandatory and node_df is optional. Also we can include additional columns in these files which are automatically considered as edge or node features respectively.
+Note, that all of the arguments are optional. The default values for these aruments are the same as passed to the functions in the example above. Except for the argument `vis_opts` in the `plot` method: The default value here is `vis_opts = None `. Passing the keyword `"small"` adjusts the visualization options for small ontologies.
 
-After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where Jaal is running. Access it to see the following dashboard,
+After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where Jaal is running. Access it to see the following dashboard:
 
 <img src="jaal/assest/dashboard.png" alt="dashboard"/>
 
@@ -166,11 +163,11 @@ Please report any bug or feature idea using Jaal issue tracker: https://github.c
 
 Any type of collaboration is appreciated. It could be  testing, development, documentation and other tasks that is useful to the project. Feel free to connect with me regarding this.
 
-## 👉 Contact
+## Contact
 
-You can connect with me on [LinkedIn](https://www.linkedin.com/in/imohitmayank/) or mail me at mohitmayank1@gmail.com.
+You can connect with me on [LinkedIn](www.linkedin.com/in/maximilian-mayerhofer-41804917b)
 
-## 👉 License
+## License
 
-Jaal is licensed under the terms of the MIT License (see the file
+*SPARQL-Query-Viz* is licensed under the terms of the MIT License (see the file
 LICENSE).
