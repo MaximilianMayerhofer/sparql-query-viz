@@ -16,7 +16,6 @@ from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
-
 # basic configuration for logging
 dir_file = os.path.dirname(__file__)
 logfile = dir_file.replace('/SPARQL-Query-Viz/sparql_query_viz',
@@ -315,7 +314,7 @@ class SQV:
             self.counter_query_history) + ": " + self.sparql_query + '\n'
 
     def _callback_filter_nodes(self, graph_data: dict, shown_result_level: int = 1):
-        """ filters the nodes based on the Python query syntax
+        """ filters the nodes based on the SPARQL query syntax
 
         :param graph_data: network data in format of visdcc
          :type graph_data: dict
@@ -555,7 +554,7 @@ class SQV:
             self.data = self._callback_size_edges(options[1].get('value'))
             self.logger.info("Edges were initially sized")
 
-    def create(self, directed=False, vis_opts: dict = None):
+    def create(self, directed: bool = False, vis_opts: dict = None):
         """ creates the SPARQl-Query-Viz app and returns it
 
         :param directed: indicates whether the graph is directed
@@ -566,7 +565,6 @@ class SQV:
          :rtype dash.Dash
         """
         # create the app
-        # app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
         app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title='SPARQL-Query-Viz')
 
         # get color_mapping and size_mapping once at the start
@@ -576,6 +574,7 @@ class SQV:
         app.layout = get_app_layout(self.data, self.onto, color_legends=get_color_popover_legend_children(),
                                     directed=directed, vis_opts=vis_opts, abox=self.abox)
 
+        # create callback to freeze/ unfreeze simulation
         @app.callback(
             Output("graph", "options"),
             Input("freeze-physics", "n_clicks"),
@@ -588,7 +587,7 @@ class SQV:
                 options = get_options(directed=directed, opts_args=vis_opts, physics=False)
             return options
 
-        # create callbacks to toggle legend popover
+        # create callback to toggle legend popover
         @app.callback(
             Output("color-legend-popup", "is_open"),
             [Input("color-legend-toggle", "n_clicks")],
@@ -603,6 +602,7 @@ class SQV:
                 return not is_open
             return is_open
 
+        # create callback to toggle sparql-info popover
         @app.callback(
             Output("info-sparql-popup", "is_open"),
             [Input("info-sparql-query-button", "n_clicks")],
@@ -617,7 +617,7 @@ class SQV:
                 return not is_open
             return is_open
 
-        # create callbacks to toggle hide/show sections - FILTER section
+        # create callback to toggle hide/show sections - SPARQL QUERY section
         @app.callback(
             Output("filter-show-toggle", "is_open"),
             [Input("filter-show-toggle-button", "n_clicks"),
@@ -643,6 +643,7 @@ class SQV:
                     return True
             return is_open
 
+        # create callback to toggle hide/show sections - SPARQL RESULT section
         @app.callback(
             Output("result-show-toggle", "is_open"),
             [Input("result-show-toggle-button", "n_clicks"),
@@ -666,6 +667,7 @@ class SQV:
                     return True
             return is_open
 
+        # create callback to toggle hide/show sections - SPARQL HISTORY section
         @app.callback(
             Output("history-show-toggle", "is_open"),
             [Input("history-show-toggle-button", "n_clicks")],
@@ -680,6 +682,7 @@ class SQV:
                 return not is_open
             return is_open
 
+        # create callback to interactively compose SPARQL queries
         @app.callback(
             Output("select-sparql", "children"),
             [Input("sparql-keywords-dropdown", "value"),
@@ -767,7 +770,7 @@ class SQV:
                     self.complete_sparql_query_with_selection(selection, template_value)
             return self.sparql_query
 
-        # create callbacks to toggle hide/show sections - COLOR section
+        # create callback to toggle hide/show sections - COLOR section
         @app.callback(
             Output("color-show-toggle", "is_open"),
             [Input("color-show-toggle-button", "n_clicks")],
@@ -782,7 +785,7 @@ class SQV:
                 return not is_open
             return is_open
 
-        # create callbacks to toggle hide/show sections - COLOR section
+        # create callback to toggle hide/show sections - SIZE section
         @app.callback(
             Output("size-show-toggle", "is_open"),
             [Input("size-show-toggle-button", "n_clicks")],
@@ -797,7 +800,7 @@ class SQV:
                 return not is_open
             return is_open
 
-        # create callbacks to toggle hide/show sections - Template section
+        # create callback to toggle hide/show sections - SPARQL TEMPLATE section
         @app.callback(
             Output("template-show-toggle", "is_open"),
             [Input("template-show-toggle-button", "n_clicks")],
@@ -812,6 +815,7 @@ class SQV:
                 return not is_open
             return is_open
 
+        # create callback to toggle hide/show sections - SPARQL LIBRARY section
         @app.callback(
             Output("library-show-toggle", "is_open"),
             [Input("library-show-toggle-button", "n_clicks")],
@@ -826,7 +830,7 @@ class SQV:
                 return not is_open
             return is_open
 
-        # create callbacks to toggle hide/show sections - A-Box-DP section
+        # create callback to toggle hide/show sections - A-BOX DATA-PROPERTY section
         @app.callback(
             Output("abox-dp-show-toggle", "is_open"),
             [Input("abox-dp-show-toggle-button", "n_clicks")],
@@ -841,7 +845,7 @@ class SQV:
                 return not is_open
             return is_open
 
-        # create callbacks to toggle hide/show sections - Edge Selection section
+        # create callback to toggle hide/show sections - SELECTED EDGE section
         @app.callback(
             Output("edge-selection-show-toggle", "is_open"),
             [Input("edge-selection-show-toggle-button", "n_clicks")],
@@ -856,6 +860,7 @@ class SQV:
                 return not is_open
             return is_open
 
+        # create callback to display dp of selected A-Box
         @app.callback(
             Output('node-selection', 'children'),
             [Input('graph', 'selection')])
@@ -881,6 +886,7 @@ class SQV:
                             s_node = s_node + [html.Div([node['title']])]
             return s_node
 
+        # create callback to display label of selected edge
         @app.callback(
             Output('edge-selection', 'children'),
             [Input('graph', 'selection')])
@@ -985,28 +991,22 @@ class SQV:
             return [graph_data, color_popover_legend_children, flat_res_list_children,
                     sparql_query_history_children, selection]
 
-        # return server
         return app
 
-    def plot(self, debug=False, host="127.0.0.1", port=8050, directed=True, vis_opts=None):
+    def plot(self, debug: bool = False, host: str = "127.0.0.1", port: int = 8050, directed: bool = True, vis_opts: dict = None):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
-        Parameter
-        ----------
-            debug (boolean)
-                run the debug instance of Dash?
 
-            host: string
-                ip address on which to run the dash server (default: 127.0.0.1)
-
-            port: string
-                port on which to expose the dash server (default: 8050)
-
-            directed (boolean):
-                whether the graph is directed or not (default: False)
-
-            vis_opts: dict
-                the visual options to be passed to the dash server (default: None)
+        :param debug: run the debug instance of Dash?
+        :type debug: bool
+        :param host: ip address on which to run the dash server
+        :type host: str
+        :param port: port on which to expose the dash server
+        :type port: int
+        :param directed: whether the graph is directed or not
+        :type directed: bool
+        :param vis_opts: the visual options to be passed to the dash server
+        :type directed: dict
         """
         # call the create_graph function
         app = self.create(directed=directed, vis_opts=vis_opts)
