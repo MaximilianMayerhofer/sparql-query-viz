@@ -1,4 +1,5 @@
 """
+Author: Maximilian Mayerhofer
 Author: Mohit Mayank
 
 Layout code for the application
@@ -12,7 +13,7 @@ import visdcc
 from dash import dcc, html
 from ontor import OntoEditor
 
-# constants
+# CONSTANTS
 # default node and edge size
 DEFAULT_NODE_SIZE = 7
 DEFAULT_EDGE_SIZE = 1
@@ -71,15 +72,23 @@ def get_options(directed: bool, opts_args: dict = None, physics: bool = True):
     else:
         if opts_args == "small":
             opts['physics'] = {'enabled': True}
+        elif opts_args is not None:
+            opts.update(opts_args)
         else:
-            opts['physics'] = {'stabilization': {'enabled': True, 'iterations': 50}, 'timestep': 0.5, 'minVelocity': 5,
+            opts['physics'] = {'stabilization': {'enabled': True, 'iterations': 50},
+                               'timestep': 0.6,
+                               'minVelocity': 5,
                                'maxVelocity': 250,
-                               'barnesHut': {'theta': 1, 'gravitationalConstant': -100000, 'centralGravity': 0.1,
-                                             'springLength': 200, 'springConstant': 0.01, 'damping': 0.09,
-                                             'avoidOverlap': 0}}
+                               'barnesHut': {
+                                   'theta': 1,
+                                   'gravitationalConstant': -100000,
+                                   'centralGravity': 0.3,
+                                   'springLength': 200,
+                                   'springConstant': 0.01,
+                                   'damping': 0.09,
+                                   'avoidOverlap': 0}}
+
     opts['edges'] = {'arrows': {'to': directed}, 'font': {'size': 0}}
-    # if opts_args is not None:
-    #    opts.update(opts_args)
 
     return opts
 
@@ -98,26 +107,6 @@ def get_distinct_colors(n: int, for_nodes=True):
         return KELLY_COLORS_HEX[:n]
     else:
         return KELLY_COLORS_HEX[2:(n + 2)]
-
-
-def create_card(card_id: str, value, description: str):
-    # todo not used (may be removed)
-    """ creates card for high level stats
-
-    :param card_id: id of the card
-     :type card_id: str
-     :param value: the children of the card
-     :param description: long text detail of the setting
-     :type description: str
-     :return: dbc-element of the card
-     :rtype: dbc.Card
-    """
-    return dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4(id=card_id, children=value, className='card-title'),
-                html.P(children=description),
-            ]))
 
 
 def create_color_legend(text: str, color: str):
