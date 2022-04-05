@@ -165,7 +165,7 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
     return filtered_node_data, node_selection
 
 
-class Jaal:
+class SQV:
     """The main visualization class
     """
 

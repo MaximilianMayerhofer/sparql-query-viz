@@ -1,4 +1,4 @@
 # import
-from jaal import Jaal
+from jaal import SQV
 
-Jaal().plot(vis_opts="small")
+SQV().plot(vis_opts="small")

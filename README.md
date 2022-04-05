@@ -27,35 +27,36 @@ The interactive graph gives an overview over the structure of the ontology at ha
 ## Installation
 
 1. Clone the repo from [GitLab](https://gitlab.lrz.de/maximilianmayerhofer/SPARQL-Query-Viz)
-2. Set up a virtual enivornment, by using `python -m venv myenv` and activate the env:
+2. Set up a virtual environment, by using `python -m venv myenv` and activate the env:
     - (Windows) `.\\myvenv\\Scripts\\activate.bat`
     - (Linux & MacOS) `source myvenv/bin/activate`
 
 ## Getting started
 
-To visualize the included *Pizza-ontology*, the file `SPARQLQueryViz_run_pizza_example.py` has to be excecuted.
-Alternativly the following two lines of code also do the job:
+To visualize the included *Pizza-ontology*, the file `SPARQLQueryViz_run_pizza_example.py` has to be executed.
+Alternatively the following two lines of code also do the job:
 
 ```python
-from jaal import Jaal
-jl = Jaal(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = True)
-jl.plot(host = "127.0.0.1", port = 8050, directed = True, vis_opts = "small")
+from jaal import SQV
+
+sqv = SQV(iri="http://example.org/onto-ex.owl", path="./jaal/datasets/ontologies/pizza", abox=True)
+sqv.plot(host="127.0.0.1", port=8050, directed=True, vis_opts="small")
 ```
 
-1. The main visualization class `Jaal` is imported. 
-2. `Jaal` is initialised by passing the following optional arguments to the constructor:
+1. The main visualization class `SQV` is imported. 
+2. `SQV` is initialised by passing the following optional arguments to the constructor:
     - `iri`: The *Internationalized Resource Identifier* of the ontology
     - `path`: The path to the ontology file
     - `abox`: The option to turn on or off the visualization of the *ABoxes* in the ontology
-3. The `plot` method of `Jaal` is called with the following optional arguments_
+3. The `plot` method of `SQV` is called with the following optional arguments_
     - `host`: The host of the `Dash`-app
     - `port`: The port of the `Dash`-app
     - `directed`: The option to visualize the edges with arrowheads
     - `vis_opts`: The option to pass additional visualization options to the `visdcc`-graph
 
-Note, that all of the arguments are optional. The default values for these aruments are the same as passed to the functions in the example above. Except for the argument `vis_opts` in the `plot` method: The default value here is `vis_opts = None `. Passing the keyword `"small"` adjusts the visualization options for small ontologies.
+Note, that all the arguments are optional. The default values for these arguments are the same as passed to the functions in the example above. Except for the argument `vis_opts` in the `plot` method: The default value here is `vis_opts = None `. Passing the keyword `"small"` adjusts the visualization options for small ontologies.
 
-After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where Jaal is running. Access it to see the following dashboard:
+After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where *SPARQL-Query-Viz* is running. Access it to see the following dashboard:
 
 <img src="jaal/assest/dashboard.png" alt="dashboard"/>
 
@@ -69,47 +70,51 @@ Currently, the dashboard consist of following components:
     - **SPARQL Templates:** provides templates for common SPARQL queries
     - **SPARQL Library:** provides inconsistency checking queries for the use-case ontology
     - **SPARQL Query:** provides options to interactively compose SPARQL queries and shows the currently formulated query
-    - **SPARQL Result:** shows the result of evaluated queries and provides a silder to adjust the context of the result visualization
-    - **SPARQL History:** shows an adjustable number of sucessfully evaluated queries
+    - **SPARQL Result:** shows the result of evaluated queries and provides a slider to adjust the context of the result visualization
+    - **SPARQL History:** shows an adjustable number of successfully evaluated queries
     - **Color:** provides options to color node and edges (is activated per default) and optionally shows the color legend
     - **Size:** provides options to size node and edges (is activated per default)
 
-2. **Graph:** the ontotlogy visualization or the query result visualization (if query was evaluated)
+2. **Graph:** the ontology visualization or the query result visualization (if query was evaluated)
 
 ## Extra settings
 
 ### Turn off *ABox* visualization
 
-By default the *ABoxes* of an ontology are displayed in the graph. To disable the *ABox* visualization, `abox = False` has to be passed to the `Jaal` constructor:
+By default, the *ABoxes* of an ontology are displayed in the graph. To disable the *ABox* visualization, `abox = False` has to be passed to the `SQV` constructor:
 
 ```python
 # turn of abox visu
-jl = Jaal(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = False)
+from jaal import SQV
+jl = SQV(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = False)
 ```
 
 ### Plot undirected graph
 
-By default, `Jaal` plots directed edges for the ontology visualization. This setting can be changed by,
+By default, `SQV` plots directed edges for the ontology visualization. This setting can be changed by,
 
 ```python
-Jaal().plot(directed = False)
+from jaal import SQV
+SQV().plot(directed = False)
 ```
 
 ### Tweak visualization options
 
-The visualization options of the `vis.js` related visualization settings, can be tweaked to the your needs. 
+The visualization options of the `vis.js` related visualization settings, can be tweaked to your needs. 
 
 The default is `vis_opts = None`. Thereby *SPARQL-Query-Viz* takes the predefined settings for visualising large ontologies.
 
-For small ontologies it is usefull to use the predefined visualization options for small ontologies, by passing `vis_opts = "small"`:
+For small ontologies it is useful to use the predefined visualization options for small ontologies, by passing `vis_opts = "small"`:
 
 ```python
-Jaal().plot(vis_opts="small")
+from jaal import SQV
+SQV().plot(vis_opts="small")
 ```
 To adjust the visualization settings further, additional options can be passed like shown in the example below:
 
 ```python
-Jaal(edge_df, node_df).plot(vis_opts={'height': '600px', # change height
+from jaal import SQV
+SQV().plot(vis_opts={'height': '600px', # change height
                                       'interaction':{'hover': False}, # turn off the hover 
                                       'physics':{'stabilization':{'iterations': 100}}}) # define the convergence iteration of network
 
@@ -122,10 +127,11 @@ For a complete list of settings, visit [vis.js website](https://visjs.github.io/
 If you are facing port related issues, try the following way to run *SPARQL-Query-Viz*:
 
 ```python
+from jaal import SQV
 port=8050
 while True:
     try:
-        Jaal().plot(port=port)
+        SQV().plot(port=port)
     except:
         port+=1
 ```
