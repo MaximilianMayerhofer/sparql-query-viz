@@ -59,98 +59,73 @@ After running the plot, the console will prompt the default localhost address (`
 
 <img src="jaal/assest/dashboard.png" alt="dashboard"/>
 
-## 👉 Features
+## Features
 
-At present, the dashboard consist of following sections,
-1. **Setting panel:** here we can play with the graph data, it further contain following sections:
+Currently, the dashboard consist of following components:
+1. **GUI panel:** here the ontology data can be explored, it further contain following sections:
     - **Search:** can be used to find a node in graph
-    - **Filter:** supports pandas query language and can be used to filter the graph data based on nodes or edge features.
-    - **Color:** can be used to color nodes or edges based on their categorical features. Note, currently only features with at max 20 cardinality are supported. 
-    - **Size:** can be used to size nodes or edges based on their numerical features.
-2. **Graph:** the network graph in all its glory :)
+    - **Selected Edge:** shows the meaning of an edge that is selected
+    - **A-Box Data-Properties:** shows the instantiated data properties of an instance that is selected (This section is invisble when no *ABoxes* are visualized)
+    - **SPARQL Templates:** provides templates for common SPARQL queries
+    - **SPARQL Library:** provides inconsistency checking queries for the use-case ontology
+    - **SPARQL Query:** provides options to interactively compose SPARQL queries and shows the currently formulated query
+    - **SPARQL Result:** shows the result of evaluated queries and provides a silder to adjust the context of the result visualization
+    - **SPARQL History:** shows an adjustable number of sucessfully evaluated queries
+    - **Color:** provides options to color node and edges (is activated per default) and optionally shows the color legend
+    - **Size:** provides options to size node and edges (is activated per default)
 
-## 👉 Examples
+2. **Graph:** the ontotlogy visualization or the query result visualization (if query was evaluated)
 
-### 1. Searching
-<img src="jaal/assest/jaal_search.gif" alt="dashboard"/>
+## Extra settings
 
-### 2. Filtering
-<img src="jaal/assest/jaal_filter.gif" alt="dashboard"/>
+### Turn off *ABox* visualization
 
-### 3. Coloring
-<img src="jaal/assest/jaal_color.gif" alt="dashboard"/>
-
-### 4. Size
-<img src="jaal/assest/jaal_size.gif" alt="dashboard"/>
-
-## 👉 Extra settings
-
-### Display edge label
-
-To display labels over edges, we need to add a `label` attribute (column) in the `edge_df`. Also, it has to be in `string` format. 
-For example, using the GoT dataset, by adding the following line before the `Jaal` call, we can display the edge labels.
+By default the *ABoxes* of an ontology are displayed in the graph. To disable the *ABox* visualization, `abox = False` has to be passed to the `Jaal` constructor:
 
 ```python
-# add edge labels
-edge_df.loc[:, 'label'] = edge_df.loc[:, 'weight'].astype(str)
+# turn of abox visu
+jl = Jaal(iri = "http://example.org/onto-ex.owl", path = "./jaal/datasets/ontologies/pizza", abox = False)
 ```
 
-### Directed edges
+### Plot undirected graph
 
-By default, `Jaal` plot undirected edges. This setting can be changed by,
+By default, `Jaal` plots directed edges for the ontology visualization. This setting can be changed by,
 
 ```python
-Jaal(edge_df, node_df).plot(directed=True)
+Jaal().plot(directed = False)
 ```
 
-### Using vis.js settings
+### Tweak visualization options
 
-We can tweak any of the `vis.js` related network visualization settings. An example is,
+The visualization options of the `vis.js` related visualization settings, can be tweaked to the your needs. 
+
+The default is `vis_opts = None`. Thereby *SPARQL-Query-Viz* takes the predefined settings for visualising large ontologies.
+
+For small ontologies it is usefull to use the predefined visualization options for small ontologies, by passing `vis_opts = "small"`:
 
 ```python
-# init Jaal and run server
+Jaal().plot(vis_opts="small")
+```
+To adjust the visualization settings further, additional options can be passed like shown in the example below:
+
+```python
 Jaal(edge_df, node_df).plot(vis_opts={'height': '600px', # change height
-                                      'interaction':{'hover': True}, # turn on-off the hover 
+                                      'interaction':{'hover': False}, # turn off the hover 
                                       'physics':{'stabilization':{'iterations': 100}}}) # define the convergence iteration of network
 
 ```
 
 For a complete list of settings, visit [vis.js website](https://visjs.github.io/vis-network/docs/network/).
 
-### Using gunicorn
+### Adjust Port
 
-We can host Jaal on production level HTTP server using `gunicorn` by first creating the app file (`jaal_app.py`),
-
-```python
-# import
-from jaal import Jaal
-from jaal.datasets import load_got
-# load the data
-edge_df, node_df = load_got()
-# create the app and server
-app = Jaal(edge_df, node_df).create()
-server = app.server
-```
-
-then from the command line, start the server by,
-
-```
-gunicorn jaal_app:server
-```
-
-Note, `Jaal.create()` takes `directed` and `vis_opts` as arguments. (same as `Jaal.plot()` except the `host` and `port` arguments)
-
-## 👉 Common Problems
-
-### Port related issue
-
-If you are facing port related issue, please try the following way to run Jaal. It will try different ports, until an empty one is found.
+If you are facing port related issues, try the following way to run *SPARQL-Query-Viz*:
 
 ```python
 port=8050
 while True:
     try:
-        Jaal(edge_df, node_df).plot(port=port)
+        Jaal().plot(port=port)
     except:
         port+=1
 ```
