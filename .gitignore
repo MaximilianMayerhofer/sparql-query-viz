@@ -1,6 +1,3 @@
-# testing call file
-# jaal_call.py
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -143,3 +140,7 @@ dmypy.json
 # use-case-data
 sparql_query_viz/datasets/queries/
 sparql_query_viz/datasets/ontologies/use-case-onto.owl
+
+# user specific settings in .idea
+**/.idea/workspace.xml
+**/.idea/tasks.xml

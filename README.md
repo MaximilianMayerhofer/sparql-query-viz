@@ -1,4 +1,4 @@
-<img src="sparql_query_viz/assest/logo_sqv.png" alt="sqv logo"/>
+<img src="sparql_query_viz/assest/sqv_logo.png" alt="sqv logo"/>
 
 
 *Your interactive ontology visualizing and SPARQL query formulation tool*
@@ -58,7 +58,7 @@ Note, that all the arguments are optional. The default values for these argument
 
 After running the plot, the console will prompt the default localhost address (`127.0.0.1:8050`) where *SPARQL-Query-Viz* is running. Access it to see the following dashboard:
 
-<img src="sparql_query_viz/assest/dashboard.png" alt="dashboard"/>
+<img src="sparql_query_viz/assest/sqv_dashboard.png" alt="dashboard"/>
 
 ## Features
 
