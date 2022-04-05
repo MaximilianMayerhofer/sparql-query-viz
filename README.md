@@ -130,11 +130,11 @@ while True:
         port+=1
 ```
 
-## 👉 Issue tracker
+## Issues
 
-Please report any bug or feature idea using Jaal issue tracker: https://github.com/imohitmayank/jaal/issues
+Please report any bug or feature idea using *SPARQL-Query-Viz* [issue tracker](https://gitlab.lrz.de/maximilianmayerhofer/SPARQL-Query-Viz/-/issues).
 
-## 👉 Collaboration
+## Collaboration
 
 Any type of collaboration is appreciated. It could be  testing, development, documentation and other tasks that is useful to the project. Feel free to connect with me regarding this.
 
