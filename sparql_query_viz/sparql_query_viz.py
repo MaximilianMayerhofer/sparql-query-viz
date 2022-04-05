@@ -3,7 +3,7 @@ Author: Mohit Mayank
 
 Editor: Maximilian Mayerhofer
 
-Main class for Jaal network visualization dashboard
+Main class for SPARQL-Query-Viz ontology visualization and querying GUI
 """
 
 # import
@@ -17,21 +17,21 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
 
-# basic configuration fpr logging
+# basic configuration for logging
 dir_file = os.path.dirname(__file__)
 logfile = dir_file.replace('/SPARQL-Query-Viz/sparql_query_viz',
                            '/SPARQL-Query-Viz/docs/logging/') + datetime.datetime.now().strftime(
     "%Y-%m-%d_%H-%M-%S") + "_SparqlQueryViz.log"
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
-# imports after logging was set up
+# imports after logging (ontor would otherwise overwrite the logfile)
 from ontor import OntoEditor
 from .datasets.parse_dataframe import parse_dataframe
 from .datasets.parse_ontology import *
 from .layout import get_app_layout, get_distinct_colors, create_color_legend, get_categorical_features, \
     get_numerical_features, DEFAULT_COLOR, DEFAULT_NODE_SIZE, DEFAULT_EDGE_SIZE, get_options
 
-# constants
+# CONSTANTS
 PREFIXES = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' \
            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' \
            'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' \
@@ -98,34 +98,31 @@ def get_color_popover_legend_children(node_value_color_mapping: dict = None, edg
                 partition = key.partition(',\n ')
                 if partition[2] == '':
                     _popover_legend_children.append(
-                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
                         create_color_legend(key, value)
                     )
                 else:
                     _popover_legend_children.append(
-                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
                         create_color_legend(partition[0], value)
                     )
                     _popover_legend_children.append(
-                        # dbc.PopoverBody(f"Key: {key}, Value: {value}")
                         create_color_legend(partition[2], value)
                     )
         else:  # otherwise add filler
             _popover_legend_children.append(dbc.PopoverBody(f"no {title.lower()} colored!"))
-        #
+
         return _popover_legend_children
 
     # add node color legends
     popover_legend_children.extend(create_legends_for("Node", node_value_color_mapping))
     # add edge color legends
     popover_legend_children.extend(create_legends_for("Edge", edge_value_color_mapping))
-    #
+
     return popover_legend_children
 
 
 def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edges_to_be_shown_around_result: int = 1):
-    """ gets the nodes in graph_data that are listed in res_list and therefore will be shown in the graph
-    NOTE: with number_of_edges_to_be_shown_around_result how many layers of the surrounding neighbourhood will be displayed
+    """ gets the nodes in graph_data that are listed in res_list and therefore will be shown in the graph NOTE: with
+    number_of_edges_to_be_shown_around_result how many layers of the surrounding neighbourhood will be displayed
 
     :param graph_data: network data in format of visdcc
      :type graph_data: dict
@@ -166,17 +163,21 @@ def get_nodes_to_be_shown(graph_data: dict, res_list: list = None, number_of_edg
 
 
 class SQV:
-    """The main visualization class
+    """ The main visualization class of SPARQL-Query-Viz
     """
 
-    def __init__(self, iri: str = "http://example.org/onto-ex.owl", path: str = "./sparql_query_viz/datasets/ontologies/pizza"
-                                                                                "-onto.owl", abox: bool = True):
-        """ initialize Jaal class
+    def __init__(self, iri: str = "http://example.org/onto-ex.owl",
+                 path: str = "./sparql_query_viz/datasets/ontologies/pizza-onto.owl", abox: bool = True):
+        """ initialize SQV class
 
-        :param onto: ontology
-         :type onto: OntoEditor
+        :param iri: IRI of the ontology
+         :type iri: str
+         :param path: local path to ontology file
+         :type path: str
          :param abox: indicates whether A-Boxes are visualized
          :type abox: bool
+         :return: returns an instance of the SQV class
+         :rtype: SQV
         """
         self.logger = logging.getLogger('sparql_query_viz-app')
         self.abox = abox
@@ -555,18 +556,18 @@ class SQV:
             self.logger.info("Edges were initially sized")
 
     def create(self, directed=False, vis_opts: dict = None):
-        """ creates the Jaal app and returns it
+        """ creates the SPARQl-Query-Viz app and returns it
 
         :param directed: indicates whether the graph is directed
          :type directed: bool
          :param vis_opts: additional visualization options for the visdcc-graph
          :type vis_opts: dict
-         :return: the Jaal app
+         :return: the SPARQl-Query-Viz app
          :rtype dash.Dash
         """
         # create the app
         # app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], title = 'SPARQL Query Viz')
-        app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title='SPARQL Query Viz')
+        app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title='SPARQL-Query-Viz')
 
         # get color_mapping and size_mapping once at the start
         self.forced_callback_execution_at_beginning(directed=directed)

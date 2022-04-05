@@ -1,6 +1,7 @@
 """
-Author: Maximilian Mayerhofer
 Author: Mohit Mayank
+
+Editor: Maximilian Mayerhofer
 
 Layout code for the application
 """
