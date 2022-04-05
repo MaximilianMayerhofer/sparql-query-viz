@@ -77,6 +77,8 @@ def get_OPs(onto: OntoEditor, edgelist: list = None):
      :rtype: list
     """
 
+    skipped_ops = 0
+    extracted_ops = 0
     # Generator of all object-properties in the ontology is created
     if edgelist is None:
         edgelist = []
@@ -89,7 +91,9 @@ def get_OPs(onto: OntoEditor, edgelist: list = None):
             # if i != 0:
             domain = op.domain
             if not domain:
-                print("op-domain empty")
+                # TODO: Find a suitable way to display ops if the domain is empty
+                logging.warning("the op %s was skipped because there was no domain defined", op.name)
+                skipped_ops = skipped_ops + 1
                 # node_gen = onto.onto.classes()
                 # for cl in node_gen:
                 #    edge_already_exists = False
@@ -105,8 +109,11 @@ def get_OPs(onto: OntoEditor, edgelist: list = None):
             else:
                 identifier = op.domain[0].name + ' ' + op.name + ' ' + op.range[i].name
                 edgelist.append([op.domain[0].name, op.range[i].name, identifier, 1, op.name, True])
+                extracted_ops = extracted_ops + 1
+    if skipped_ops > 0:
+        logging.warning("%i ops were skipped", skipped_ops)
+    logging.info("successfully parsed %i Object-Properties from ontology specified", extracted_ops)
     # return list of all extracted edges/ relations
-    logging.info("successfully parsed Object-Properties from ontology specified")
     return edgelist
 
 
@@ -123,13 +130,14 @@ def get_DPs(onto: OntoEditor, nodelist: list = None, edgelist: list = None):
      :rtype: tuple[ list, list]
     """
 
-    # todo Filter DPs that have no valid structure (if min/max exclusive is given and exact value is given, a error must
+    # TODO: Filter DPs that have no valid structure (if min/max exclusive is given and exact value is given, a error must
     #  be thrown e.g. faulty dp)
+    extracted_dps = 0
+    skipped_dps = 0
     if edgelist is None:
         edgelist = []
     if nodelist is None:
         nodelist = []
-    counter_parsed = 0
     # Generator of all data-properties in the ontology is created
     dp_gen = onto.onto.data_properties()
     # Iteration over all data-properties from the generator
@@ -139,7 +147,6 @@ def get_DPs(onto: OntoEditor, nodelist: list = None, edgelist: list = None):
         for dom in dp.domain:
             if not dom in dp_dom_unique:
                 dp_dom_unique.append(dom)
-        # try:
         # Booleans to indicate, whether node/ edge is already in nodelist/ edgelist are instantiated
         edge_in_edgelist = False
         # The datatype of the associated data-property is written into a string-variable
@@ -147,7 +154,8 @@ def get_DPs(onto: OntoEditor, nodelist: list = None, edgelist: list = None):
             dp_type = str(dp.range).split("'")[1]
         except IndexError:
             dp_type = 'NoneType'
-            logging.warning("DP %s has no defined range", dp.name)
+            logging.warning("the op %s was skipped because there was no defined range", dp.name)
+            skipped_dps = skipped_dps + 1
         # Iteration over all relations in edgelist
         for edge in edgelist:
             # Iteration over all unique domains of the associated data-property
@@ -180,12 +188,10 @@ def get_DPs(onto: OntoEditor, nodelist: list = None, edgelist: list = None):
         # with their identifier, weight, shape and T-Box label
         if not node_in_nodelist:
             nodelist.append([dp_type, 1, 'triangle', 'T', ""])
-        counter_parsed = counter_parsed + 1
-        # If an IndexError is thrown, an warning will be logged, that the one data-property was skipped
-        # except IndexError:
-        #    counter_skipped = counter_skipped + 1
-    logging.info("successfully parsed %i Data-Properties from ontology specified", counter_parsed)
-    # logging.warning("while parsing, %i Data-Properties were skipped", counter_skipped)
+        extracted_dps = extracted_dps + 1
+    if skipped_dps > 0:
+        logging.warning("%i dps were skipped", skipped_dps)
+    logging.info("successfully parsed %i Data-Properties from ontology specified", extracted_dps)
     # return list of all extracted nodes/ data-types and list of all extracted edges/ relations
     return nodelist, edgelist
 

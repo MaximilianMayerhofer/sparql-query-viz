@@ -1,12 +1,21 @@
 """
 Author: Mohit Mayank
 
+Editor: Maximilian Mayerhofer
+
 Parse network data from dataframe format into visdcc format 
 """
+import pandas
 
 
-def compute_scaling_vars_for_numerical_cols(df):
-    """Identify and scale numerical cols"""
+def compute_scaling_vars_for_numerical_cols(df: pandas.DataFrame):
+    """Identify and scale numerical columns
+
+    :param df: dataframe of which the numerical columns are scaled
+    :type df: pandas.DataFrame
+    :return: scaling variables of df
+    :rtype: dict
+    """
     # identify numerical cols
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_cols = df.select_dtypes(include=numerics).columns.tolist()
@@ -16,20 +25,19 @@ def compute_scaling_vars_for_numerical_cols(df):
     for col in numeric_cols:
         minn, maxx = df[col].min(), df[col].max()
         scaling_vars[col] = {'min': minn, 'max': maxx}
-        # return
+    # return
     return scaling_vars
 
 
-def parse_dataframe(edge_df, node_df=None):
+def parse_dataframe(edge_df: pandas.DataFrame, node_df: pandas.DataFrame = None):
     """Parse the network dataframe into visdcc format
 
-    Parameters
-    -------------
-    edge_df: pandas dataframe
-            The network edge data stored in format of pandas dataframe 
-    
-    node_df: pandas dataframe (optional)
-            The network node data stored in format of pandas dataframe 
+    :param edge_df: The network edge data stored in format of pandas dataframe
+    :type edge_df: pandas.DataFrame
+    :param node_df: The network node data stored in format of pandas dataframe
+    :type node_df: pandas.DataFrame
+    :return: network data in dict format and scaling variables
+    :rtype: dict
     """
     # Data checks
     # Check 1: mandatory columns presence
