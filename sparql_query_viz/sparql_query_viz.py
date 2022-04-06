@@ -239,6 +239,30 @@ class SQV:
                         max_number_of_selected_nodes = 1
                     elif template == "template_3.sparql":
                         max_number_of_selected_nodes = 3
+                    elif template == "template_4.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_5.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_6.sparql":
+                        max_number_of_selected_nodes = 2
+                    elif template == "template_7.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_8.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_9.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_10.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_11.sparql":
+                        max_number_of_selected_nodes = 2
+                    elif template == "template_12.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_13.sparql":
+                        max_number_of_selected_nodes = 1
+                    elif template == "template_14.sparql":
+                        max_number_of_selected_nodes = 2
+                    elif template == "template_15.sparql":
+                        max_number_of_selected_nodes = 2
                     if '[:node]' in self.sparql_query:
                         placeholder = "[:node]"
                     elif '[:node1]' in self.sparql_query:
@@ -269,6 +293,24 @@ class SQV:
                         max_number_of_selected_edges = 1
                     elif template == "template_3.sparql":
                         max_number_of_selected_edges = 2
+                    elif template == "template_5.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_6.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_7.sparql":
+                        max_number_of_selected_edges = 2
+                    elif template == "template_8.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_9.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_11.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_12.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_14.sparql":
+                        max_number_of_selected_edges = 1
+                    elif template == "template_15.sparql":
+                        max_number_of_selected_edges = 1
                     if '[:edge]' in self.sparql_query:
                         placeholder = "[:edge]"
                     elif '[:edge1]' in self.sparql_query:
@@ -329,7 +371,10 @@ class SQV:
             try:
                 rdflib_onto = self.onto.onto_world.as_rdflib_graph()
                 res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
-                flat_res_list = [x for l in res_list for x in l]
+                if type(res_list[0]) == list:
+                    flat_res_list = [x for l in res_list for x in l]
+                else:
+                    flat_res_list = res_list
                 self.sparql_query_result_list = flat_res_list
                 result = ""
                 if not flat_res_list:
@@ -363,6 +408,12 @@ class SQV:
                 result = "Syntax Error in SPARQL Query."
                 self.sparql_query_result = result
                 self.logger.warning("sparql query passed from user included a syntax error")
+            #except Exception:
+            #    graph_data = self.data
+            #    result = "Some Prefixes are not defined."
+            #    self.sparql_query_result = result
+            #    self.logger.warning("sparql query passed from user included a syntax error")
+
         else:
             graph_data = self.data
             result = "There is nothing to evaluate."
@@ -754,7 +805,8 @@ class SQV:
                         self.delete_last_user_input()
                 elif input_id == "sparql_template_dropdown" and template_value:
                     query = open("sparql_query_viz/datasets/templates/" + template_value, "r")
-                    self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n" + query.read())
+                    self.sparql_query_last_input.append(
+                        "PREFIX : <" + self.onto.iri + "#>" + "\n" + "\n" + query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.sparql_query_last_input_type.append('user_input')
@@ -993,7 +1045,8 @@ class SQV:
 
         return app
 
-    def plot(self, debug: bool = False, host: str = "127.0.0.1", port: int = 8050, directed: bool = True, vis_opts: dict = None):
+    def plot(self, debug: bool = False, host: str = "127.0.0.1", port: int = 8050,
+             directed: bool = True, vis_opts: dict = None):
         """Plot the Jaal by first creating the app and then hosting it on default server
 
 
