@@ -269,6 +269,12 @@ class SQV:
                         max_number_of_selected_nodes = 3
                     elif template == "template_17.sparql":
                         max_number_of_selected_nodes = 3
+                    elif template == "template_18.sparql":
+                        max_number_of_selected_nodes = 3
+                    elif template == "template_19.sparql":
+                        max_number_of_selected_nodes = 4
+                    elif template == "template_20.sparql":
+                        max_number_of_selected_nodes = 3
                     if '[:node]' in self.sparql_query:
                         placeholder = "[:node]"
                     elif '[:node1]' in self.sparql_query:
@@ -321,6 +327,12 @@ class SQV:
                         max_number_of_selected_edges = 3
                     elif template == "template_17.sparql":
                         max_number_of_selected_edges = 2
+                    elif template == "template_18.sparql":
+                        max_number_of_selected_edges = 2
+                    elif template == "template_19.sparql":
+                        max_number_of_selected_edges = 3
+                    elif template == "template_20.sparql":
+                        max_number_of_selected_edges = 1
                     if '[:edge]' in self.sparql_query:
                         placeholder = "[:edge]"
                     elif '[:edge1]' in self.sparql_query:
