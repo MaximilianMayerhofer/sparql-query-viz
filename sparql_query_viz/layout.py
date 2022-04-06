@@ -197,6 +197,7 @@ filter_node_form = dbc.FormGroup([
                 {'label': 'Filter', 'value': 'FILTER'},
                 {'label': 'Bind', 'value': 'BIND'},
                 {'label': 'Distinct', 'value': 'DISTINCT'},
+                {'label': 'Having', 'value': 'HAVING'},
                 {'label': 'Filter Exists', 'value': 'FILTER EXISTS'},
                 {'label': 'Filter not Exists', 'value': 'FILTER NOT EXISTS'},
                 {'label': 'Values', 'value': 'VALUES'}
@@ -280,9 +281,16 @@ sparql_template_form = dbc.FormGroup([
                     {'label': 'Select Grouped and Ordered Properties', 'value': 'template_9.sparql'},
                     {'label': 'Construct Instances with Properties', 'value': 'template_15.sparql'},
                     {'label': 'Construct Instances with specific Properties', 'value': 'template_14.sparql'},
-                    {'label': 'Inconsistency Query Template 1', 'value': 'template_3.sparql'},
                 ],
-                placeholder="Templates",
+                placeholder="Standard Templates",
+                style={'width': '100%'}),
+            dcc.Dropdown(
+                id='inconsistency_template_dropdown',
+                options=[
+                    {'label': 'Inconsistency Query Template 1', 'value': 'template_3.sparql'},
+                    {'label': 'Inconsistency Query Template 2', 'value': 'template_16.sparql'},
+                ],
+                placeholder="Inconsistency Templates",
                 style={'width': '100%'}),
         ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
             'justify-content': 'space-between'}),

@@ -195,6 +195,7 @@ class SQV:
         self.counter_query_history = 0
         self.sparql_query_result = ''
         self.sparql_query_result_list = []
+        self.selected_template = ''
         self.nodes_selected_for_template = 0
         self.selected_node_for_template = ''
         self.edges_selected_for_template = 0
@@ -216,6 +217,7 @@ class SQV:
     def clear_selection_for_template_query(self):
         """ deletes/ clears the selection made by the user for query templates
         """
+        self.selected_template = ''
         self.nodes_selected_for_template = 0
         self.selected_node_for_template = ''
         self.edges_selected_for_template = 0
@@ -263,6 +265,8 @@ class SQV:
                         max_number_of_selected_nodes = 2
                     elif template == "template_15.sparql":
                         max_number_of_selected_nodes = 2
+                    elif template == "template_16.sparql":
+                        max_number_of_selected_nodes = 3
                     if '[:node]' in self.sparql_query:
                         placeholder = "[:node]"
                     elif '[:node1]' in self.sparql_query:
@@ -311,6 +315,8 @@ class SQV:
                         max_number_of_selected_edges = 1
                     elif template == "template_15.sparql":
                         max_number_of_selected_edges = 1
+                    elif template == "template_16.sparql":
+                        max_number_of_selected_edges = 3
                     if '[:edge]' in self.sparql_query:
                         placeholder = "[:edge]"
                     elif '[:edge1]' in self.sparql_query:
@@ -407,12 +413,14 @@ class SQV:
                 graph_data = self.data
                 result = "Syntax Error in SPARQL Query."
                 self.sparql_query_result = result
-                self.logger.warning("sparql query passed from user included a syntax error")
-            #except Exception:
-            #    graph_data = self.data
-            #    result = "Some Prefixes are not defined."
-            #    self.sparql_query_result = result
-            #    self.logger.warning("sparql query passed from user included a syntax error")
+                self.logger.warning("sparql query passed from user includes a syntax error")
+            except Exception:
+                graph_data = self.data
+                result = "An unknown Error occurred! Possible reasons are: " \
+                         "\n - Used Prefix is not defined " \
+                         "\n - Structural mistake in query"
+                self.sparql_query_result = result
+                self.logger.warning("sparql query passed from user includes an error")
 
         else:
             graph_data = self.data
@@ -673,10 +681,11 @@ class SQV:
             Output("filter-show-toggle", "is_open"),
             [Input("filter-show-toggle-button", "n_clicks"),
              Input('sparql_template_dropdown', 'value'),
-             Input('sparql_library_dropdown', 'value'), ],
+             Input('inconsistency_template_dropdown', 'value'),
+             Input('sparql_library_dropdown', 'value'),],
             [State("filter-show-toggle", "is_open")],
         )
-        def toggle_filter_collapse(n_show, template_value, library_value, is_open):
+        def toggle_filter_collapse(n_show, template_value, incons_template_value, library_value, is_open):
             ctx = dash.callback_context
             if not ctx.triggered:
                 return is_open
@@ -689,7 +698,8 @@ class SQV:
                         self.logger.info("sparql query section was shown, triggered by user")
                     return not is_open
                 if (input_id == "sparql_template_dropdown" and template_value) \
-                        or (input_id == "sparql_library_dropdown" and library_value):
+                        or (input_id == "sparql_library_dropdown" and library_value)\
+                        or (input_id == "inconsistency_template_dropdown" and incons_template_value):
                     self.logger.info("sparql query section was shown, because template/library input was triggered")
                     return True
             return is_open
@@ -745,11 +755,13 @@ class SQV:
              Input("add_node_edge_to_query_button", "on"),
              Input('graph', 'selection'),
              Input('sparql_template_dropdown', 'value'),
+             Input('inconsistency_template_dropdown', 'value'),
              Input('sparql_library_dropdown', 'value')],
             [State("filter_nodes", "value")],
         )
         def edit_sparql_query(kw_value, var_value, syn_value, n_add,
-                              n_clear, n_delete, on_select, selection, template_value, library_value, value):
+                              n_clear, n_delete, on_select, selection, template_value,
+                              inconsistency_template_value, library_value, value):
             ctx = dash.callback_context
             if self.sparql_query is None:
                 self.sparql_query = ""
@@ -809,8 +821,19 @@ class SQV:
                         "PREFIX : <" + self.onto.iri + "#>" + "\n" + "\n" + query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
+                    self.selected_template = template_value
                     self.sparql_query_last_input_type.append('user_input')
-                    self.logger.info("template: %s added to sparql query", self.sparql_query_last_input[-1])
+                    self.logger.info("standard-template: %s added to sparql query", self.sparql_query_last_input[-1])
+                elif input_id == "inconsistency_template_dropdown" and inconsistency_template_value:
+                    query = open("sparql_query_viz/datasets/templates/" + inconsistency_template_value, "r")
+                    self.sparql_query_last_input.append(
+                        "PREFIX : <" + self.onto.iri + "#>" + "\n" + "\n" + query.read())
+                    self.sparql_query = self.sparql_query_last_input[-1]
+                    self.clear_selection_for_template_query()
+                    self.selected_template = inconsistency_template_value
+                    self.sparql_query_last_input_type.append('user_input')
+                    self.logger.info("inconsistency-template: %s added to sparql query",
+                                     self.sparql_query_last_input[-1])
                 elif input_id == "sparql_library_dropdown" and library_value:
                     query = open("sparql_query_viz/datasets/queries/" + library_value, "r")
                     self.sparql_query_last_input.append(query.read())
@@ -819,7 +842,7 @@ class SQV:
                     self.sparql_query_last_input_type.append('user_input')
                     self.logger.info("Inconsistency Check: %s added to sparql query", self.sparql_query_last_input[-1])
                 elif input_id == "graph" and selection != {'nodes': [], 'edges': []} and on_select:
-                    self.complete_sparql_query_with_selection(selection, template_value)
+                    self.complete_sparql_query_with_selection(selection, self.selected_template)
             return self.sparql_query
 
         # create callback to toggle hide/show sections - COLOR section
