@@ -267,6 +267,8 @@ class SQV:
                         max_number_of_selected_nodes = 2
                     elif template == "template_16.sparql":
                         max_number_of_selected_nodes = 3
+                    elif template == "template_17.sparql":
+                        max_number_of_selected_nodes = 3
                     if '[:node]' in self.sparql_query:
                         placeholder = "[:node]"
                     elif '[:node1]' in self.sparql_query:
@@ -317,6 +319,8 @@ class SQV:
                         max_number_of_selected_edges = 1
                     elif template == "template_16.sparql":
                         max_number_of_selected_edges = 3
+                    elif template == "template_17.sparql":
+                        max_number_of_selected_edges = 2
                     if '[:edge]' in self.sparql_query:
                         placeholder = "[:edge]"
                     elif '[:edge1]' in self.sparql_query:
@@ -377,13 +381,8 @@ class SQV:
             try:
                 rdflib_onto = self.onto.onto_world.as_rdflib_graph()
                 res_list = list(rdflib_onto.query_owlready(PREFIXES + self.sparql_query))
-                if type(res_list[0]) == list:
-                    flat_res_list = [x for l in res_list for x in l]
-                else:
-                    flat_res_list = res_list
-                self.sparql_query_result_list = flat_res_list
-                result = ""
-                if not flat_res_list:
+
+                if not res_list:
                     graph_data = self.data
                     result = "No results for this SPARQL query."
                     self.sparql_query_result = result
@@ -391,7 +390,14 @@ class SQV:
                     self.logger.info("valid sparql query successfully evaluated")
                     self.logger.info("result for passed sparql query is empty")
                     return graph_data, result, selection
-                res_is_no_data_object = True
+                else:
+                    if type(res_list[0]) == list:
+                        flat_res_list = [x for l in res_list for x in l]
+                    else:
+                        flat_res_list = res_list
+                    self.sparql_query_result_list = flat_res_list
+                    result = ""
+                    res_is_no_data_object = True
                 for flat_res in flat_res_list:
                     try:
                         result = result + str(flat_res.name) + "\n"
@@ -836,7 +842,7 @@ class SQV:
                                      self.sparql_query_last_input[-1])
                 elif input_id == "sparql_library_dropdown" and library_value:
                     query = open("sparql_query_viz/datasets/queries/" + library_value, "r")
-                    self.sparql_query_last_input.append(query.read())
+                    self.sparql_query_last_input.append("PREFIX : <" + self.onto.iri + "#>" + "\n" + "\n" + query.read())
                     self.sparql_query = self.sparql_query_last_input[-1]
                     self.clear_selection_for_template_query()
                     self.sparql_query_last_input_type.append('user_input')

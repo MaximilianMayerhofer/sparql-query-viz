@@ -1,12 +1,4 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX : <http://example.org/onto-example.owl#>
-
 # Allgemeine Infos, zB aus [Auslegung] oder [MA1], sollten übereinstimmen: zB Breite oder Dicke
-
-# RFE: fix onto and use information model instead - leverage information_concretization class
 
 SELECT DISTINCT ?param_type ?file1 ?value1 ?file2 ?value2
 WHERE {

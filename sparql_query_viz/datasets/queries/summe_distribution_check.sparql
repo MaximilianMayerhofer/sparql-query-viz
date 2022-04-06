@@ -1,12 +1,4 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX : <http://example.org/onto-example.owl#>
-
 # Summe Distribution (in %) [H2O] aller Rollen ist ungleich 100 %
-
-# RFE: fix the way gz are represented (eg, h2o is not a caster by itself) - leverage information model
 
 SELECT DISTINCT ?gz ?summe_distribution
 WHERE {

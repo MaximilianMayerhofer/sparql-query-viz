@@ -289,6 +289,7 @@ sparql_template_form = dbc.FormGroup([
                 options=[
                     {'label': 'Inconsistency Query Template 1', 'value': 'template_3.sparql'},
                     {'label': 'Inconsistency Query Template 2', 'value': 'template_16.sparql'},
+                    {'label': 'Inconsistency Query Template 3', 'value': 'template_17.sparql'},
                 ],
                 placeholder="Inconsistency Templates",
                 style={'width': '100%'}),
