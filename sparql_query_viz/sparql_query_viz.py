@@ -979,7 +979,7 @@ class SQV:
                 return is_open
             else:
                 input_id = ctx.triggered[0]['prop_id'].split('.')[0]
-                if input_id == "abox-dp-show-toggle-button":
+                if input_id == "edge-selection-show-toggle-button":
                     if n:
                         if is_open:
                             self.logger.info("edge selection section was hidden, triggered by user")

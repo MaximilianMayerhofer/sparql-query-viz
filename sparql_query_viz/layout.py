@@ -705,6 +705,18 @@ def get_app_layout(graph_data: dict, onto: OntoEditor, color_legends: list = Non
                         html.Hr(className="my-2"),
                     ], id="template-show-toggle", is_open=False),
 
+                    # ---- SPARQL Library section ----
+                    create_row([
+                        html.H6("SPARQL Library"),
+                        dbc.Button("Hide/Show", id="library-show-toggle-button", outline=True, color="secondary",
+                                   size="sm"),
+                    ], {**fetch_flex_row_style(), 'margin-left': 0, 'margin-right': 0,
+                        'justify-content': 'space-between'}),
+                    dbc.Collapse([
+                        sparql_library_form,
+                        html.Hr(className="my-2"),
+                    ], id="library-show-toggle", is_open=False),
+
                     # ---- SPARQL Query section ----
                     create_row([
                         html.H6("SPARQL Query"),
