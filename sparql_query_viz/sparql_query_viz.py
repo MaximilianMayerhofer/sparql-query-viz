@@ -926,16 +926,42 @@ class SQV:
         # create callback to toggle hide/show sections - A-BOX DATA-PROPERTY section
         @app.callback(
             Output("abox-dp-show-toggle", "is_open"),
-            [Input("abox-dp-show-toggle-button", "n_clicks")],
+            [Input("abox-dp-show-toggle-button", "n_clicks"),
+             Input('graph', 'selection'),
+             Input("add_node_edge_to_query_button", "on")],
             [State("abox-dp-show-toggle", "is_open")],
         )
-        def toggle_template_collapse(n, is_open):
-            if n:
-                if is_open:
-                    self.logger.info("A-Box Data Property section was hidden, triggered by user")
-                else:
-                    self.logger.info("A-Box Data Property section was shown, triggered by user")
-                return not is_open
+        def toggle_template_collapse(n, selection, on_select, is_open):
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                self.logger.info("no trigger by user")
+                return is_open
+            else:
+                input_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if input_id == "abox-dp-show-toggle-button":
+                    if n:
+                        if is_open:
+                            self.logger.info("A-Box Data Property section was hidden, triggered by user")
+                            return not is_open
+                        else:
+                            self.logger.info("A-Box Data Property section was shown, triggered by user")
+                            return not is_open
+                if input_id == "graph":
+                    if on_select:
+                        return is_open
+                    elif len(selection['nodes']) > 0:
+                        for node in self.data['nodes']:
+                            if [node['id']] == selection['nodes']:
+                                if node['T/A'] == 'A':
+                                    self.logger.info("A-Box Data Property section was shown, triggered by user")
+                                    return True
+                                else:
+                                    self.logger.info("A-Box Data Property section was hidden, triggered by user")
+                                    return False
+                    elif (selection == {'nodes': [], 'edges': []}) or \
+                            (len(selection['nodes']) == 0 and len(selection['edges']) > 0):
+                        self.logger.info("A-Box Data Property section was hidden, triggered by user")
+                        return False
             return is_open
 
         # create callback to toggle hide/show sections - SELECTED EDGE section
