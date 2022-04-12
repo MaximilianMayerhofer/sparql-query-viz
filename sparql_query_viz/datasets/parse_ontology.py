@@ -270,7 +270,7 @@ def get_aboxes(onto: OntoEditor, nodelist: list, edgelist: list):
     node_gen = onto.onto.classes()
     # Iteration over all classes/ nodes in the generator
     for node in node_gen:
-        # Iteration over all instances of of the associated class
+        # Iteration over all instances of the associated class
         for ins in onto.onto.search(type=node):
             # Boolean to indicate, whether edge is already in edgelist is instantiated
             edge_in_edgelist = False

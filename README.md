@@ -20,9 +20,10 @@ The interactive graph gives an overview over the structure of the ontology at ha
     - dash_core_components
     - dash_html_components 
 2. dash_bootstrap_components
-3. visdcc
-4. ontor
-5. owlready2
+3. dash_daq
+4. visdcc
+5. ontor
+6. pandas
 
 ## Installation
 
